@@ -1,0 +1,390 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/Container.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+import Button from '../components/Button.astro';
+import Rule from '../components/Rule.astro';
+import Tag from '../components/Tag.astro';
+
+const colours = [
+	{ token: '--paper', light: '#F4F1EA', dark: '#141210', use: 'Page background' },
+	{ token: '--paper-2', light: '#EBE6DA', dark: '#1D1A16', use: 'Panels, hover' },
+	{ token: '--ink', light: '#1A1A1A', dark: '#EDE8DD', use: 'Text, rules, primary button' },
+	{ token: '--ink-2', light: '#4A4740', dark: '#BDB6A8', use: 'Secondary text' },
+	{ token: '--ink-3', light: '#69655C', dark: '#8F887B', use: 'Muted text, captions' },
+	{ token: '--rule', light: '#1A1A1A / 15%', dark: '#EDE8DD / 15%', use: 'Hairlines' },
+	{ token: '--accent', light: '#A54C26', dark: '#E07A4F', use: 'Accent words, link hover' },
+	{ token: '--label', light: '#7A5F2F', dark: '#C9A66B', use: 'Mono labels' },
+];
+
+const spacing = [
+	['--space-1', '4px'],
+	['--space-2', '8px'],
+	['--space-3', '12px'],
+	['--space-4', '16px'],
+	['--space-5', '24px'],
+	['--space-6', '32px'],
+	['--space-7', '48px'],
+	['--space-8', '64px'],
+	['--space-9', '96px'],
+	['--space-10', '144px'],
+];
+
+const themes = ['light', 'dark'] as const;
+---
+
+<BaseLayout title="Styleguide | Jibin Johnson" description="Design tokens and components for jibinjohnson.in." noindex>
+	<header class="sg-header">
+		<Container>
+			<div class="sg-bar">
+				<p class="label">Editorial ink / Styleguide</p>
+				<div class="sg-theme" role="group" aria-label="Colour theme">
+					<button type="button" data-set-theme="system" aria-pressed="true">System</button>
+					<button type="button" data-set-theme="light" aria-pressed="false">Light</button>
+					<button type="button" data-set-theme="dark" aria-pressed="false">Dark</button>
+				</div>
+			</div>
+		</Container>
+	</header>
+
+	<main>
+		<Container as="section" class="section">
+			<SectionLabel index="00" text="Foundation" />
+			<h1 class="sg-hero">Websites that <em>get found.</em></h1>
+			<p class="lead">
+				This page shows every token and component the site is built from. Switch the theme above, or see light and dark side by side in the components section.
+			</p>
+		</Container>
+
+		<Container as="section" class="section sg-section" aria-labelledby="colour">
+			<div class="grid">
+				<div class="col-label"><SectionLabel index="01" text="Colour" /></div>
+				<div class="col-content stack">
+					<h2 id="colour">Colour</h2>
+					<p class="muted small">Swatches use the live theme. Light and dark values are listed under each one. Every text colour passes WCAG AA on --paper and --paper-2.</p>
+					<ul class="sg-swatches" role="list">
+						{
+							colours.map((c) => (
+								<li class="sg-swatch">
+									<span class="sg-swatch__chip" style={`background: var(${c.token})`} />
+									<code class="label">{c.token}</code>
+									<span class="small">{c.use}</span>
+									<span class="small muted">Light {c.light}</span>
+									<span class="small muted">Dark {c.dark}</span>
+								</li>
+							))
+						}
+					</ul>
+				</div>
+			</div>
+		</Container>
+
+		<Container as="section" class="section sg-section" aria-labelledby="type">
+			<div class="grid">
+				<div class="col-label"><SectionLabel index="02" text="Type" /></div>
+				<div class="col-content">
+					<h2 id="type">Type scale</h2>
+					<dl class="sg-type">
+						<div>
+							<dt class="label">Display / Instrument Serif / clamp(2.75rem, 7vw, 6rem)</dt>
+							<dd class="display">I build sites people <em>actually find.</em></dd>
+						</div>
+						<div>
+							<dt class="label">H2 / clamp(2rem, 4.5vw, 3.5rem)</dt>
+							<dd class="h2">Clean code, <em>clear results.</em></dd>
+						</div>
+						<div>
+							<dt class="label">H3 / clamp(1.375rem, 2.2vw, 1.75rem)</dt>
+							<dd class="h3">Technical SEO audits</dd>
+						</div>
+						<div>
+							<dt class="label">Lead / Instrument Sans / clamp(1.125rem, 1.6vw, 1.375rem)</dt>
+							<dd class="lead">I'm a web developer and SEO specialist in Trivandrum. I build fast sites and help them show up in search.</dd>
+						</div>
+						<div>
+							<dt class="label">Body / 1.0625rem / 65ch</dt>
+							<dd>
+								<p>Body copy sits at a comfortable reading size with plenty of line height. It never runs wider than about 65 characters, so long paragraphs stay easy to follow. Here's an <a href="#type">inline link</a> to show the underline style.</p>
+							</dd>
+						</div>
+						<div>
+							<dt class="label">Small / 0.875rem</dt>
+							<dd class="small muted">Captions, notes and secondary details.</dd>
+						</div>
+						<div>
+							<dt class="label">Label / JetBrains Mono / 0.75rem</dt>
+							<dd class="label">Python · Django · Astro</dd>
+						</div>
+					</dl>
+				</div>
+			</div>
+		</Container>
+
+		<Container as="section" class="section sg-section" aria-labelledby="spacing">
+			<div class="grid">
+				<div class="col-label"><SectionLabel index="03" text="Spacing" /></div>
+				<div class="col-content stack">
+					<h2 id="spacing">Spacing</h2>
+					<ul class="sg-spacing" role="list">
+						{
+							spacing.map(([token, px]) => (
+								<li>
+									<code class="label">{token}</code>
+									<span class="small muted">{px}</span>
+									<span class="sg-spacing__bar" style={`width: var(${token})`} />
+								</li>
+							))
+						}
+					</ul>
+					<p class="small muted">Section padding clamp(4rem, 10vw, 9rem). Container 1240px max, side padding clamp(1.25rem, 4vw, 3rem). Radius 2px.</p>
+				</div>
+			</div>
+		</Container>
+
+		<Container as="section" class="section sg-section" aria-labelledby="components">
+			<div class="grid">
+				<div class="col-label"><SectionLabel index="04" text="Components" /></div>
+				<div class="col-content">
+					<h2 id="components">Components</h2>
+				</div>
+			</div>
+			<div class="sg-panels">
+				{
+					themes.map((theme) => (
+						<div class="sg-panel stack" data-theme={theme}>
+							<p class="label">{theme} theme</p>
+
+							<h3>SectionLabel</h3>
+							<SectionLabel index="01" text="About" />
+
+							<h3>Button</h3>
+							<div class="sg-row">
+								<Button href="#components">Start a project</Button>
+								<Button variant="outline" href="#components">See my work</Button>
+								<Button variant="link" href="#components">Read the case study</Button>
+							</div>
+							<div class="sg-row">
+								<Button>Button element</Button>
+								<Button variant="outline">Outline button</Button>
+								<Button variant="link">Link button</Button>
+							</div>
+
+							<h3>Tag</h3>
+							<div class="sg-row">
+								<Tag>Python</Tag>
+								<Tag>Django</Tag>
+								<Tag>Astro</Tag>
+								<Tag>Technical SEO</Tag>
+							</div>
+
+							<h3>Rule</h3>
+							<Rule />
+							<Rule variant="ink" />
+
+							<h3>Text colours</h3>
+							<p>Ink. <span style="color: var(--ink-2)">Ink 2.</span> <span class="muted">Ink 3.</span> <span style="color: var(--accent)">Accent.</span> <span class="label">Label</span></p>
+							<p class="sg-on-paper2 small">On paper 2: ink, <span style="color: var(--ink-2)">ink 2</span>, <span class="muted">ink 3</span>, <span style="color: var(--accent)">accent</span>, <span class="label">label</span></p>
+						</div>
+					))
+				}
+			</div>
+		</Container>
+
+		<Container as="section" class="section sg-section" aria-labelledby="grid">
+			<div class="grid">
+				<div class="col-label"><SectionLabel index="05" text="Grid" /></div>
+				<div class="col-content stack">
+					<h2 id="grid">12-column grid</h2>
+					<p>Labels sit in columns 1 to 3 and content in 4 to 12. Below 768px every column stacks.</p>
+				</div>
+			</div>
+			<div class="grid sg-grid-demo" aria-hidden="true">
+				{Array.from({ length: 12 }, (_, i) => <span class="col" style="--span: 1">{i + 1}</span>)}
+				<span class="col-label">1 to 3</span>
+				<span class="col-content">4 to 12</span>
+				<span class="col" style="--start: 1; --span: 7">1 to 7</span>
+				<span class="col" style="--start: 8; --span: 5">8 to 12</span>
+			</div>
+		</Container>
+	</main>
+</BaseLayout>
+
+<script>
+	const root = document.documentElement;
+	const buttons = document.querySelectorAll<HTMLButtonElement>('[data-set-theme]');
+
+	buttons.forEach((button) => {
+		button.addEventListener('click', () => {
+			const theme = button.dataset.setTheme;
+			if (theme === 'system') root.removeAttribute('data-theme');
+			else root.setAttribute('data-theme', theme ?? '');
+			buttons.forEach((b) => b.setAttribute('aria-pressed', String(b === button)));
+		});
+	});
+</script>
+
+<style>
+	.sg-header {
+		position: sticky;
+		top: 0;
+		z-index: 10;
+		background: var(--paper);
+		border-bottom: var(--hairline);
+	}
+
+	.sg-bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-3);
+		padding-block: var(--space-3);
+	}
+
+	.sg-theme {
+		display: flex;
+		border: var(--hairline);
+		border-radius: var(--radius);
+	}
+
+	.sg-theme button {
+		padding: var(--space-2) var(--space-3);
+		border: 0;
+		background: none;
+		font-family: var(--font-mono);
+		font-size: var(--text-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ink-2);
+	}
+
+	.sg-theme button + button {
+		border-left: var(--hairline);
+	}
+
+	.sg-theme button[aria-pressed='true'] {
+		background: var(--ink);
+		color: var(--paper);
+	}
+
+	.sg-hero {
+		margin-block: var(--space-6) var(--space-5);
+	}
+
+	.sg-section {
+		position: relative;
+	}
+
+	.sg-section::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		inset-inline: var(--container-pad);
+		border-top: var(--hairline);
+	}
+
+	.sg-swatches {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+		gap: var(--space-6) var(--space-5);
+	}
+
+	.sg-swatch {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+	}
+
+	.sg-swatch__chip {
+		display: block;
+		aspect-ratio: 4 / 3;
+		margin-bottom: var(--space-2);
+		border: var(--hairline);
+		border-radius: var(--radius);
+	}
+
+	.sg-type > div {
+		padding-block: var(--space-6);
+		border-bottom: var(--hairline);
+	}
+
+	.sg-type dt {
+		margin-bottom: var(--space-3);
+	}
+
+	.sg-type dd {
+		margin: 0;
+	}
+
+	.sg-spacing li {
+		display: grid;
+		grid-template-columns: 6.5rem 2.5rem minmax(0, 1fr);
+		align-items: center;
+		gap: var(--space-3);
+		padding-block: var(--space-2);
+	}
+
+	.sg-spacing__bar {
+		display: block;
+		height: var(--space-3);
+		background: var(--accent);
+	}
+
+	.sg-panels {
+		display: grid;
+		gap: var(--space-5);
+		margin-top: var(--space-7);
+	}
+
+	@media (min-width: 900px) {
+		.sg-panels {
+			grid-template-columns: 1fr 1fr;
+		}
+	}
+
+	.sg-panel {
+		--stack-gap: var(--space-4);
+		padding: var(--space-6);
+		background: var(--paper);
+		color: var(--ink);
+		border: var(--hairline);
+		border-radius: var(--radius);
+	}
+
+	.sg-panel h3 {
+		margin-top: var(--space-7);
+	}
+
+	.sg-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-3) var(--space-5);
+	}
+
+	.sg-on-paper2 {
+		padding: var(--space-4);
+		background: var(--paper-2);
+	}
+
+	.sg-grid-demo {
+		margin-top: var(--space-7);
+		gap: var(--space-2) var(--grid-gap);
+	}
+
+	.sg-grid-demo > * {
+		padding: var(--space-2);
+		background: var(--paper-2);
+		border: var(--hairline);
+		font-family: var(--font-mono);
+		font-size: var(--text-label);
+		color: var(--ink-2);
+		text-align: center;
+	}
+
+	@media (max-width: 767px) {
+		.sg-grid-demo > .col[style*='--span: 1'] {
+			display: none;
+		}
+	}
+</style>

@@ -1,0 +1,22 @@
+---
+interface Props {
+	/** "hairline" uses --rule at 15%; "ink" is a full-strength rule */
+	variant?: 'hairline' | 'ink';
+	class?: string;
+}
+
+const { variant = 'hairline', class: className } = Astro.props;
+---
+
+<hr class:list={['rule', `rule--${variant}`, className]} />
+
+<style>
+	.rule {
+		border: 0;
+		border-top: 1px solid var(--rule);
+	}
+
+	.rule--ink {
+		border-top-color: var(--ink);
+	}
+</style>

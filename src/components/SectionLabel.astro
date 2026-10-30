@@ -1,0 +1,34 @@
+---
+interface Props {
+	/** e.g. "01" */
+	index?: string;
+	/** e.g. "About" */
+	text: string;
+	class?: string;
+}
+
+const { index, text, class: className } = Astro.props;
+---
+
+<p class:list={['section-label', 'label', className]}>
+	<span class="section-label__rule" aria-hidden="true"></span>
+	{index && <span>{index}</span>}
+	{index && <span aria-hidden="true">—</span>}
+	<span>{text}</span>
+</p>
+
+<style>
+	.section-label {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	.section-label__rule {
+		display: inline-block;
+		width: var(--space-6);
+		height: 1px;
+		margin-right: var(--space-1);
+		background: currentColor;
+	}
+</style>

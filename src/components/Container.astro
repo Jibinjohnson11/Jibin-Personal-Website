@@ -1,0 +1,11 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'div'> {
+	as?: 'div' | 'section' | 'header' | 'footer' | 'main' | 'article' | 'nav';
+}
+
+const { as: Tag = 'div', class: className, ...rest } = Astro.props;
+---
+
+<Tag class:list={['container', className]} {...rest}><slot /></Tag>
