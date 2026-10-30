@@ -1,7 +1,15 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Container from '../../components/Container.astro';
 ---
 
-<BaseLayout title="Work">
-	<h1>Work</h1>
+<BaseLayout
+	title="Projects & Case Studies | Jibin Johnson"
+	description="Website, SEO, and Django projects: AQ Air, healthcare and education SEO campaigns, and an SEO Management Dashboard."
+	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Work', url: '/work/' }]}
+>
+	<Container as="section" class="section stack">
+		<h1>Web Development and SEO Projects</h1>
+		<p class="lead">[PLACEHOLDER] Page content coming soon.</p>
+	</Container>
 </BaseLayout>

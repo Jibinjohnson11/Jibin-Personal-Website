@@ -1,0 +1,149 @@
+---
+import Button from './Button.astro';
+import Container from './Container.astro';
+import Rule from './Rule.astro';
+import { SERVICES, SITE, SOCIAL } from '../data/site';
+
+const year = new Date().getFullYear();
+
+const pages = [
+	{ name: 'Home', url: '/' },
+	{ name: 'Work', url: '/work/' },
+	{ name: 'About', url: '/about/' },
+	{ name: 'Contact', url: '/contact/' },
+];
+---
+
+<footer class="site-footer">
+	<Container>
+		<div class="footer-cta">
+			<h2 class="footer-cta__title">Have a project in <em>mind?</em></h2>
+			<div class="footer-cta__actions">
+				<Button href="/contact/">Start a project</Button>
+				<a class="footer-cta__email" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+			</div>
+		</div>
+
+		<Rule />
+
+		<div class="footer-cols">
+			<section aria-labelledby="footer-pages">
+				<h2 id="footer-pages" class="label">Pages</h2>
+				<ul role="list">
+					{pages.map((page) => <li><a href={page.url}>{page.name}</a></li>)}
+				</ul>
+			</section>
+			<section aria-labelledby="footer-services">
+				<h2 id="footer-services" class="label">Services</h2>
+				<ul role="list">
+					{SERVICES.map((service) => <li><a href={service.url}>{service.name}</a></li>)}
+				</ul>
+			</section>
+			<section aria-labelledby="footer-connect">
+				<h2 id="footer-connect" class="label">Connect</h2>
+				<ul role="list">
+					{
+						SOCIAL.map((link) => (
+							<li>
+								<a href={link.url} target="_blank" rel="noopener">
+									{link.name}
+									<span class="visually-hidden"> (opens in a new tab)</span>
+								</a>
+							</li>
+						))
+					}
+					<li><a href={`mailto:${SITE.email}`}>Email</a></li>
+				</ul>
+			</section>
+		</div>
+
+		<div class="footer-bottom small">
+			<p>{SITE.location}</p>
+			<p>© {year} {SITE.name}</p>
+		</div>
+	</Container>
+</footer>
+
+<style>
+	.site-footer {
+		padding-top: var(--section-pad);
+		border-top: 1px solid var(--rule);
+	}
+
+	.footer-cta {
+		display: grid;
+		gap: var(--space-6);
+		padding-bottom: var(--space-8);
+	}
+
+	.footer-cta__title {
+		font-size: var(--text-display);
+		line-height: 1;
+		letter-spacing: -0.02em;
+	}
+
+	.footer-cta__actions {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: var(--space-4);
+	}
+
+	.footer-cta__email {
+		display: inline-flex;
+		align-items: center;
+		min-height: 3rem;
+		color: var(--ink-2);
+		overflow-wrap: anywhere;
+	}
+
+	@media (min-width: 768px) {
+		.footer-cta {
+			grid-template-columns: 1fr auto;
+			align-items: end;
+		}
+
+		.footer-cta__actions {
+			align-items: flex-end;
+		}
+	}
+
+	.footer-cols {
+		display: grid;
+		gap: var(--space-6);
+		padding-block: var(--space-7);
+	}
+
+	@media (min-width: 640px) {
+		.footer-cols {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+
+	.footer-cols h2 {
+		margin-bottom: var(--space-3);
+		font-family: var(--font-mono);
+	}
+
+	.footer-cols a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+		font-size: var(--text-small);
+		text-decoration-color: transparent;
+	}
+
+	.footer-cols a:hover {
+		text-decoration-color: currentColor;
+	}
+
+	.footer-bottom {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: var(--space-2) var(--space-5);
+		padding-block: var(--space-5);
+		border-top: 1px solid var(--rule);
+		color: var(--ink-3);
+	}
+</style>

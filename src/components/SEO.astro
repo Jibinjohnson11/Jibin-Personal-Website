@@ -1,0 +1,63 @@
+---
+import { SITE, withSlash } from '../data/site';
+
+export interface Props {
+	title: string;
+	description: string;
+	canonical?: string;
+	ogImage?: string;
+	ogImageAlt?: string;
+	ogType?: 'website' | 'article' | 'profile';
+	noindex?: boolean;
+	schema?: Record<string, unknown>[];
+}
+
+const {
+	title,
+	description,
+	canonical = new URL(withSlash(Astro.url.pathname), SITE.url).href,
+	ogImage = '/og/default.png',
+	ogImageAlt = 'Jibin Johnson, Web Developer and SEO Specialist in Kerala',
+	ogType = 'website',
+	noindex = false,
+	schema = [],
+} = Astro.props;
+
+const ogImageUrl = new URL(ogImage, SITE.url).href;
+
+if (import.meta.env.DEV) {
+	const page = Astro.url.pathname;
+	if (title.length > 60) {
+		console.warn(`[SEO] ${page}: title is ${title.length} characters (max 60): "${title}"`);
+	}
+	if (description.length > 160) {
+		console.warn(`[SEO] ${page}: description is ${description.length} characters (max 160)`);
+	}
+}
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
+{!noindex && <link rel="canonical" href={canonical} />}
+
+<meta property="og:type" content={ogType} />
+<meta property="og:url" content={canonical} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={ogImageAlt} />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:locale" content={SITE.locale} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageUrl} />
+
+<meta name="theme-color" content="#F4F1EA" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#141210" media="(prefers-color-scheme: dark)" />
+
+{schema.map((item) => <script type="application/ld+json" set:html={JSON.stringify(item)} />)}

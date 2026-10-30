@@ -1,0 +1,496 @@
+---
+import Button from './Button.astro';
+import Container from './Container.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import { SERVICES, SITE, withSlash } from '../data/site';
+
+const path = withSlash(Astro.url.pathname);
+const isCurrent = (url: string) => path === url;
+const inSection = (url: string) => path.startsWith(url);
+const inServices = path.startsWith('/services/');
+
+// Links after the Services dropdown in the desktop nav.
+const trailingLinks = [
+	{ name: 'About', url: '/about/' },
+	{ name: 'Contact', url: '/contact/' },
+];
+---
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="site-header" data-header>
+	<Container class="site-header__inner">
+		<a href="/" class="brand" aria-current={isCurrent('/') ? 'page' : undefined}>{SITE.name}</a>
+
+		<nav class="nav-desktop" aria-label="Main">
+			<ul class="nav-desktop__list" role="list">
+				<li>
+					<a href="/work/" class:list={['nav-link', { 'is-active': inSection('/work/') }]} aria-current={isCurrent('/work/') ? 'page' : undefined}>Work</a>
+				</li>
+				<li class="dropdown" data-dropdown>
+					<button type="button" class:list={['nav-link', 'dropdown__toggle', { 'is-active': inServices }]} aria-expanded="false" aria-controls="services-menu">
+						Services
+						<svg class="dropdown__chevron" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" focusable="false">
+							<path d="M1.5 3.5 5 7l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.25"></path>
+						</svg>
+					</button>
+					<ul id="services-menu" class="dropdown__panel" role="list" hidden>
+						{
+							SERVICES.map((service) => (
+								<li>
+									<a href={service.url} class="dropdown__link" aria-current={isCurrent(service.url) ? 'page' : undefined}>
+										{service.name}
+									</a>
+								</li>
+							))
+						}
+					</ul>
+				</li>
+				{
+					trailingLinks.map((link) => (
+						<li>
+							<a href={link.url} class:list={['nav-link', { 'is-active': inSection(link.url) }]} aria-current={isCurrent(link.url) ? 'page' : undefined}>
+								{link.name}
+							</a>
+						</li>
+					))
+				}
+			</ul>
+		</nav>
+
+		<div class="header-actions">
+			<ThemeToggle />
+			<Button variant="outline" href={SITE.resume} target="_blank" rel="noopener" class="header-resume">
+				Resume<span class="visually-hidden"> (PDF, opens in a new tab)</span>
+			</Button>
+		</div>
+
+		<button type="button" class="menu-button" aria-expanded="false" aria-controls="mobile-menu" data-menu-open>Menu</button>
+	</Container>
+</header>
+
+<div id="mobile-menu" class="mobile-menu" role="dialog" aria-modal="true" aria-label="Site menu" hidden data-menu>
+	<Container class="mobile-menu__top">
+		<a href="/" class="brand">{SITE.name}</a>
+		<button type="button" class="menu-button menu-button--close" data-menu-close>Close</button>
+	</Container>
+
+	<Container as="nav" class="mobile-menu__nav" aria-label="Mobile">
+		<ol class="mobile-menu__list" role="list">
+			<li>
+				<span class="mobile-menu__num label" aria-hidden="true">01</span>
+				<a href="/work/" class="mobile-menu__link" aria-current={isCurrent('/work/') ? 'page' : undefined}>Work</a>
+			</li>
+			<li>
+				<span class="mobile-menu__num label" aria-hidden="true">02</span>
+				<span class="mobile-menu__link mobile-menu__link--group" id="mobile-services-heading">Services</span>
+				<ul class="mobile-menu__sub" role="list" aria-labelledby="mobile-services-heading">
+					{
+						SERVICES.map((service) => (
+							<li>
+								<a href={service.url} aria-current={isCurrent(service.url) ? 'page' : undefined}>
+									{service.name}
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</li>
+			<li>
+				<span class="mobile-menu__num label" aria-hidden="true">03</span>
+				<a href="/about/" class="mobile-menu__link" aria-current={isCurrent('/about/') ? 'page' : undefined}>About</a>
+			</li>
+			<li>
+				<span class="mobile-menu__num label" aria-hidden="true">04</span>
+				<a href="/contact/" class="mobile-menu__link" aria-current={isCurrent('/contact/') ? 'page' : undefined}>Contact</a>
+			</li>
+		</ol>
+
+		<div class="mobile-menu__actions">
+			<ThemeToggle />
+			<Button variant="outline" href={SITE.resume} target="_blank" rel="noopener">
+				Resume<span class="visually-hidden"> (PDF, opens in a new tab)</span>
+			</Button>
+		</div>
+	</Container>
+</div>
+
+<script>
+	const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+	/* --- Sticky header: hide on scroll down, show on scroll up ------------ */
+	const header = document.querySelector<HTMLElement>('[data-header]');
+
+	if (header) {
+		let lastY = window.scrollY;
+		let ticking = false;
+
+		const update = () => {
+			const y = window.scrollY;
+			header.classList.toggle('is-scrolled', y > 4);
+
+			const pastHeader = y > header.offsetHeight;
+			const goingDown = y > lastY;
+			const keepVisible = reduceMotion.matches || header.contains(document.activeElement);
+			header.classList.toggle('is-hidden', !keepVisible && pastHeader && goingDown);
+
+			lastY = Math.max(y, 0);
+			ticking = false;
+		};
+
+		window.addEventListener(
+			'scroll',
+			() => {
+				if (!ticking) {
+					requestAnimationFrame(update);
+					ticking = true;
+				}
+			},
+			{ passive: true },
+		);
+
+		header.addEventListener('focusin', () => header.classList.remove('is-hidden'));
+		update();
+	}
+
+	/* --- Services dropdown (disclosure) ----------------------------------- */
+	document.querySelectorAll<HTMLElement>('[data-dropdown]').forEach((dropdown) => {
+		const toggle = dropdown.querySelector<HTMLButtonElement>('.dropdown__toggle');
+		const panel = dropdown.querySelector<HTMLElement>('.dropdown__panel');
+		if (!toggle || !panel) return;
+
+		const setOpen = (open: boolean) => {
+			toggle.setAttribute('aria-expanded', String(open));
+			panel.hidden = !open;
+		};
+
+		toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+
+		dropdown.addEventListener('keydown', (event) => {
+			if (event.key === 'Escape' && !panel.hidden) {
+				setOpen(false);
+				toggle.focus();
+			}
+		});
+
+		// Close when focus moves out of the dropdown (e.g. tabbing past the last link).
+		dropdown.addEventListener('focusout', (event) => {
+			if (!dropdown.contains(event.relatedTarget as Node | null)) setOpen(false);
+		});
+
+		document.addEventListener('click', (event) => {
+			if (!dropdown.contains(event.target as Node)) setOpen(false);
+		});
+	});
+
+	/* --- Mobile menu ------------------------------------------------------ */
+	const menu = document.querySelector<HTMLElement>('[data-menu]');
+	const openButton = document.querySelector<HTMLButtonElement>('[data-menu-open]');
+	const closeButton = document.querySelector<HTMLButtonElement>('[data-menu-close]');
+
+	if (menu && openButton && closeButton) {
+		const focusables = () =>
+			Array.from(menu.querySelectorAll<HTMLElement>('a[href], button:not([disabled])')).filter((el) => el.offsetParent !== null);
+
+		const onKeydown = (event: KeyboardEvent) => {
+			if (event.key === 'Escape') {
+				closeMenu();
+				return;
+			}
+			if (event.key !== 'Tab') return;
+
+			const items = focusables();
+			const first = items[0];
+			const last = items[items.length - 1];
+			if (event.shiftKey && document.activeElement === first) {
+				event.preventDefault();
+				last.focus();
+			} else if (!event.shiftKey && document.activeElement === last) {
+				event.preventDefault();
+				first.focus();
+			}
+		};
+
+		function openMenu() {
+			menu!.hidden = false;
+			openButton!.setAttribute('aria-expanded', 'true');
+			document.documentElement.classList.add('menu-open');
+			document.addEventListener('keydown', onKeydown);
+			closeButton!.focus();
+		}
+
+		function closeMenu() {
+			if (menu!.hidden) return;
+			menu!.hidden = true;
+			openButton!.setAttribute('aria-expanded', 'false');
+			document.documentElement.classList.remove('menu-open');
+			document.removeEventListener('keydown', onKeydown);
+			openButton!.focus();
+		}
+
+		openButton.addEventListener('click', openMenu);
+		closeButton.addEventListener('click', closeMenu);
+
+		// If the viewport grows past the mobile breakpoint, close the overlay.
+		window.matchMedia('(min-width: 768px)').addEventListener('change', (event) => {
+			if (event.matches) closeMenu();
+		});
+	}
+</script>
+
+<style>
+	.skip-link {
+		position: absolute;
+		top: var(--space-3);
+		left: var(--space-3);
+		z-index: 100;
+		padding: var(--space-3) var(--space-4);
+		background: var(--ink);
+		color: var(--paper);
+		font-size: var(--text-small);
+		text-decoration: none;
+		border-radius: var(--radius);
+		transform: translateY(-200%);
+	}
+
+	.skip-link:focus-visible {
+		transform: none;
+		color: var(--paper);
+	}
+
+	.site-header {
+		position: sticky;
+		top: 0;
+		z-index: 50;
+		background: var(--paper) var(--grain);
+		border-bottom: 1px solid transparent;
+		transition:
+			transform var(--dur-base) var(--ease-out),
+			border-color var(--dur-fast) var(--ease-out);
+	}
+
+	.site-header.is-scrolled {
+		border-bottom-color: var(--rule);
+	}
+
+	.site-header.is-hidden {
+		transform: translateY(-100%);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.site-header.is-hidden {
+			transform: none;
+		}
+	}
+
+	.site-header :global(.site-header__inner) {
+		display: flex;
+		align-items: center;
+		gap: var(--space-5);
+		min-height: 4.5rem;
+	}
+
+	.brand {
+		margin-right: auto;
+		font-family: var(--font-serif);
+		font-size: 1.5rem;
+		line-height: 1;
+		color: var(--ink);
+		text-decoration: none;
+		white-space: nowrap;
+	}
+
+	.brand:hover {
+		color: var(--ink);
+	}
+
+	/* Desktop nav */
+	.nav-desktop,
+	.header-actions {
+		display: none;
+	}
+
+	.nav-desktop__list {
+		display: flex;
+		align-items: center;
+		gap: var(--space-5);
+	}
+
+	.nav-link {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-1);
+		min-height: 3rem;
+		padding: 0;
+		border: 0;
+		background: none;
+		font-size: var(--text-small);
+		color: var(--ink);
+		text-decoration-line: underline;
+		text-decoration-color: transparent;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.4em;
+		transition:
+			color var(--dur-fast) var(--ease-out),
+			text-decoration-color var(--dur-fast) var(--ease-out);
+	}
+
+	.nav-link:hover {
+		color: var(--accent);
+		text-decoration-color: currentColor;
+	}
+
+	.nav-link[aria-current='page'],
+	.nav-link.is-active {
+		text-decoration-color: var(--accent);
+		text-decoration-thickness: 2px;
+	}
+
+	.dropdown {
+		position: relative;
+	}
+
+	.dropdown__chevron {
+		transition: transform var(--dur-fast) var(--ease-out);
+	}
+
+	.dropdown__toggle[aria-expanded='true'] .dropdown__chevron {
+		transform: rotate(180deg);
+	}
+
+	.dropdown__panel {
+		position: absolute;
+		top: 100%;
+		left: calc(var(--space-4) * -1);
+		min-width: 15rem;
+		padding: var(--space-2) 0;
+		background: var(--paper);
+		border: 1px solid var(--rule);
+		border-radius: var(--radius);
+	}
+
+	.dropdown__link {
+		display: block;
+		padding: var(--space-3) var(--space-4);
+		font-size: var(--text-small);
+		text-decoration: none;
+	}
+
+	.dropdown__link:hover {
+		background: var(--paper-2);
+	}
+
+	.dropdown__link[aria-current='page'] {
+		color: var(--accent);
+	}
+
+	.header-actions {
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	.menu-button {
+		min-width: 3rem;
+		min-height: 3rem;
+		padding: 0 var(--space-2);
+		border: 0;
+		background: none;
+		font-family: var(--font-mono);
+		font-size: var(--text-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: var(--ink);
+	}
+
+	@media (min-width: 768px) {
+		.nav-desktop,
+		.header-actions {
+			display: flex;
+		}
+
+		.menu-button {
+			display: none;
+		}
+	}
+
+	/* Mobile overlay */
+	.mobile-menu {
+		position: fixed;
+		inset: 0;
+		z-index: 60;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		background: var(--paper) var(--grain);
+	}
+
+	.mobile-menu[hidden] {
+		display: none;
+	}
+
+	.mobile-menu :global(.mobile-menu__top) {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		min-height: 4.5rem;
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.mobile-menu :global(.mobile-menu__nav) {
+		padding-block: var(--space-7);
+	}
+
+	.mobile-menu__list > li {
+		display: grid;
+		grid-template-columns: 2.5rem 1fr;
+		align-items: baseline;
+		padding-block: var(--space-3);
+		border-bottom: 1px solid var(--rule);
+	}
+
+	.mobile-menu__link {
+		display: block;
+		padding-block: var(--space-1);
+		font-family: var(--font-serif);
+		font-size: clamp(2.25rem, 10vw, 3rem);
+		line-height: 1.1;
+		color: var(--ink);
+		text-decoration: none;
+	}
+
+	.mobile-menu__link[aria-current='page'] {
+		color: var(--accent);
+	}
+
+	.mobile-menu__link--group {
+		color: var(--ink-2);
+	}
+
+	.mobile-menu__sub {
+		grid-column: 2;
+		padding-block: var(--space-2) var(--space-1);
+	}
+
+	.mobile-menu__sub a {
+		display: flex;
+		align-items: center;
+		min-height: 3rem;
+		font-size: 1.125rem;
+		text-decoration: none;
+	}
+
+	.mobile-menu__sub a[aria-current='page'] {
+		color: var(--accent);
+	}
+
+	.mobile-menu__actions {
+		display: flex;
+		align-items: center;
+		gap: var(--space-4);
+		margin-top: var(--space-7);
+	}
+
+	:global(html.menu-open),
+	:global(html.menu-open body) {
+		overflow: hidden;
+	}
+</style>

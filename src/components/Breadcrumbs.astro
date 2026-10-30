@@ -1,0 +1,80 @@
+---
+import { SITE } from '../data/site';
+
+export interface Crumb {
+	name: string;
+	url: string;
+}
+
+interface Props {
+	items: Crumb[];
+}
+
+const { items } = Astro.props;
+
+const schema = {
+	'@context': 'https://schema.org',
+	'@type': 'BreadcrumbList',
+	itemListElement: items.map((item, index) => ({
+		'@type': 'ListItem',
+		position: index + 1,
+		name: item.name,
+		item: new URL(item.url, SITE.url).href,
+	})),
+};
+---
+
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+	<ol role="list" class="label">
+		{
+			items.map((item, index) =>
+				index === items.length - 1 ? (
+					<li>
+						<span aria-current="page">{item.name}</span>
+					</li>
+				) : (
+					<li>
+						<a href={item.url}>{item.name}</a>
+						<span class="breadcrumbs__sep" aria-hidden="true">/</span>
+					</li>
+				),
+			)
+		}
+	</ol>
+</nav>
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+<style>
+	.breadcrumbs ol {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+		padding: 0;
+		list-style: none;
+	}
+
+	.breadcrumbs li {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	.breadcrumbs a {
+		color: var(--ink-2);
+		text-decoration-color: transparent;
+	}
+
+	.breadcrumbs a:hover {
+		color: var(--accent);
+		text-decoration-color: currentColor;
+	}
+
+	.breadcrumbs [aria-current='page'] {
+		color: var(--label);
+	}
+
+	.breadcrumbs__sep {
+		color: var(--ink-3);
+	}
+</style>

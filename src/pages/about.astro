@@ -1,7 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/Container.astro';
 ---
 
-<BaseLayout title="About">
-	<h1>About</h1>
+<BaseLayout
+	title="About Jibin Johnson – Web Developer & SEO, Kerala"
+	description="Web developer and SEO specialist at Prception Medialab, with a PG in Artificial Intelligence, working toward AI full-stack development."
+	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'About', url: '/about/' }]}
+>
+	<Container as="section" class="section stack">
+		<h1>About Jibin Johnson</h1>
+		<p class="lead">[PLACEHOLDER] Page content coming soon.</p>
+	</Container>
 </BaseLayout>

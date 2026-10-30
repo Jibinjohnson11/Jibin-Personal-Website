@@ -34,7 +34,7 @@ const themes = ['light', 'dark'] as const;
 ---
 
 <BaseLayout title="Styleguide | Jibin Johnson" description="Design tokens and components for jibinjohnson.in." noindex>
-	<header class="sg-header">
+	<div class="sg-header">
 		<Container>
 			<div class="sg-bar">
 				<p class="label">Editorial ink / Styleguide</p>
@@ -45,9 +45,9 @@ const themes = ['light', 'dark'] as const;
 				</div>
 			</div>
 		</Container>
-	</header>
+	</div>
 
-	<main>
+	<div>
 		<Container as="section" class="section">
 			<SectionLabel index="00" text="Foundation" />
 			<h1 class="sg-hero">Websites that <em>get found.</em></h1>
@@ -206,7 +206,7 @@ const themes = ['light', 'dark'] as const;
 				<span class="col" style="--start: 8; --span: 5">8 to 12</span>
 			</div>
 		</Container>
-	</main>
+	</div>
 </BaseLayout>
 
 <script>
@@ -225,10 +225,6 @@ const themes = ['light', 'dark'] as const;
 
 <style>
 	.sg-header {
-		position: sticky;
-		top: 0;
-		z-index: 10;
-		background: var(--paper);
 		border-bottom: var(--hairline);
 	}
 

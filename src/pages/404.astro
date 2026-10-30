@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/Container.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+import Button from '../components/Button.astro';
+---
+
+<BaseLayout title="Page not found | Jibin Johnson" description="This page doesn't exist. Head back to the homepage, my work, or the contact page." noindex>
+	<Container as="section" class="section not-found">
+		<SectionLabel index="404" text="Not found" />
+		<h1>This page got <em>lost.</em></h1>
+		<p class="lead">The link might be old, or the address has a typo. Here's where you can go instead.</p>
+		<ul class="not-found__links" role="list">
+			<li><Button href="/">Back to home</Button></li>
+			<li><Button variant="outline" href="/work/">See my work</Button></li>
+			<li><Button variant="link" href="/contact/">Get in touch</Button></li>
+		</ul>
+	</Container>
+</BaseLayout>
+
+<style>
+	.not-found h1 {
+		margin-block: var(--space-6) var(--space-5);
+	}
+
+	.not-found__links {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-4) var(--space-5);
+		margin-top: var(--space-7);
+	}
+</style>
