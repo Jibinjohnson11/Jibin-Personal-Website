@@ -166,7 +166,8 @@ const trailingLinks = [
 
 		toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
 
-		dropdown.addEventListener('keydown', (event) => {
+		// Listen on the document so Escape works even if a mouse click didn't move focus (Safari).
+		document.addEventListener('keydown', (event) => {
 			if (event.key === 'Escape' && !panel.hidden) {
 				setOpen(false);
 				toggle.focus();

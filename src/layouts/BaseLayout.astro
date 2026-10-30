@@ -28,11 +28,17 @@ const { title, description, ogImage, noindex = false, schema, breadcrumbs } = As
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<script is:inline>
-			// Apply the saved theme before first paint to avoid a flash. No saved choice = follow the system.
-			try {
-				const theme = localStorage.getItem('theme');
-				if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
-			} catch {}
+			// Set the theme before first paint to avoid a flash: saved choice first, then the system preference.
+			(() => {
+				let theme = null;
+				try {
+					theme = localStorage.getItem('theme');
+				} catch {}
+				if (theme !== 'light' && theme !== 'dark') {
+					theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				}
+				document.documentElement.dataset.theme = theme;
+			})();
 		</script>
 		<SEO title={title} description={description} ogImage={ogImage} noindex={noindex} schema={schema} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />

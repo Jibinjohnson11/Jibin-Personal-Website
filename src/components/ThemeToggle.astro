@@ -41,7 +41,19 @@ const { class: className } = Astro.props;
 		});
 	});
 
-	darkQuery.addEventListener('change', syncToggles);
+	const savedTheme = () => {
+		try {
+			return localStorage.getItem('theme');
+		} catch {
+			return null;
+		}
+	};
+
+	// With no saved choice, keep following the system if it changes while the page is open.
+	darkQuery.addEventListener('change', (event) => {
+		if (!savedTheme()) root.dataset.theme = event.matches ? 'dark' : 'light';
+		syncToggles();
+	});
 	syncToggles();
 </script>
 
