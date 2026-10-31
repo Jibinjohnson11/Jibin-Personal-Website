@@ -315,6 +315,34 @@ h3,
 	}
 }
 
+/* Page section: generous vertical space with a hairline across the top.
+   Usual inner layout: .grid > .col-label (SectionLabel) + .col-content (H2 and body). */
+.page-section {
+	position: relative;
+	padding-block: calc(var(--section-pad) * 0.75);
+}
+
+.page-section--last {
+	padding-bottom: var(--section-pad);
+}
+
+.page-section::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	inset-inline: var(--container-pad);
+	border-top: var(--hairline);
+}
+
+/* Label + H2 row above a full-width block (lists that span all 12 columns). */
+.section-head {
+	margin-bottom: var(--space-7);
+}
+
+.page-section .col-content > h2 + * {
+	margin-top: var(--space-6);
+}
+
 /* --- Utilities ---------------------------------------------------------- */
 
 .visually-hidden {

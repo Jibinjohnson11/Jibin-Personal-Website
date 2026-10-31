@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionLabel from '../../components/SectionLabel.astro';
+import ServiceList from '../../components/ServiceList.astro';
+import CtaLine from '../../components/CtaLine.astro';
+
+const services = [
+	{
+		name: 'Website Development',
+		text: 'Fast, responsive business websites, landing pages and portfolio sites, with the SEO groundwork set up before launch.',
+		url: '/services/web-development/',
+		anchor: 'Website development services in Kerala',
+	},
+	{
+		name: 'SEO Services',
+		text: 'Technical fixes, on-page work, link building and local SEO for Kerala businesses, with a plain-English report every month.',
+		url: '/services/seo/',
+		anchor: 'SEO services in Kerala',
+	},
+	{
+		name: 'Python & Django Development',
+		text: 'Dashboards, admin panels and internal tools for teams that have outgrown spreadsheets, built in small, working steps.',
+		url: '/services/python-django-development/',
+		anchor: 'Python Django development',
+	},
+];
+---
+
+<BaseLayout
+	title="Services – Web Development, SEO and Django | Jibin Johnson"
+	description="Website development, SEO and Python Django development for businesses in Kerala and beyond, from a web developer and SEO specialist in Trivandrum."
+	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Services', url: '/services/' }]}
+>
+	<section class="services-intro container" aria-labelledby="services-title">
+		<SectionLabel text="Services" />
+		<h1 id="services-title" class="services-intro__title" data-reveal="lines">Services</h1>
+		<p class="lead" data-reveal style="--reveal-delay: 250ms">
+			Three ways I can help: build your website, get it found on Google, or build the tool your team is missing.
+		</p>
+	</section>
+
+	<div class="services-list container">
+		<ServiceList items={services} headingLevel={2} />
+		<CtaLine text="Not sure which one you need?" accent="Ask me." label="Get in touch" />
+	</div>
+</BaseLayout>
+
+<style>
+	.services-intro {
+		padding-block: var(--space-7) var(--space-8);
+	}
+
+	.services-intro__title {
+		margin-block: var(--space-5) var(--space-5);
+	}
+
+	.services-intro .lead {
+		max-width: 38rem;
+	}
+
+	.services-list {
+		padding-bottom: var(--section-pad);
+	}
+</style>

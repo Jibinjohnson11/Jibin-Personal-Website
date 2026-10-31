@@ -6,6 +6,8 @@ import SectionLabel from '../components/SectionLabel.astro';
 import Button from '../components/Button.astro';
 import Rule from '../components/Rule.astro';
 import CtaLine from '../components/CtaLine.astro';
+import Faq from '../components/Faq.astro';
+import ServiceList from '../components/ServiceList.astro';
 import WorkList from '../components/WorkList.astro';
 import { SITE } from '../data/site';
 import { getPerson, PERSON_ID } from '../lib/person';
@@ -166,7 +168,7 @@ const schema = [
 	</section>
 
 	<!-- 01 About -->
-	<section class="home-section container" aria-labelledby="about-title">
+	<section class="page-section container" aria-labelledby="about-title">
 		<div class="grid">
 			<div class="col-label"><SectionLabel index="01" text="About" /></div>
 			<div class="col-content stack">
@@ -183,7 +185,7 @@ const schema = [
 	</section>
 
 	<!-- 02 Services -->
-	<section class="home-section container" aria-labelledby="services-title">
+	<section class="page-section container" aria-labelledby="services-title">
 		<div class="grid section-head">
 			<div class="col-label"><SectionLabel index="02" text="Services" /></div>
 			<div class="col-content">
@@ -191,37 +193,11 @@ const schema = [
 			</div>
 		</div>
 
-		<ol class="service-list" role="list">
-			{
-				services.map((service, i) => (
-					<li class:list={['service-row', { 'has-link': service.url }]} data-reveal>
-						<div class="service-row__inner">
-							<span class="service-row__num label">{pad(i + 1)}</span>
-							<div class="service-row__body">
-								<h3 class="service-row__name">{service.name}</h3>
-								<p class="service-row__text">{service.text}</p>
-							</div>
-							{service.url && (
-								<a class="service-row__link" href={service.url}>
-									{/* Last word and arrow share a no-wrap span so the arrow never ends up alone on a line. */}
-									<span class="service-row__anchor">
-										{service.anchor.split(' ').slice(0, -1).join(' ')}{' '}
-										<span class="nowrap">
-											{service.anchor.split(' ').at(-1)}
-											<span class="service-row__arrow" aria-hidden="true">→</span>
-										</span>
-									</span>
-								</a>
-							)}
-						</div>
-					</li>
-				))
-			}
-		</ol>
+		<ServiceList items={services} />
 	</section>
 
 	<!-- 03 Skills -->
-	<section class="home-section container" aria-labelledby="skills-title">
+	<section class="page-section container" aria-labelledby="skills-title">
 		<div class="grid">
 			<div class="col-label"><SectionLabel index="03" text="Skills" /></div>
 			<div class="col-content">
@@ -250,7 +226,7 @@ const schema = [
 	</section>
 
 	<!-- 04 Selected work -->
-	<section class="home-section container" aria-labelledby="work-title">
+	<section class="page-section container" aria-labelledby="work-title">
 		<div class="grid section-head">
 			<div class="col-label"><SectionLabel index="04" text="Work" /></div>
 			<div class="col-content">
@@ -264,7 +240,7 @@ const schema = [
 	</section>
 
 	<!-- 05 Why work with me -->
-	<section class="home-section container" aria-labelledby="why-title">
+	<section class="page-section container" aria-labelledby="why-title">
 		<div class="grid">
 			<div class="col-label"><SectionLabel index="05" text="Why me" /></div>
 			<div class="col-content">
@@ -284,7 +260,7 @@ const schema = [
 	</section>
 
 	<!-- 06 Process -->
-	<section class="home-section container" aria-labelledby="process-title">
+	<section class="page-section container" aria-labelledby="process-title">
 		<div class="grid section-head">
 			<div class="col-label"><SectionLabel index="06" text="Process" /></div>
 			<div class="col-content">
@@ -306,7 +282,7 @@ const schema = [
 	</section>
 
 	<!-- 07 Location -->
-	<section class="home-section container" aria-labelledby="location-title">
+	<section class="page-section container" aria-labelledby="location-title">
 		<div class="grid">
 			<div class="col-label"><SectionLabel index="07" text="Location" /></div>
 			<div class="col-content stack">
@@ -319,26 +295,12 @@ const schema = [
 	</section>
 
 	<!-- 08 FAQ -->
-	<section class="home-section home-section--last container" aria-labelledby="faq-title">
+	<section class="page-section page-section--last container" aria-labelledby="faq-title">
 		<div class="grid">
 			<div class="col-label"><SectionLabel index="08" text="FAQ" /></div>
 			<div class="col-content">
 				<h2 id="faq-title" data-reveal="lines">Frequently asked <em>questions</em></h2>
-				<div class="faq-list" data-reveal>
-					{
-						faqs.map((faq) => (
-							<details class="faq">
-								<summary>
-									<h3 class="faq__q">{faq.q}</h3>
-									<span class="faq__icon" aria-hidden="true" />
-								</summary>
-								<div class="faq__a">
-									<p>{faq.a}</p>
-								</div>
-							</details>
-						))
-					}
-				</div>
+				<Faq items={faqs} />
 			</div>
 		</div>
 	</section>
@@ -409,141 +371,6 @@ const schema = [
 	@media (min-width: 1024px) {
 		.hero__grid > .hero__portrait {
 			grid-column: 10 / span 3;
-		}
-	}
-
-	/* --- Sections --- */
-	.home-section {
-		position: relative;
-		padding-block: calc(var(--section-pad) * 0.75);
-	}
-
-	.home-section--last {
-		padding-bottom: var(--section-pad);
-	}
-
-	/* Hairline across the top of each section, inside the container padding. */
-	.home-section::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		inset-inline: var(--container-pad);
-		border-top: var(--hairline);
-	}
-
-	.section-head {
-		margin-bottom: var(--space-7);
-	}
-
-	.col-content > h2 + :global(*) {
-		margin-top: var(--space-6);
-	}
-
-	/* --- Services --- */
-	.service-row {
-		position: relative;
-		border-top: var(--hairline);
-	}
-
-	.service-row:last-child {
-		border-bottom: var(--hairline);
-	}
-
-	.service-row__inner {
-		position: relative;
-		display: grid;
-		grid-template-columns: 2.5rem minmax(0, 1fr);
-		gap: var(--space-3) var(--space-4);
-		padding-block: var(--space-6);
-		transition: transform var(--dur-base) var(--ease-out);
-	}
-
-	.service-row__num {
-		padding-top: 0.6rem;
-	}
-
-	.service-row__name {
-		font-size: clamp(1.625rem, 3vw, 2.5rem);
-		line-height: 1.1;
-	}
-
-	.service-row__text {
-		margin-top: var(--space-3);
-		color: var(--ink-2);
-	}
-
-	.service-row__link {
-		grid-column: 2;
-		justify-self: start;
-		padding-block: var(--space-2);
-		font-size: var(--text-small);
-		font-weight: 500;
-		text-decoration: none;
-	}
-
-	.service-row__anchor {
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 0.22em;
-	}
-
-	/* The whole row is clickable through the link. */
-	.service-row__link::after {
-		content: '';
-		position: absolute;
-		inset: 0;
-	}
-
-	.nowrap {
-		white-space: nowrap;
-	}
-
-	.service-row__arrow {
-		display: inline-block;
-		margin-left: 0.4em;
-		transition: transform var(--dur-base) var(--ease-out);
-	}
-
-	.service-row.has-link:hover .service-row__inner {
-		transform: translateX(var(--space-2));
-	}
-
-	.service-row.has-link:hover .service-row__name,
-	.service-row.has-link:hover .service-row__link {
-		color: var(--accent);
-	}
-
-	.service-row.has-link:hover .service-row__arrow,
-	.service-row__link:focus-visible .service-row__arrow {
-		transform: translateX(6px);
-	}
-
-	@media (min-width: 1024px) {
-		.service-row__inner {
-			grid-template-columns: 4rem minmax(0, 1fr) minmax(0, 18rem);
-			align-items: center;
-			gap: var(--space-6);
-		}
-
-		.service-row__body {
-			display: grid;
-			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-			gap: var(--space-6);
-			align-items: baseline;
-		}
-
-		.service-row__text {
-			margin-top: 0;
-		}
-
-		.service-row__num {
-			padding-top: 0;
-		}
-
-		.service-row__link {
-			grid-column: 3;
-			justify-self: end;
-			text-align: right;
 		}
 	}
 
@@ -669,70 +496,4 @@ const schema = [
 		}
 	}
 
-	/* --- FAQ --- */
-	.faq {
-		border-bottom: var(--hairline);
-	}
-
-	.faq:first-child {
-		border-top: var(--hairline);
-	}
-
-	.faq summary {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-5);
-		padding-block: var(--space-5);
-		cursor: pointer;
-		list-style: none;
-	}
-
-	.faq summary::-webkit-details-marker {
-		display: none;
-	}
-
-	.faq__q {
-		font-size: clamp(1.25rem, 2vw, 1.5rem);
-		transition: color var(--dur-fast) var(--ease-out);
-	}
-
-	.faq summary:hover .faq__q {
-		color: var(--accent);
-	}
-
-	/* A "+" drawn with two lines; rotating 45deg turns it into an "×". */
-	.faq__icon {
-		position: relative;
-		flex: none;
-		width: 1rem;
-		height: 1rem;
-		transition: transform var(--dur-base) var(--ease-out);
-	}
-
-	.faq__icon::before,
-	.faq__icon::after {
-		content: '';
-		position: absolute;
-		top: 50%;
-		left: 0;
-		width: 100%;
-		height: 1.5px;
-		margin-top: -0.75px;
-		background: currentColor;
-	}
-
-	.faq__icon::after {
-		transform: rotate(90deg);
-	}
-
-	.faq[open] .faq__icon {
-		transform: rotate(45deg);
-		color: var(--accent);
-	}
-
-	.faq__a {
-		padding-bottom: var(--space-5);
-		color: var(--ink-2);
-	}
 </style>

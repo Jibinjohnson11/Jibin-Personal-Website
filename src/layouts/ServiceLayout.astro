@@ -1,0 +1,135 @@
+---
+/**
+ * Shared frame for the three service pages: hero, the page's own sections (default slot),
+ * related case studies, FAQ, closing call to action, and Service + FAQPage schema.
+ */
+import { getCollection } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+import Button from '../components/Button.astro';
+import Section from '../components/Section.astro';
+import WorkList from '../components/WorkList.astro';
+import Faq, { type FaqItem } from '../components/Faq.astro';
+import CtaLine from '../components/CtaLine.astro';
+import { SITE } from '../data/site';
+import { getPerson } from '../lib/person';
+
+interface Props {
+	/** <title> and meta description (docs/seo-strategy.pdf section 10) */
+	title: string;
+	description: string;
+	/** Short page name for the breadcrumb and the Service schema, e.g. "SEO Services" */
+	name: string;
+	serviceType: string;
+	/** H1 = keyword + accent, e.g. "SEO Services" + "in Kerala" */
+	keyword: string;
+	accent: string;
+	lead: string;
+	/** Case study slugs for the Related work block, in display order */
+	related: string[];
+	/** Section numbers for the shared blocks, continuing the page's own numbering */
+	relatedIndex: string;
+	faqIndex: string;
+	faqs: FaqItem[];
+	closing: { text: string; accent: string; label: string };
+}
+
+const { title, description, name, serviceType, keyword, accent, lead, related, relatedIndex, faqIndex, faqs, closing } = Astro.props;
+
+const path = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+
+const projects = (await getCollection('projects'))
+	.filter((project) => related.includes(project.id))
+	.sort((a, b) => related.indexOf(a.id) - related.indexOf(b.id));
+
+const schema = [
+	{
+		'@context': 'https://schema.org',
+		'@type': 'Service',
+		name: `${name} in Kerala`,
+		serviceType,
+		description,
+		url: new URL(path, SITE.url).href,
+		provider: await getPerson(),
+		areaServed: [
+			{ '@type': 'State', name: 'Kerala' },
+			{ '@type': 'Country', name: 'India' },
+		],
+	},
+	{
+		'@context': 'https://schema.org',
+		'@type': 'FAQPage',
+		mainEntity: faqs.map((faq) => ({
+			'@type': 'Question',
+			name: faq.q,
+			acceptedAnswer: { '@type': 'Answer', text: faq.a },
+		})),
+	},
+];
+---
+
+<BaseLayout
+	title={title}
+	description={description}
+	schema={schema}
+	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Services', url: '/services/' }, { name, url: path }]}
+>
+	<section class="service-hero container" aria-labelledby="service-title">
+		<SectionLabel text="Services" />
+		<h1 id="service-title" class="service-hero__title" data-reveal="lines">{keyword} <em>{accent}</em></h1>
+		<p class="lead service-hero__lead" data-reveal style="--reveal-delay: 300ms">{lead}</p>
+		<div class="service-hero__actions" data-reveal style="--reveal-delay: 450ms">
+			<Button href="/contact/">Get a quote</Button>
+		</div>
+	</section>
+
+	<slot />
+
+	<section class="page-section container" aria-labelledby="related-title">
+		<div class="grid section-head">
+			<div class="col-label"><SectionLabel index={relatedIndex} text="Related work" /></div>
+			<div class="col-content">
+				<h2 id="related-title" data-reveal="lines">Related <em>work</em></h2>
+			</div>
+		</div>
+		<WorkList projects={projects} />
+	</section>
+
+	<Section id="faq-title" index={faqIndex} label="FAQ">
+		<Fragment slot="heading">Common <em>questions</em></Fragment>
+		<Faq items={faqs} />
+	</Section>
+
+	<div class="container service-closing">
+		<CtaLine text={closing.text} accent={closing.accent} label={closing.label} />
+	</div>
+</BaseLayout>
+
+<style>
+	.service-hero {
+		padding-block: var(--space-7) var(--space-9);
+	}
+
+	.service-hero__title {
+		max-width: 18ch;
+		margin-block: var(--space-5) var(--space-6);
+	}
+
+	.service-hero__lead {
+		max-width: 40rem;
+	}
+
+	.service-hero__actions {
+		margin-top: var(--space-6);
+	}
+
+	.service-closing {
+		padding-bottom: var(--section-pad);
+	}
+
+	.service-closing :global(.cta-line) {
+		margin-top: 0;
+		padding-top: var(--space-6);
+		border-top: var(--hairline);
+	}
+</style>

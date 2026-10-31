@@ -1,16 +1,120 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import Container from '../../components/Container.astro';
-import Placeholder from '../../components/Placeholder.astro';
+import ServiceLayout from '../../layouts/ServiceLayout.astro';
+import Section from '../../components/Section.astro';
+
+const faqs = [
+	{
+		q: 'What access do you need to my website?',
+		a: "Google Search Console and Google Analytics are the main ones. If you'd like me to make changes directly, I'll also need access to the site itself. If Search Console isn't set up yet, I can set it up for you.",
+	},
+	{
+		q: 'Is SEO a one-off job or ongoing?',
+		a: 'It can be either. A technical audit and the fixes that follow can be a one-off project. Rankings, content and links need steady work over months, so most SEO is ongoing. We decide which fits after I review your site.',
+	},
+	{
+		q: 'Can you work alongside my web developer?',
+		a: "Yes. I'll write up technical fixes as clear, prioritised notes your developer can act on, or make the changes myself if that's easier for everyone.",
+	},
+	{
+		q: 'Do you write the content too?',
+		a: "I plan every piece around a keyword and what the searcher wants, and I can write it or work with your writers. Either way, nothing goes live until you've approved it.",
+	},
+	{
+		q: 'Have you done SEO for healthcare or education businesses?',
+		a: 'Yes. I handled SEO for Seren Derma, a healthcare brand, and I lead SEO for Blackbox Learning, an AI training academy. In healthcare especially, every page goes through client review so the facts stay accurate.',
+	},
+];
 ---
 
-<BaseLayout
+<ServiceLayout
 	title="SEO Services in Kerala | Freelance SEO Specialist"
 	description="Technical, on-page, and off-page SEO for Kerala businesses, with clear monthly reporting. Based in Trivandrum. Request an SEO review."
-	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'SEO', url: '/services/seo/' }]}
+	name="SEO Services"
+	serviceType="Search engine optimization"
+	keyword="SEO Services"
+	accent="in Kerala"
+	lead="I offer SEO services in Kerala for businesses that aren't showing up on Google yet, or not as often as they should. I'm an SEO specialist in Trivandrum, and I handle the technical fixes, the on-page work and link building, with a clear report every month."
+	related={['seren-derma', 'blackbox-learning']}
+	relatedIndex="07"
+	faqIndex="08"
+	faqs={faqs}
+	closing={{ text: 'Want to know where your site', accent: 'stands today?', label: 'Request an SEO review' }}
 >
-	<Container as="section" class="section stack">
-		<h1>SEO Services in Kerala</h1>
-		<Placeholder class="lead">Page content coming soon.</Placeholder>
-	</Container>
-</BaseLayout>
+	<Section id="technical-title" index="01" label="Technical">
+		<Fragment slot="heading">Technical <em>SEO</em></Fragment>
+		<p class="lead">
+			Content and links can't help much if Google struggles to crawl your site. So I start with a technical review in Google Search Console and work through what it finds:
+		</p>
+		<ul class="dash" role="list">
+			<li>Pages that aren't indexed, and the reasons why</li>
+			<li>Crawl errors, broken links and redirect chains</li>
+			<li>Page speed and how the site behaves on phones</li>
+			<li>Sitemaps, robots.txt and canonical tags</li>
+			<li>Duplicate or thin pages that compete with each other</li>
+		</ul>
+		<p>
+			Some fixes take minutes. Others need changes to the site itself, which I can make directly or hand to your developer with clear notes. If the site needs a rebuild rather than a repair, that's my <a href="/services/web-development/">website development</a> work.
+		</p>
+	</Section>
+
+	<Section id="onpage-title" index="02" label="On-page">
+		<Fragment slot="heading">On-page <em>SEO</em></Fragment>
+		<p>
+			Each page should clearly answer one search. I research the words your customers really use, then match each keyword to a single page, so your own pages don't end up competing for the same search.
+		</p>
+		<p>
+			On every page, I work on the title and meta description, the heading structure, the body content and the internal links that tie it to the rest of the site. Where content is missing, I plan new pages and take them through drafting and approval before they go live.
+		</p>
+		<p>
+			I've run this process on a <a href="/work/seren-derma/">healthcare SEO project</a>, where every page went through client review, and on an <a href="/work/blackbox-learning/">education SEO project</a> planned around the courses students search for.
+		</p>
+	</Section>
+
+	<Section id="offpage-title" index="03" label="Off-page">
+		<Fragment slot="heading">Off-page SEO and <em>link building</em></Fragment>
+		<p>
+			Links from other relevant websites are one of the signals Google uses to judge whether your site deserves to rank. I look for links that make sense for your business, through blogs, articles and other platforms in your field.
+		</p>
+		<p>
+			I don't buy links or use link schemes. They can get a site penalised, and undoing that damage takes far longer than building links the slow way.
+		</p>
+	</Section>
+
+	<Section id="local-title" index="04" label="Local">
+		<Fragment slot="heading">Local SEO for <em>Trivandrum businesses</em></Fragment>
+		<p>
+			If most of your customers live nearby, local searches are the ones that bring them in. Someone searching for a clinic or a coaching centre in Thiruvananthapuram wants an answer close to home.
+		</p>
+		<p>
+			Local SEO means making sure Google knows exactly where you are and what you offer. That covers your Google Business Profile, the same name, address and phone number everywhere your business is listed, and location pages only where they're genuinely useful to visitors. I'm based in Trivandrum myself.
+		</p>
+	</Section>
+
+	<Section id="report-title" index="05" label="Reporting">
+		<Fragment slot="heading">How I report <em>progress</em></Fragment>
+		<p>
+			Every client of my SEO services in Kerala gets the same thing each month: a short report in plain English. It covers:
+		</p>
+		<ul class="checklist" role="list">
+			<li>Rankings for your target keywords, and how they've moved</li>
+			<li>Organic traffic, from Google Analytics</li>
+			<li>Indexing issues found in Search Console, and what's been fixed</li>
+			<li>The work done that month</li>
+			<li>The plan for next month</li>
+		</ul>
+		<p>
+			The numbers come straight from Google's own tools, so they're the same figures you'd see if you logged in yourself. Pulling reports together by hand takes time, which is one reason I've started building my own tools with <a href="/services/python-django-development/">Python and Django</a>.
+		</p>
+	</Section>
+
+	<Section id="promise-title" index="06" label="Honesty">
+		<Fragment slot="heading">What SEO can and <em>can't promise</em></Fragment>
+		<p class="lead">Nobody controls Google's rankings. Anyone who guarantees you the first spot is guessing, or worse.</p>
+		<p>
+			What I can promise is honest work on the things that influence rankings, clear monthly reports, and straight answers when something isn't working.
+		</p>
+		<p>
+			Results usually take months, not weeks. How long depends on your competition, the current state of your site and how much useful content it already has. Once I've reviewed your site, I'll tell you what's realistic for it.
+		</p>
+	</Section>
+</ServiceLayout>

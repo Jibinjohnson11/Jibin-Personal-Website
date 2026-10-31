@@ -1,16 +1,136 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import Container from '../../components/Container.astro';
-import Placeholder from '../../components/Placeholder.astro';
+import ServiceLayout from '../../layouts/ServiceLayout.astro';
+import Section from '../../components/Section.astro';
+
+const faqs = [
+	{
+		q: 'What affects the cost of a website?',
+		a: "Mainly the number of pages, any features beyond the basics, like forms or booking, and whether your content is ready. I don't have fixed packages. I quote once we've talked through the scope, so you know the price before any work starts.",
+	},
+	{
+		q: 'Do you build WordPress or Shopify sites?',
+		a: "I build with HTML, CSS and JavaScript, and with Python and Django when a site needs a back end. If your project needs a specific platform, tell me early and I'll say honestly whether I'm the right fit.",
+	},
+	{
+		q: 'Will my new website rank on Google straight away?',
+		a: "No. Google needs time to find, crawl and trust a new site. The SEO setup at launch gives it a clean start, and ongoing SEO work is what helps it climb from there.",
+	},
+	{
+		q: 'Do I need to write the content myself?',
+		a: "You know your business inside out, so I'll need the facts from you: what you offer, who it's for and how people reach you. I'll shape that into pages and suggest wording that reads clearly and works for search. We agree who writes what during planning.",
+	},
+	{
+		q: 'What do you need from me to get started?',
+		a: "A short description of your business, who your customers are, and a few websites you like. Logos, photos and existing text help too, but we can sort those out during planning.",
+	},
+];
 ---
 
-<BaseLayout
+<ServiceLayout
 	title="Website Development Services in Kerala | Jibin Johnson"
 	description="Responsive, fast business websites built with SEO from day one. Freelance website development in Trivandrum and across Kerala. Get a quote."
-	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Web Development', url: '/services/web-development/' }]}
+	name="Web Development"
+	serviceType="Website development"
+	keyword="Website Development Services"
+	accent="in Kerala"
+	lead="I'm a web developer in Trivandrum offering website development services in Kerala for businesses that need a site people can actually find. I build fast, responsive websites with clean code, and I set up the SEO groundwork before launch, not after."
+	related={['aq-air']}
+	relatedIndex="05"
+	faqIndex="06"
+	faqs={faqs}
+	closing={{ text: 'Ready for a website that', accent: 'gets found?', label: 'Get a website quote' }}
 >
-	<Container as="section" class="section stack">
-		<h1>Website Development Services in Kerala</h1>
-		<Placeholder class="lead">Page content coming soon.</Placeholder>
-	</Container>
-</BaseLayout>
+	<Section id="get-title" index="01" label="What you get">
+		<Fragment slot="heading">What you <em>get</em></Fragment>
+		<p class="lead">
+			My website development services in Kerala are a one-person setup. You work with me directly, from the first call to launch day, with no account manager in between and no handover to a separate SEO team.
+		</p>
+		<ul class="items items--2" role="list">
+			<li>
+				<h3>A site that works on every screen</h3>
+				<p>I write the HTML, CSS and JavaScript myself, often with Bootstrap for the layout grid, and test each page on phones, tablets and desktops before it goes live.</p>
+			</li>
+			<li>
+				<h3>Search set up from the start</h3>
+				<p>Page titles, headings and the sitemap are part of the build, so Google can understand your site from the day it launches.</p>
+			</li>
+			<li>
+				<h3>Code that's easy to work with</h3>
+				<p>Clean, readable code that's simple to update later, by me or by another developer.</p>
+			</li>
+			<li>
+				<h3>Straight answers</h3>
+				<p>If something you want will slow the site down or won't help your customers, I'll tell you, and suggest what will.</p>
+			</li>
+		</ul>
+	</Section>
+
+	<Section id="types-title" index="02" label="Websites">
+		<Fragment slot="heading">Types of websites <em>I build</em></Fragment>
+		<ul class="items" role="list">
+			<li>
+				<h3>Business websites</h3>
+				<p>
+					A clear home for your business online: what you do, where you are and how to reach you. Usually a handful of pages, each one planned around what your customers search for.
+				</p>
+			</li>
+			<li>
+				<h3>Landing pages</h3>
+				<p>
+					One page with one job, like launching a product or collecting enquiries for a campaign. My <a href="/work/aq-air/">AQ Air landing page</a> is an example: a scroll-driven product story built in plain JavaScript, with no framework.
+				</p>
+			</li>
+			<li>
+				<h3>Portfolio sites</h3>
+				<p>For freelancers and professionals who need to show their work. Quick to load, simple to share, and easy to add new pieces to.</p>
+			</li>
+		</ul>
+		<p>
+			Need more than a website, like a booking system or an internal dashboard for your team? That's a custom web app, and it's covered on my <a href="/services/python-django-development/">Python Django development</a> page.
+		</p>
+	</Section>
+
+	<Section id="seo-title" index="03" label="SEO">
+		<Fragment slot="heading">SEO built into <em>every build</em></Fragment>
+		<p>
+			A new website starts with no rankings and no history. Getting the technical groundwork right at launch means Google can crawl it properly from day one, and you're not paying to fix avoidable problems later. Every site I launch includes:
+		</p>
+		<ul class="checklist" role="list">
+			<li>A responsive layout, tested on phones, tablets and desktops</li>
+			<li>A unique page title and meta description for every page</li>
+			<li>A clean heading structure, with one H1 per page</li>
+			<li>A sitemap and a robots.txt file</li>
+			<li>Google Search Console set up, with the sitemap submitted</li>
+			<li>A speed and accessibility check before launch</li>
+		</ul>
+		<p>
+			That covers the foundations. Growing your rankings after launch takes ongoing work on content and links, which is what my <a href="/services/seo/">SEO services</a> are for.
+		</p>
+	</Section>
+
+	<Section id="process-title" index="04" label="Process">
+		<Fragment slot="heading">How I <em>work</em></Fragment>
+		<ol class="steps" role="list">
+			<li>
+				<h3>Discovery</h3>
+				<p>We talk through your business, your customers and what the site needs to do. I'll ask what people type into Google when they're looking for someone like you.</p>
+			</li>
+			<li>
+				<h3>Planning</h3>
+				<p>I map out the pages and the content each one needs. We agree the scope and the timeline before any code gets written.</p>
+			</li>
+			<li>
+				<h3>Design and development</h3>
+				<p>I build the site and share progress as I go, so you can give feedback while changes are still easy to make.</p>
+			</li>
+			<li>
+				<h3>Testing</h3>
+				<p>Every page gets checked on different screen sizes, tested for speed and accessibility, and reviewed for titles and headings.</p>
+			</li>
+			<li>
+				<h3>Launch and support</h3>
+				<p>I put the site live, connect Search Console and Analytics, and stay around for fixes and updates once it's out in the world.</p>
+			</li>
+		</ol>
+	</Section>
+</ServiceLayout>

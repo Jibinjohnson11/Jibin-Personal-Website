@@ -1,0 +1,100 @@
+---
+/**
+ * Accordion of questions. Pass the same items to FAQPage schema so the markup and
+ * the structured data always match word for word.
+ */
+export interface FaqItem {
+	q: string;
+	a: string;
+}
+
+interface Props {
+	items: FaqItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="faq-list" data-reveal>
+	{
+		items.map((faq) => (
+			<details class="faq">
+				<summary>
+					<h3 class="faq__q">{faq.q}</h3>
+					<span class="faq__icon" aria-hidden="true" />
+				</summary>
+				<div class="faq__a">
+					<p>{faq.a}</p>
+				</div>
+			</details>
+		))
+	}
+</div>
+
+<style>
+	.faq {
+		border-bottom: var(--hairline);
+	}
+
+	.faq:first-child {
+		border-top: var(--hairline);
+	}
+
+	.faq summary {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-5);
+		padding-block: var(--space-5);
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.faq summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.faq__q {
+		font-size: clamp(1.25rem, 2vw, 1.5rem);
+		transition: color var(--dur-fast) var(--ease-out);
+	}
+
+	.faq summary:hover .faq__q {
+		color: var(--accent);
+	}
+
+	/* A "+" drawn with two lines; rotating 45deg turns it into an "×". */
+	.faq__icon {
+		position: relative;
+		flex: none;
+		width: 1rem;
+		height: 1rem;
+		transition: transform var(--dur-base) var(--ease-out);
+	}
+
+	.faq__icon::before,
+	.faq__icon::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 0;
+		width: 100%;
+		height: 1.5px;
+		margin-top: -0.75px;
+		background: currentColor;
+	}
+
+	.faq__icon::after {
+		transform: rotate(90deg);
+	}
+
+	.faq[open] .faq__icon {
+		transform: rotate(45deg);
+		color: var(--accent);
+	}
+
+	.faq__a {
+		padding-bottom: var(--space-5);
+		color: var(--ink-2);
+	}
+</style>

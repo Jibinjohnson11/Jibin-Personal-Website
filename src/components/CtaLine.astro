@@ -1,11 +1,23 @@
 ---
 import Button from './Button.astro';
+
+interface Props {
+	/** Plain start of the sentence. */
+	text?: string;
+	/** Closing words, set in italic accent. */
+	accent?: string;
+	/** Link button text. */
+	label?: string;
+	href?: string;
+}
+
+const { text = 'Like what you see?', accent = "Let's build yours.", label = 'Start a project', href = '/contact/' } = Astro.props;
 ---
 
 <!-- Quiet one-line call to action: serif sentence and a link button. -->
 <div class="cta-line" data-reveal>
-	<p class="cta-line__text">Like what you see? <em>Let's build yours.</em></p>
-	<Button variant="link" href="/contact/">Start a project</Button>
+	<p class="cta-line__text">{text} <em>{accent}</em></p>
+	<Button variant="link" href={href}>{label}</Button>
 </div>
 
 <style>

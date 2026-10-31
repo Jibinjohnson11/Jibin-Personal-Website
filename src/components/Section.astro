@@ -1,0 +1,172 @@
+---
+/**
+ * Editorial page section: SectionLabel in the left columns, H2 and body on the right.
+ * Put the H2 text in the "heading" slot (it can contain <em> for the accent words).
+ * Body content gets reading styles: paragraph rhythm, H3s, dash and check lists, steps.
+ */
+import SectionLabel from './SectionLabel.astro';
+
+interface Props {
+	id: string;
+	index: string;
+	label: string;
+	last?: boolean;
+}
+
+const { id, index, label, last = false } = Astro.props;
+---
+
+<section class:list={['page-section', 'container', { 'page-section--last': last }]} aria-labelledby={id}>
+	<div class="grid">
+		<div class="col-label"><SectionLabel index={index} text={label} /></div>
+		<div class="col-content">
+			<h2 id={id} data-reveal="lines"><slot name="heading" /></h2>
+			<div class="section-body" data-reveal>
+				<slot />
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	.section-body {
+		max-width: 46rem;
+	}
+
+	.section-body > :global(* + *) {
+		margin-top: var(--space-4);
+	}
+
+	.section-body :global(p) {
+		color: var(--ink-2);
+	}
+
+	.section-body :global(h3) {
+		font-size: clamp(1.25rem, 2vw, 1.5rem);
+	}
+
+	/* Cards of H3 + text, two columns from tablet up */
+	.section-body :global(.items) {
+		display: grid;
+		gap: var(--space-6) var(--space-7);
+		margin-top: var(--space-6);
+		padding: 0;
+		list-style: none;
+	}
+
+	.section-body :global(.items > li) {
+		padding-top: var(--space-4);
+		border-top: var(--hairline);
+	}
+
+	.section-body :global(.items h3 + p) {
+		margin-top: var(--space-2);
+	}
+
+	@media (min-width: 768px) {
+		.section-body :global(.items--2) {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	/* Plain list with an accent dash */
+	.section-body :global(ul.dash) {
+		padding: 0;
+		list-style: none;
+	}
+
+	.section-body :global(ul.dash li) {
+		position: relative;
+		padding-left: 1.5em;
+		color: var(--ink-2);
+	}
+
+	.section-body :global(ul.dash li + li) {
+		margin-top: var(--space-2);
+	}
+
+	.section-body :global(ul.dash li::before) {
+		content: '';
+		position: absolute;
+		top: 0.85em;
+		left: 0;
+		width: 0.75em;
+		border-top: 1.5px solid var(--accent);
+	}
+
+	/* Checklist: hairline rows with a drawn tick */
+	.section-body :global(ul.checklist) {
+		padding: 0;
+		list-style: none;
+		border-top: var(--hairline);
+	}
+
+	.section-body :global(ul.checklist li) {
+		position: relative;
+		padding: var(--space-3) 0 var(--space-3) 2rem;
+		border-bottom: var(--hairline);
+	}
+
+	.section-body :global(ul.checklist li::before) {
+		content: '';
+		position: absolute;
+		top: 1.15em;
+		left: 0.2rem;
+		width: 0.7rem;
+		height: 0.4rem;
+		border-left: 1.5px solid var(--accent);
+		border-bottom: 1.5px solid var(--accent);
+		transform: rotate(-45deg);
+	}
+
+	/* Numbered steps with a vertical hairline */
+	.section-body :global(ol.steps) {
+		position: relative;
+		display: grid;
+		gap: var(--space-6);
+		margin-top: var(--space-6);
+		padding: 0;
+		list-style: none;
+		counter-reset: step;
+	}
+
+	.section-body :global(ol.steps::before) {
+		content: '';
+		position: absolute;
+		top: 0.5rem;
+		bottom: 0.5rem;
+		left: 4px;
+		border-left: var(--hairline);
+	}
+
+	.section-body :global(ol.steps > li) {
+		position: relative;
+		padding-left: var(--space-6);
+		counter-increment: step;
+	}
+
+	.section-body :global(ol.steps > li::before) {
+		content: '';
+		position: absolute;
+		top: 0.45rem;
+		left: 0;
+		width: 9px;
+		height: 9px;
+		border-radius: 50%;
+		background: var(--accent);
+	}
+
+	.section-body :global(ol.steps h3::before) {
+		content: counter(step, decimal-leading-zero);
+		display: block;
+		margin-bottom: var(--space-1);
+		font-family: var(--font-mono);
+		font-size: var(--text-label);
+		letter-spacing: 0.06em;
+		color: var(--label);
+	}
+
+	.section-body :global(ol.steps h3 + p) {
+		margin-top: var(--space-2);
+	}
+</style>

@@ -79,7 +79,7 @@ const schema = [
 	</section>
 
 	<!-- 01 Story -->
-	<section class="about-section container" aria-labelledby="story-title">
+	<section class="page-section container" aria-labelledby="story-title">
 		<div class="grid">
 			<div class="col-label"><SectionLabel index="01" text="My story" /></div>
 			<div class="col-content stack">
@@ -98,7 +98,7 @@ const schema = [
 	</section>
 
 	<!-- 02 Experience -->
-	<section class="about-section container" aria-labelledby="experience-title">
+	<section class="page-section container" aria-labelledby="experience-title">
 		<div class="grid">
 			<div class="col-label"><SectionLabel index="02" text="Experience" /></div>
 			<div class="col-content">
@@ -120,7 +120,7 @@ const schema = [
 	</section>
 
 	<!-- 03 Education -->
-	<section class="about-section container" aria-labelledby="education-title">
+	<section class="page-section container" aria-labelledby="education-title">
 		<div class="grid">
 			<div class="col-label"><SectionLabel index="03" text="Education" /></div>
 			<div class="col-content">
@@ -150,7 +150,7 @@ const schema = [
 	</section>
 
 	<!-- 04 Now -->
-	<section class="about-section about-section--last container" aria-labelledby="now-title">
+	<section class="page-section page-section--last container" aria-labelledby="now-title">
 		<div class="grid">
 			<div class="col-label"><SectionLabel index="04" text="Now" /></div>
 			<div class="col-content stack">
@@ -215,28 +215,6 @@ const schema = [
 		.about-hero__grid > .about-hero__portrait {
 			grid-column: 10 / span 3;
 		}
-	}
-
-	/* --- Sections --- */
-	.about-section {
-		position: relative;
-		padding-block: calc(var(--section-pad) * 0.75);
-	}
-
-	.about-section--last {
-		padding-bottom: var(--section-pad);
-	}
-
-	.about-section::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		inset-inline: var(--container-pad);
-		border-top: var(--hairline);
-	}
-
-	.col-content > h2 + :global(*) {
-		margin-top: var(--space-6);
 	}
 
 	/* --- Timeline: vertical hairline with a dot per entry, newest first --- */

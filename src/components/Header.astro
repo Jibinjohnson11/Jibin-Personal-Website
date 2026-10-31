@@ -35,6 +35,9 @@ const trailingLinks = [
 						</svg>
 					</button>
 					<ul id="services-menu" class="dropdown__panel" role="list" hidden>
+						<li>
+							<a href="/services/" class="dropdown__link" aria-current={isCurrent('/services/') ? 'page' : undefined}>All services</a>
+						</li>
 						{
 							SERVICES.map((service) => (
 								<li>
@@ -85,6 +88,9 @@ const trailingLinks = [
 				<span class="mobile-menu__num label" aria-hidden="true">02</span>
 				<span class="mobile-menu__link mobile-menu__link--group" id="mobile-services-heading">Services</span>
 				<ul class="mobile-menu__sub" role="list" aria-labelledby="mobile-services-heading">
+					<li>
+						<a href="/services/" aria-current={isCurrent('/services/') ? 'page' : undefined}>All services</a>
+					</li>
 					{
 						SERVICES.map((service) => (
 							<li>

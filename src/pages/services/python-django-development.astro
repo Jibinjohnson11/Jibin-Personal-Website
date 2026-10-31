@@ -1,16 +1,109 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import Container from '../../components/Container.astro';
-import Placeholder from '../../components/Placeholder.astro';
+import ServiceLayout from '../../layouts/ServiceLayout.astro';
+import Section from '../../components/Section.astro';
+
+const faqs = [
+	{
+		q: 'How long does a custom web app take to build?',
+		a: 'It depends on the scope. We agree a timeline during planning, once we know what the first working version needs to do.',
+	},
+	{
+		q: 'How much does a custom web app cost?',
+		a: "There's no fixed price, because no two apps are the same. I quote after we've scoped the first version, so you know the cost before any work starts.",
+	},
+	{
+		q: 'Can you add features to an existing Django project?',
+		a: "Yes, depending on how it's built. I'll look through the code first and tell you honestly what's realistic.",
+	},
+	{
+		q: "Can I see code you've written?",
+		a: "Some of it. My GitHub profile is public, including the code for the AQ Air landing page. The SEO Management Dashboard isn't public yet, but I'm happy to walk you through it on a call.",
+	},
+	{
+		q: 'Do you build AI features into web apps?',
+		a: "Not as a service yet. I'm learning Generative AI and AI full-stack development, and I'll offer AI features once I have real projects to show for it.",
+	},
+];
 ---
 
-<BaseLayout
+<ServiceLayout
 	title="Python Django Developer in Kerala | Jibin Johnson"
 	description="Custom web apps, dashboards, and internal tools built with Python, Django, and PostgreSQL by a full-stack developer in Trivandrum."
-	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Python Django Development', url: '/services/python-django-development/' }]}
+	name="Python Django Development"
+	serviceType="Web application development"
+	keyword="Python Django Developer"
+	accent="in Kerala"
+	lead="I'm a Python Django developer in Kerala, based in Trivandrum, and I build custom web applications for teams that have outgrown spreadsheets and shared inboxes. My focus is dashboards, admin panels and internal tools that fit the way your team already works."
+	related={['seo-management-dashboard']}
+	relatedIndex="04"
+	faqIndex="05"
+	faqs={faqs}
+	closing={{ text: 'Got a process that needs', accent: 'its own tool?', label: 'Discuss your web app' }}
 >
-	<Container as="section" class="section stack">
-		<h1>Python Django Developer in Kerala</h1>
-		<Placeholder class="lead">Page content coming soon.</Placeholder>
-	</Container>
-</BaseLayout>
+	<Section id="build-title" index="01" label="What I build">
+		<Fragment slot="heading">What I <em>build</em></Fragment>
+		<p class="lead">
+			My first Django build started with a familiar problem: a team tracking work across spreadsheets and messages. Drafts, approvals and tasks were scattered, and more time went into coordinating them than doing the work, so I started building one place to manage it all. If your team works the same way, a small custom app can do the same for you.
+		</p>
+		<ul class="items items--2" role="list">
+			<li>
+				<h3>Dashboards</h3>
+				<p>One screen that shows what matters: project status, figures that update themselves, and reports you don't have to rebuild by hand every week.</p>
+			</li>
+			<li>
+				<h3>Admin panels</h3>
+				<p>A secure place for your team to manage records, users and content, with the right permissions for each person.</p>
+			</li>
+			<li>
+				<h3>Workflow and internal tools</h3>
+				<p>Approval flows, task tracking and request forms that follow your process step by step, so everyone can see what's waiting on them.</p>
+			</li>
+			<li>
+				<h3>Custom web apps</h3>
+				<p>Small-to-medium applications built around one clear job, from the database up to the screens your team uses.</p>
+			</li>
+		</ul>
+		<p>I don't build enterprise systems or large-scale platforms. If your project is that size, I'll tell you upfront.</p>
+	</Section>
+
+	<Section id="stack-title" index="02" label="Tech stack">
+		<Fragment slot="heading">The tech <em>stack</em></Fragment>
+		<p>I build with Python and Django on the back end, PostgreSQL for the database, and plain HTML, CSS and JavaScript for the screens people use.</p>
+		<h3>Why Django</h3>
+		<p>
+			Django comes with user login, an admin panel and an ORM for talking to the database. Those are the parts every app needs, so starting with them already built means more time goes into the part that's specific to your business.
+		</p>
+		<h3>Why PostgreSQL</h3>
+		<p>
+			Most business data is connected: clients have projects, projects have tasks, tasks have people. PostgreSQL handles those relationships well and makes it straightforward to keep a history of who changed what.
+		</p>
+		<p>
+			If what you need is a public website rather than an app, that's a different kind of job, and it's covered by my <a href="/services/web-development/">website development services</a>.
+		</p>
+	</Section>
+
+	<Section id="custom-title" index="03" label="Process">
+		<Fragment slot="heading">How I work on <em>custom builds</em></Fragment>
+		<p>Custom software goes wrong when it tries to do everything at once. So I keep the first version small.</p>
+		<ol class="steps" role="list">
+			<li>
+				<h3>Start small</h3>
+				<p>We pick the one problem that costs your team the most time, and agree what a working first version needs to do.</p>
+			</li>
+			<li>
+				<h3>Ship a working core</h3>
+				<p>I build that core first and get it in front of your team, so you're using real software early instead of reviewing plans.</p>
+			</li>
+			<li>
+				<h3>Add features in steps</h3>
+				<p>Once the core works, we add features one at a time, based on what your team needs after using it.</p>
+			</li>
+		</ol>
+		<p>
+			That's how I'm building the <a href="/work/seo-management-dashboard/">SEO Management Dashboard</a>: content approvals first, because that's where our team lost the most time. The idea came from running <a href="/services/seo/">SEO campaigns</a>, where coordinating drafts and approvals took more time than the SEO itself.
+		</p>
+		<p>
+			Working with a Python Django developer in Kerala doesn't mean your team has to be here. I work remotely with clients across India and abroad.
+		</p>
+	</Section>
+</ServiceLayout>

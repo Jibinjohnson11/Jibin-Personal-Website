@@ -3,7 +3,8 @@ import { SITE } from '../data/site';
 
 export interface Crumb {
 	name: string;
-	url: string;
+	/** Leave out for a level that has no page of its own (shown as plain text, skipped in the schema). */
+	url?: string;
 }
 
 interface Props {
@@ -15,12 +16,14 @@ const { items } = Astro.props;
 const schema = {
 	'@context': 'https://schema.org',
 	'@type': 'BreadcrumbList',
-	itemListElement: items.map((item, index) => ({
-		'@type': 'ListItem',
-		position: index + 1,
-		name: item.name,
-		item: new URL(item.url, SITE.url).href,
-	})),
+	itemListElement: items
+		.filter((item) => item.url)
+		.map((item, index) => ({
+			'@type': 'ListItem',
+			position: index + 1,
+			name: item.name,
+			item: new URL(item.url!, SITE.url).href,
+		})),
 };
 ---
 
@@ -34,7 +37,7 @@ const schema = {
 					</li>
 				) : (
 					<li>
-						<a href={item.url}>{item.name}</a>
+						{item.url ? <a href={item.url}>{item.name}</a> : <span>{item.name}</span>}
 						<span class="breadcrumbs__sep" aria-hidden="true">/</span>
 					</li>
 				),

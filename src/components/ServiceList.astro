@@ -1,0 +1,159 @@
+---
+/**
+ * Editorial numbered list of services: number, serif name, short description and a
+ * keyword link to the service page. A row without a url is shown without a link.
+ */
+export interface ServiceItem {
+	name: string;
+	text: string;
+	url?: string;
+	/** Link text, usually the page's target keyword */
+	anchor?: string;
+}
+
+interface Props {
+	items: ServiceItem[];
+	/** 3 under a section H2 (home), 2 under the page H1 (/services/) */
+	headingLevel?: 2 | 3;
+}
+
+const { items, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+---
+
+<ol class="service-list" role="list">
+	{
+		items.map((service, i) => (
+			<li class:list={['service-row', { 'has-link': service.url }]} data-reveal>
+				<div class="service-row__inner">
+					<span class="service-row__num label">{String(i + 1).padStart(2, '0')}</span>
+					<div class="service-row__body">
+						<Heading class="service-row__name">{service.name}</Heading>
+						<p class="service-row__text">{service.text}</p>
+					</div>
+					{service.url && (
+						<a class="service-row__link" href={service.url}>
+							{/* Last word and arrow share a no-wrap span so the arrow never ends up alone on a line. */}
+							<span class="service-row__anchor">
+								{service.anchor!.split(' ').slice(0, -1).join(' ')}{' '}
+								<span class="nowrap">
+									{service.anchor!.split(' ').at(-1)}
+									<span class="service-row__arrow" aria-hidden="true">→</span>
+								</span>
+							</span>
+						</a>
+					)}
+				</div>
+			</li>
+		))
+	}
+</ol>
+
+<style>
+	.service-row {
+		position: relative;
+		border-top: var(--hairline);
+	}
+
+	.service-row:last-child {
+		border-bottom: var(--hairline);
+	}
+
+	.service-row__inner {
+		position: relative;
+		display: grid;
+		grid-template-columns: 2.5rem minmax(0, 1fr);
+		gap: var(--space-3) var(--space-4);
+		padding-block: var(--space-6);
+		transition: transform var(--dur-base) var(--ease-out);
+	}
+
+	.service-row__num {
+		padding-top: 0.6rem;
+	}
+
+	.service-row__name {
+		font-size: clamp(1.625rem, 3vw, 2.5rem);
+		line-height: 1.1;
+	}
+
+	.service-row__text {
+		margin-top: var(--space-3);
+		color: var(--ink-2);
+	}
+
+	.service-row__link {
+		grid-column: 2;
+		justify-self: start;
+		padding-block: var(--space-2);
+		font-size: var(--text-small);
+		font-weight: 500;
+		text-decoration: none;
+	}
+
+	.service-row__anchor {
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.22em;
+	}
+
+	/* The whole row is clickable through the link. */
+	.service-row__link::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+	}
+
+	.nowrap {
+		white-space: nowrap;
+	}
+
+	.service-row__arrow {
+		display: inline-block;
+		margin-left: 0.4em;
+		transition: transform var(--dur-base) var(--ease-out);
+	}
+
+	.service-row.has-link:hover .service-row__inner {
+		transform: translateX(var(--space-2));
+	}
+
+	.service-row.has-link:hover .service-row__name,
+	.service-row.has-link:hover .service-row__link {
+		color: var(--accent);
+	}
+
+	.service-row.has-link:hover .service-row__arrow,
+	.service-row__link:focus-visible .service-row__arrow {
+		transform: translateX(6px);
+	}
+
+	@media (min-width: 1024px) {
+		.service-row__inner {
+			grid-template-columns: 4rem minmax(0, 1fr) minmax(0, 18rem);
+			align-items: center;
+			gap: var(--space-6);
+		}
+
+		.service-row__body {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			gap: var(--space-6);
+			align-items: baseline;
+		}
+
+		.service-row__text {
+			margin-top: 0;
+		}
+
+		.service-row__num {
+			padding-top: 0;
+		}
+
+		.service-row__link {
+			grid-column: 3;
+			justify-self: end;
+			text-align: right;
+		}
+	}
+</style>
