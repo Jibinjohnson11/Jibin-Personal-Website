@@ -1,16 +1,458 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Container from '../components/Container.astro';
-import Placeholder from '../components/Placeholder.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+import Button from '../components/Button.astro';
+import { SITE, SOCIAL } from '../data/site';
+import { getPerson } from '../lib/person';
+
+const title = 'Contact Jibin Johnson – Web Developer in Trivandrum';
+const description =
+	'Have a website, SEO, or Django project? Send a message. I reply within 24 hours on working days.';
+
+// Web3Forms access keys are public by design: they only allow sending to the inbox they belong to.
+const accessKey = import.meta.env.PUBLIC_WEB3FORMS_KEY as string | undefined;
+if (!accessKey || accessKey.includes('YOUR_KEY')) {
+	console.warn('[contact] PUBLIC_WEB3FORMS_KEY is missing or still a placeholder. The contact form will not send.');
+}
+
+// Without JavaScript, Web3Forms redirects here and :target reveals the success message.
+const redirectUrl = `${SITE.url}/contact/?sent=1#sent`;
+
+const topics = ['Job opportunity', 'Website project', 'SEO project', 'Something else'];
+
+const schema = [
+	{
+		'@context': 'https://schema.org',
+		'@type': 'ContactPage',
+		name: title,
+		description,
+		url: `${SITE.url}/contact/`,
+		mainEntity: await getPerson(),
+	},
+];
 ---
 
-<BaseLayout
-	title="Contact Jibin Johnson – Web Developer in Trivandrum"
-	description="Have a website, SEO, or Django project? Send a message or WhatsApp. I reply within 24 hours on working days."
-	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Contact', url: '/contact/' }]}
->
-	<Container as="section" class="section stack">
-		<h1>Contact Jibin Johnson</h1>
-		<Placeholder class="lead">Page content coming soon.</Placeholder>
-	</Container>
+<BaseLayout title={title} description={description} schema={schema} breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Contact', url: '/contact/' }]}>
+	<section class="contact container" aria-labelledby="contact-title">
+		<div class="grid contact__grid">
+			<!-- Info -->
+			<div class="contact__info">
+				<SectionLabel text="Contact" />
+				<h1 id="contact-title" class="contact__title" data-reveal="lines">Let's <em>talk.</em></h1>
+				<p class="lead" data-reveal style="--reveal-delay: 250ms">
+					Have a role, a project or a question? Send me a message. I usually reply within 24 hours on working days.
+				</p>
+
+				<dl class="contact__details" data-reveal style="--reveal-delay: 400ms">
+					<div>
+						<dt class="label">Email</dt>
+						<dd><a href={`mailto:${SITE.email}`}>{SITE.email}</a></dd>
+					</div>
+					<div>
+						<dt class="label">Location</dt>
+						<dd>{SITE.location}</dd>
+					</div>
+					<div>
+						<dt class="label">Open to</dt>
+						<dd>Full-time roles, freelance web and SEO projects, collaborations</dd>
+					</div>
+					<div>
+						<dt class="label">Profiles</dt>
+						<dd>
+							<ul class="contact__profiles" role="list">
+								{
+									SOCIAL.map((link) => (
+										<li>
+											<a href={link.url} target="_blank" rel="noopener">
+												{link.name}
+												<span aria-hidden="true"> ↗</span>
+												<span class="visually-hidden"> (opens in a new tab)</span>
+											</a>
+										</li>
+									))
+								}
+							</ul>
+						</dd>
+					</div>
+				</dl>
+			</div>
+
+			<!-- Form -->
+			<div class="contact__form-area" data-reveal style="--reveal-delay: 300ms">
+				<div class="form-success" id="sent" tabindex="-1" data-form-success>
+					<p class="form-success__text">Thanks, your message is on its way. I'll reply within 24 hours.</p>
+				</div>
+
+				<form class="contact-form" action="https://api.web3forms.com/submit" method="POST" data-contact-form>
+					<input type="hidden" name="access_key" value={accessKey} />
+					<input type="hidden" name="subject" value="New message from jibinjohnson.in" />
+					<input type="hidden" name="from_name" value="jibinjohnson.in" />
+					<input type="hidden" name="redirect" value={redirectUrl} />
+					<!-- Honeypot: real visitors never see or fill this; bots that tick it are rejected. -->
+					<input type="checkbox" name="botcheck" class="contact-form__botcheck" tabindex="-1" autocomplete="off" />
+
+					<p class="contact-form__note small muted">Fields marked <span aria-hidden="true">*</span><span class="visually-hidden">with an asterisk</span> are required.</p>
+
+					<div class="field">
+						<label for="name">Name <span class="field__req" aria-hidden="true">*</span></label>
+						<input
+							id="name"
+							name="name"
+							type="text"
+							autocomplete="name"
+							placeholder="Arjun Nair"
+							required
+							aria-describedby="name-error"
+							data-validate
+							data-required="Please enter your name."
+						/>
+						<p class="field__error" id="name-error"></p>
+					</div>
+
+					<div class="field">
+						<label for="email">Email <span class="field__req" aria-hidden="true">*</span></label>
+						<input
+							id="email"
+							name="email"
+							type="email"
+							autocomplete="email"
+							placeholder="you@example.com"
+							required
+							aria-describedby="email-error"
+							data-validate
+							data-required="Please enter your email address."
+							data-invalid="Please enter a valid email address, like you@example.com."
+						/>
+						<p class="field__error" id="email-error"></p>
+					</div>
+
+					<div class="field">
+						<label for="phone">Phone <span class="field__optional">(optional)</span></label>
+						<input id="phone" name="phone" type="tel" autocomplete="tel" />
+					</div>
+
+					<div class="field">
+						<label for="topic">Topic <span class="field__req" aria-hidden="true">*</span></label>
+						<div class="field__select">
+							<select id="topic" name="topic" required aria-describedby="topic-error" data-validate data-required="Please choose a topic.">
+								<option value="">Choose a topic</option>
+								{topics.map((topic) => <option value={topic}>{topic}</option>)}
+							</select>
+						</div>
+						<p class="field__error" id="topic-error"></p>
+					</div>
+
+					<div class="field">
+						<label for="message">Message <span class="field__req" aria-hidden="true">*</span></label>
+						<textarea
+							id="message"
+							name="message"
+							rows="6"
+							placeholder="Tell me a bit about what you need"
+							required
+							aria-describedby="message-error"
+							data-validate
+							data-required="Please write a short message."></textarea>
+						<p class="field__error" id="message-error"></p>
+					</div>
+
+					<p class="form-status" aria-live="polite" data-form-status></p>
+
+					<div class="contact-form__submit">
+						<Button type="submit" data-form-submit>Send message</Button>
+						<p class="small muted">Your details are only used to reply to you.</p>
+					</div>
+				</form>
+			</div>
+		</div>
+	</section>
 </BaseLayout>
+
+<script>
+	const form = document.querySelector<HTMLFormElement>('[data-contact-form]');
+	const success = document.querySelector<HTMLElement>('[data-form-success]');
+	const status = document.querySelector<HTMLElement>('[data-form-status]');
+	const button = document.querySelector<HTMLButtonElement>('[data-form-submit]');
+	const buttonText = button?.querySelector<HTMLElement>('.btn__text');
+
+	const ERROR_MESSAGE = 'Something went wrong. Please try again, or email me at jibinjohnsoninfo@gmail.com.';
+
+	type Field = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+	if (form && success && status && button && buttonText) {
+		// With JavaScript we validate inline; without it the browser's own validation applies.
+		form.noValidate = true;
+
+		const fields = Array.from(form.querySelectorAll<Field>('[data-validate]'));
+
+		const messageFor = (field: Field) => {
+			if (field.validity.valueMissing) return field.dataset.required ?? '';
+			if (field.validity.typeMismatch) return field.dataset.invalid ?? '';
+			return '';
+		};
+
+		const showError = (field: Field, message: string) => {
+			const error = document.getElementById(`${field.id}-error`);
+			if (error) error.textContent = message;
+			if (message) field.setAttribute('aria-invalid', 'true');
+			else field.removeAttribute('aria-invalid');
+		};
+
+		const showSuccess = () => {
+			form.hidden = true;
+			success.classList.add('is-shown');
+			success.focus();
+		};
+
+		fields.forEach((field) => {
+			// Clear (or update) an error as soon as the visitor fixes the field.
+			field.addEventListener(field instanceof HTMLSelectElement ? 'change' : 'input', () => {
+				if (field.getAttribute('aria-invalid') === 'true') showError(field, messageFor(field));
+			});
+			// Catch typos like a half-written email when leaving a field that has something in it.
+			field.addEventListener('blur', () => {
+				if (field.value) showError(field, messageFor(field));
+			});
+		});
+
+		form.addEventListener('submit', async (event) => {
+			event.preventDefault();
+			status.classList.remove('is-error');
+
+			const invalid = fields.filter((field) => {
+				const message = messageFor(field);
+				showError(field, message);
+				return message !== '';
+			});
+
+			if (invalid.length > 0) {
+				status.textContent = invalid.length === 1 ? 'One field needs a fix before you can send.' : `${invalid.length} fields need a fix before you can send.`;
+				invalid[0].focus();
+				return;
+			}
+
+			status.textContent = '';
+			button.disabled = true;
+			buttonText.textContent = 'Sending…';
+
+			try {
+				const response = await fetch(form.action, {
+					method: 'POST',
+					headers: { Accept: 'application/json' },
+					body: new FormData(form),
+				});
+				const result = await response.json();
+				if (!response.ok || !result.success) throw new Error(result.message);
+				showSuccess();
+			} catch {
+				status.textContent = ERROR_MESSAGE;
+				status.classList.add('is-error');
+			} finally {
+				button.disabled = false;
+				buttonText.textContent = 'Send message';
+			}
+		});
+
+		// Back from a no-JS submit (?sent=1) without the #sent hash: still show the message.
+		if (new URLSearchParams(window.location.search).get('sent') === '1') showSuccess();
+	}
+</script>
+
+<style>
+	.contact {
+		padding-block: var(--space-7) var(--section-pad);
+	}
+
+	.contact__grid {
+		row-gap: var(--space-8);
+	}
+
+	.contact__title {
+		margin-block: var(--space-5) var(--space-6);
+	}
+
+	.contact__info .lead {
+		max-width: 34rem;
+	}
+
+	@media (min-width: 960px) {
+		.contact__grid > .contact__info {
+			grid-column: 1 / span 5;
+		}
+
+		.contact__grid > .contact__form-area {
+			grid-column: 7 / span 6;
+			padding-top: var(--space-8);
+		}
+	}
+
+	/* --- Info list --- */
+	.contact__details {
+		display: grid;
+		gap: var(--space-5);
+		margin-top: var(--space-7);
+		padding-top: var(--space-5);
+		border-top: var(--hairline);
+	}
+
+	.contact__details dt {
+		margin-bottom: var(--space-1);
+	}
+
+	.contact__details dd {
+		margin: 0;
+		overflow-wrap: anywhere;
+	}
+
+	.contact__details a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+	}
+
+	.contact__profiles {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 var(--space-5);
+	}
+
+	/* --- Form --- */
+	.contact-form {
+		display: grid;
+		gap: var(--space-5);
+	}
+
+	.contact-form__botcheck {
+		display: none;
+	}
+
+	.field {
+		display: grid;
+		gap: var(--space-2);
+	}
+
+	.field label {
+		font-weight: 500;
+	}
+
+	.field__req {
+		color: var(--accent);
+	}
+
+	.field__optional {
+		font-weight: 400;
+		color: var(--ink-3);
+	}
+
+	.field input,
+	.field select,
+	.field textarea {
+		width: 100%;
+		min-height: 3rem;
+		padding: var(--space-3) var(--space-4);
+		border: 1px solid var(--ink-3);
+		border-radius: var(--radius);
+		background: var(--paper);
+		color: var(--ink);
+		line-height: 1.5;
+		transition: border-color var(--dur-fast) var(--ease-out);
+	}
+
+	.field textarea {
+		resize: vertical;
+	}
+
+	.field ::placeholder {
+		color: var(--ink-3);
+		opacity: 1;
+	}
+
+	.field input:hover,
+	.field select:hover,
+	.field textarea:hover {
+		border-color: var(--ink);
+	}
+
+	.field [aria-invalid='true'] {
+		border-color: var(--accent);
+		box-shadow: inset 3px 0 0 var(--accent);
+	}
+
+	.field__select {
+		position: relative;
+	}
+
+	.field__select select {
+		appearance: none;
+		padding-right: var(--space-7);
+	}
+
+	/* Chevron for the custom-styled select */
+	.field__select::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		right: var(--space-4);
+		width: 0.5rem;
+		height: 0.5rem;
+		margin-top: -0.35rem;
+		border-right: 1.5px solid var(--ink);
+		border-bottom: 1.5px solid var(--ink);
+		transform: rotate(45deg);
+		pointer-events: none;
+	}
+
+	.field__error {
+		font-size: var(--text-small);
+		color: var(--accent);
+	}
+
+	.field__error:empty {
+		display: none;
+	}
+
+	.form-status:empty {
+		display: none;
+	}
+
+	.form-status.is-error {
+		padding: var(--space-3) var(--space-4);
+		border-left: 3px solid var(--accent);
+		background: var(--paper-2);
+	}
+
+	.contact-form__submit {
+		display: grid;
+		justify-items: start;
+		gap: var(--space-3);
+	}
+
+	.contact-form__submit :global(button[disabled]) {
+		opacity: 0.6;
+		cursor: progress;
+	}
+
+	/* --- Success: shown by JS, or by :target after a no-JS redirect to #sent --- */
+	.form-success {
+		display: none;
+		padding: var(--space-6);
+		border: var(--hairline);
+		border-left: 3px solid var(--accent);
+		background: var(--paper-2);
+	}
+
+	.form-success:target,
+	.form-success.is-shown {
+		display: block;
+	}
+
+	.contact__form-area:has(.form-success:target) .contact-form {
+		display: none;
+	}
+
+	.form-success__text {
+		font-family: var(--font-serif);
+		font-size: var(--text-h3);
+		line-height: 1.25;
+	}
+</style>

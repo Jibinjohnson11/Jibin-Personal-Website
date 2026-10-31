@@ -1,16 +1,324 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Container from '../components/Container.astro';
-import Placeholder from '../components/Placeholder.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+import Button from '../components/Button.astro';
+import { SITE } from '../data/site';
+import { getPerson } from '../lib/person';
+import portrait from '../assets/images/jibin-johnson.jpg';
+
+const title = 'About Jibin Johnson – Web Developer & SEO, Kerala';
+const description =
+	'Web developer and SEO specialist at Prception Medialab, with a PG in Artificial Intelligence, working toward AI full-stack development.';
+
+const experience = [
+	{
+		role: 'Web Developer & SEO Specialist',
+		org: 'Prception Medialab',
+		dates: 'Jan 2026 – Present',
+		text: 'Building client websites and running SEO across healthcare, education and hospitality.',
+	},
+	{
+		role: 'Web Developer & SEO Team Lead',
+		org: 'Blackbox Learning (client of Prception Medialab)',
+		dates: 'Jan 2026 – Present',
+		text: 'Leading the SEO and web team and training interns.',
+	},
+];
+
+const education = [
+	{
+		role: 'PG in Artificial Intelligence',
+		org: 'Edure, Thiruvananthapuram',
+		dates: 'Nov 2024 – Nov 2025',
+		text: 'Python, machine learning, deep learning, NLP, image processing, data analysis and full-stack development with Django.',
+	},
+	{
+		role: 'Bachelor of Computer Applications (BCA)',
+		org: 'University of Madras',
+		dates: '2023 – 2026',
+		text: 'Results awaited.',
+	},
+];
+
+const schema = [
+	{
+		'@context': 'https://schema.org',
+		'@type': 'ProfilePage',
+		name: title,
+		url: `${SITE.url}/about/`,
+		mainEntity: await getPerson(),
+	},
+];
 ---
 
-<BaseLayout
-	title="About Jibin Johnson – Web Developer & SEO, Kerala"
-	description="Web developer and SEO specialist at Prception Medialab, with a PG in Artificial Intelligence, working toward AI full-stack development."
-	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'About', url: '/about/' }]}
->
-	<Container as="section" class="section stack">
-		<h1>About Jibin Johnson</h1>
-		<Placeholder class="lead">Page content coming soon.</Placeholder>
-	</Container>
+<BaseLayout title={title} description={description} schema={schema} breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'About', url: '/about/' }]}>
+	<!-- Hero -->
+	<section class="about-hero container" aria-labelledby="about-title">
+		<div class="grid about-hero__grid">
+			<div class="about-hero__text">
+				<SectionLabel text="About" />
+				<h1 id="about-title" class="about-hero__title" data-reveal="lines">I build for the web, <em>and for search.</em></h1>
+				<p class="lead" data-reveal style="--reveal-delay: 350ms">
+					I'm Jibin Johnson, a web developer and SEO specialist in Thiruvananthapuram, Kerala. I build websites that load fast and get found, and I'm moving into full-stack development with AI at its core.
+				</p>
+			</div>
+
+			<figure class="about-hero__portrait" data-reveal style="--reveal-delay: 500ms">
+				<Image
+					src={portrait}
+					alt="Jibin Johnson smiling, wearing a navy blazer over a white T-shirt, against a plain cream wall"
+					widths={[320, 480, 640]}
+					sizes="(min-width: 1024px) 300px, (min-width: 768px) 30vw, 16rem"
+					quality={78}
+					loading="eager"
+					fetchpriority="high"
+				/>
+			</figure>
+		</div>
+	</section>
+
+	<!-- 01 Story -->
+	<section class="about-section container" aria-labelledby="story-title">
+		<div class="grid">
+			<div class="col-label"><SectionLabel index="01" text="My story" /></div>
+			<div class="col-content stack">
+				<h2 id="story-title" data-reveal="lines">How I got <em>here</em></h2>
+				<p class="lead" data-reveal>
+					My work started where development meets search. I learned early that a good-looking website isn't enough if nobody can find it, so I learned to do both: build the site and make it visible.
+				</p>
+				<p data-reveal>
+					At Prception Medialab, I build responsive websites and run SEO campaigns for clients in healthcare, education and hospitality. I also lead the SEO and web team for Blackbox Learning, an AI training academy, where I train interns in SEO, front-end development, blog writing and using AI tools properly for coding.
+				</p>
+				<p data-reveal>
+					Running campaigns showed me how much time goes into manual coordination. That pushed me to build software to handle it, which led me to a PG in Artificial Intelligence and to full-stack work in Python and Django.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- 02 Experience -->
+	<section class="about-section container" aria-labelledby="experience-title">
+		<div class="grid">
+			<div class="col-label"><SectionLabel index="02" text="Experience" /></div>
+			<div class="col-content">
+				<h2 id="experience-title" data-reveal="lines">Where I've <em>worked</em></h2>
+				<ol class="timeline" role="list">
+					{
+						experience.map((item) => (
+							<li class="timeline__item" data-reveal>
+								<p class="label">{item.dates}</p>
+								<h3 class="timeline__role">{item.role}</h3>
+								<p class="timeline__org">{item.org}</p>
+								<p class="timeline__text">{item.text}</p>
+							</li>
+						))
+					}
+				</ol>
+			</div>
+		</div>
+	</section>
+
+	<!-- 03 Education -->
+	<section class="about-section container" aria-labelledby="education-title">
+		<div class="grid">
+			<div class="col-label"><SectionLabel index="03" text="Education" /></div>
+			<div class="col-content">
+				<h2 id="education-title" data-reveal="lines">What I've <em>studied</em></h2>
+				<ol class="timeline" role="list">
+					{
+						education.map((item) => (
+							<li class="timeline__item" data-reveal>
+								<p class="label">{item.dates}</p>
+								<h3 class="timeline__role">{item.role}</h3>
+								<p class="timeline__org">{item.org}</p>
+								<p class="timeline__text">{item.text}</p>
+							</li>
+						))
+					}
+				</ol>
+
+				<div class="cert" data-reveal>
+					<h3 class="label">Certification</h3>
+					<p class="cert__line">
+						<span class="cert__name">Generative AI Workshop</span>
+						<span>Blackbox Learning · April 2026</span>
+					</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- 04 Now -->
+	<section class="about-section about-section--last container" aria-labelledby="now-title">
+		<div class="grid">
+			<div class="col-label"><SectionLabel index="04" text="Now" /></div>
+			<div class="col-content stack">
+				<h2 id="now-title" data-reveal="lines">What I'm <em>learning</em></h2>
+				<p class="lead" data-reveal>
+					I'm currently going deeper into Generative AI and AI full-stack development: building web applications where AI does real work, not just a chatbot bolted on. The <a href="/work/seo-management-dashboard/">SEO Management Dashboard</a> is where I'm putting this into practice.
+				</p>
+				<div class="about-actions" data-reveal>
+					<Button href={SITE.resume} target="_blank" rel="noopener">
+						Download my resume<span class="visually-hidden"> (PDF, opens in a new tab)</span>
+					</Button>
+					<Button variant="link" href="/work/">See my work</Button>
+				</div>
+			</div>
+		</div>
+	</section>
 </BaseLayout>
+
+<style>
+	/* --- Hero --- */
+	.about-hero {
+		padding-block: var(--space-7) var(--space-8);
+	}
+
+	.about-hero__grid {
+		align-items: end;
+		row-gap: var(--space-7);
+	}
+
+	.about-hero__title {
+		margin-block: var(--space-5) var(--space-6);
+	}
+
+	.about-hero .lead {
+		max-width: 38rem;
+	}
+
+	.about-hero__portrait {
+		max-width: 16rem;
+	}
+
+	.about-hero__portrait img {
+		width: 100%;
+		height: auto;
+		border-radius: var(--radius);
+		background: var(--paper-2);
+	}
+
+	@media (min-width: 768px) {
+		.about-hero__grid > .about-hero__text {
+			grid-column: 1 / span 8;
+		}
+
+		.about-hero__grid > .about-hero__portrait {
+			grid-column: 9 / span 4;
+			justify-self: end;
+			width: 100%;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.about-hero__grid > .about-hero__portrait {
+			grid-column: 10 / span 3;
+		}
+	}
+
+	/* --- Sections --- */
+	.about-section {
+		position: relative;
+		padding-block: calc(var(--section-pad) * 0.75);
+	}
+
+	.about-section--last {
+		padding-bottom: var(--section-pad);
+	}
+
+	.about-section::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		inset-inline: var(--container-pad);
+		border-top: var(--hairline);
+	}
+
+	.col-content > h2 + :global(*) {
+		margin-top: var(--space-6);
+	}
+
+	/* --- Timeline: vertical hairline with a dot per entry, newest first --- */
+	.timeline {
+		position: relative;
+		display: grid;
+		gap: var(--space-7);
+	}
+
+	.timeline::before {
+		content: '';
+		position: absolute;
+		top: 0.5rem;
+		bottom: 0;
+		left: 4px;
+		border-left: var(--hairline);
+	}
+
+	.timeline__item {
+		position: relative;
+		padding-left: var(--space-6);
+	}
+
+	.timeline__item::before {
+		content: '';
+		position: absolute;
+		top: 0.3rem;
+		left: 0;
+		width: 9px;
+		height: 9px;
+		border-radius: 50%;
+		background: var(--accent);
+	}
+
+	.timeline__role {
+		margin-top: var(--space-2);
+	}
+
+	.timeline__org {
+		margin-top: var(--space-1);
+		font-weight: 500;
+		color: var(--ink);
+	}
+
+	.timeline__text {
+		margin-top: var(--space-2);
+		color: var(--ink-2);
+	}
+
+	/* --- Certification: a smaller line under the education timeline --- */
+	.cert {
+		margin-top: var(--space-7);
+		padding-top: var(--space-5);
+		border-top: var(--hairline);
+	}
+
+	.cert h3 {
+		font-family: var(--font-mono);
+		font-size: var(--text-label);
+		color: var(--label);
+	}
+
+	.cert__line {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1) var(--space-3);
+		margin-top: var(--space-3);
+		font-size: var(--text-small);
+		color: var(--ink-2);
+	}
+
+	.cert__name {
+		font-weight: 500;
+		color: var(--ink);
+	}
+
+	/* --- Closing actions --- */
+	.about-actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-4) var(--space-6);
+		padding-top: var(--space-4);
+	}
+</style>

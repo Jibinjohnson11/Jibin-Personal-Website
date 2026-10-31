@@ -1,5 +1,5 @@
 ---
-import { Image, getImage } from 'astro:assets';
+import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionLabel from '../components/SectionLabel.astro';
@@ -7,7 +7,8 @@ import Button from '../components/Button.astro';
 import Rule from '../components/Rule.astro';
 import CtaLine from '../components/CtaLine.astro';
 import WorkList from '../components/WorkList.astro';
-import { SITE, SOCIAL } from '../data/site';
+import { SITE } from '../data/site';
+import { getPerson, PERSON_ID } from '../lib/person';
 import portrait from '../assets/images/jibin-johnson.jpg';
 
 const title = 'Web Developer in Kerala & SEO Specialist | Jibin Johnson';
@@ -103,41 +104,10 @@ const faqs = [
 
 const pad = (n: number) => String(n).padStart(2, '0');
 
-const schemaImage = await getImage({ src: portrait, width: 800, format: 'jpg' });
 const homeUrl = `${SITE.url}/`;
 
 const schema = [
-	{
-		'@context': 'https://schema.org',
-		'@type': 'Person',
-		'@id': `${homeUrl}#person`,
-		name: SITE.name,
-		jobTitle: 'Web Developer and SEO Specialist',
-		url: homeUrl,
-		image: new URL(schemaImage.src, SITE.url).href,
-		email: `mailto:${SITE.email}`,
-		worksFor: { '@type': 'Organization', name: 'Prception Medialab' },
-		address: {
-			'@type': 'PostalAddress',
-			addressLocality: 'Thiruvananthapuram',
-			addressRegion: 'Kerala',
-			addressCountry: 'IN',
-		},
-		sameAs: SOCIAL.map((link) => link.url),
-		knowsAbout: [
-			'Web development',
-			'Search engine optimization',
-			'Technical SEO',
-			'HTML',
-			'CSS',
-			'JavaScript',
-			'Python',
-			'Django',
-			'PostgreSQL',
-			'Google Search Console',
-			'Google Analytics',
-		],
-	},
+	{ '@context': 'https://schema.org', ...(await getPerson()) },
 	{
 		'@context': 'https://schema.org',
 		'@type': 'WebSite',
@@ -145,7 +115,7 @@ const schema = [
 		name: SITE.name,
 		url: homeUrl,
 		inLanguage: 'en-IN',
-		publisher: { '@id': `${homeUrl}#person` },
+		publisher: { '@id': PERSON_ID },
 	},
 	{
 		'@context': 'https://schema.org',
