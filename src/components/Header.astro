@@ -69,6 +69,8 @@ const trailingLinks = [
 		</div>
 
 		<button type="button" class="menu-button" aria-expanded="false" aria-controls="mobile-menu" data-menu-open>Menu</button>
+		<!-- Shown instead of the button when JavaScript is off (see the <noscript> style in BaseLayout). -->
+		<a href="#footer-nav" class="menu-link-nojs">Menu</a>
 	</Container>
 </header>
 
@@ -406,6 +408,19 @@ const trailingLinks = [
 		font-size: var(--text-label);
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
+		color: var(--ink);
+	}
+
+	.menu-link-nojs {
+		display: none;
+		align-items: center;
+		min-height: 3rem;
+		padding: 0 var(--space-2);
+		font-family: var(--font-mono);
+		font-size: var(--text-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		text-decoration: none;
 		color: var(--ink);
 	}
 

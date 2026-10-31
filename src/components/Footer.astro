@@ -26,21 +26,21 @@ const pages = [
 
 		<Rule />
 
-		<div class="footer-cols">
-			<section aria-labelledby="footer-pages">
+		<nav id="footer-nav" class="footer-cols" aria-label="Footer">
+			<div>
 				<h2 id="footer-pages" class="label">Pages</h2>
 				<ul role="list">
 					{pages.map((page) => <li><a href={page.url}>{page.name}</a></li>)}
 				</ul>
-			</section>
-			<section aria-labelledby="footer-services">
+			</div>
+			<div>
 				<h2 id="footer-services" class="label">Services</h2>
 				<ul role="list">
 					<li><a href="/services/">All services</a></li>
 					{SERVICES.map((service) => <li><a href={service.url}>{service.name}</a></li>)}
 				</ul>
-			</section>
-			<section aria-labelledby="footer-connect">
+			</div>
+			<div>
 				<h2 id="footer-connect" class="label">Connect</h2>
 				<ul role="list">
 					{
@@ -55,8 +55,8 @@ const pages = [
 					}
 					<li><a href={`mailto:${SITE.email}`}>Email</a></li>
 				</ul>
-			</section>
-		</div>
+			</div>
+		</nav>
 
 		<div class="footer-bottom small">
 			<p>{SITE.location}</p>

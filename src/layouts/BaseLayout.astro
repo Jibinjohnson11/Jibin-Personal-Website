@@ -10,6 +10,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Container from '../components/Container.astro';
 import Breadcrumbs, { type Crumb } from '../components/Breadcrumbs.astro';
+import { ogImageFor } from '../data/og';
 
 interface Props {
 	title: string;
@@ -22,6 +23,10 @@ interface Props {
 }
 
 const { title, description, ogImage, ogType, noindex = false, schema, breadcrumbs } = Astro.props;
+
+// Each page gets its own build-time OG image (src/pages/og/[name].png.ts) unless one is passed in.
+const path = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const og = await ogImageFor(path);
 ---
 
 <html lang="en-IN">
@@ -52,8 +57,37 @@ const { title, description, ogImage, ogType, noindex = false, schema, breadcrumb
 				}, 3000);
 			})();
 		</script>
-		<SEO title={title} description={description} ogImage={ogImage} ogType={ogType} noindex={noindex} schema={schema} />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<!-- Without JavaScript: plain links instead of the JS-only menu, dropdown and theme buttons. -->
+		<noscript>
+			<style>
+				.menu-button,
+				.theme-toggle {
+					display: none !important;
+				}
+				.dropdown:hover .dropdown__panel,
+				.dropdown:focus-within .dropdown__panel {
+					display: block;
+				}
+				@media (max-width: 767px) {
+					.menu-link-nojs {
+						display: inline-flex !important;
+					}
+				}
+			</style>
+		</noscript>
+		<SEO
+			title={title}
+			description={description}
+			ogImage={ogImage ?? og.src}
+			ogImageAlt={ogImage ? undefined : og.alt}
+			ogType={ogType}
+			noindex={noindex}
+			schema={schema}
+		/>
+		<link rel="icon" href="/favicon.ico" sizes="32x32" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/site.webmanifest" />
 		<link rel="preload" href={serifFont} as="font" type="font/woff2" crossorigin />
 		<meta name="generator" content={Astro.generator} />
 	</head>
@@ -72,6 +106,7 @@ const { title, description, ogImage, ogType, noindex = false, schema, breadcrumb
 		<Footer />
 		<script>
 			import '../scripts/motion';
+			import '../scripts/analytics';
 		</script>
 	</body>
 </html>
