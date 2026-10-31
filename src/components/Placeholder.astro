@@ -1,0 +1,23 @@
+---
+/**
+ * A note about missing content. Shown highlighted in dev, left out of production builds,
+ * so "[PLACEHOLDER]" never reaches the live site.
+ */
+import { showPlaceholders } from '../lib/placeholders';
+
+interface Props {
+	class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+{
+	showPlaceholders && (
+		<p class={className}>
+			<mark class="placeholder">
+				[PLACEHOLDER] <slot />
+			</mark>
+		</p>
+	)
+}

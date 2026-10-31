@@ -329,6 +329,15 @@ h3,
 	border: 0;
 }
 
+/* Dev-only highlight for [PLACEHOLDER] text (stripped from production builds). */
+.placeholder {
+	padding: 0 0.25em;
+	background: #ffe066;
+	color: #1a1a1a;
+	font-family: var(--font-mono);
+	font-size: 0.85em;
+}
+
 .stack > * + * {
 	margin-top: var(--stack-gap, var(--space-5));
 }

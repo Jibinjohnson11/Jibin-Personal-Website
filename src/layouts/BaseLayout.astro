@@ -15,12 +15,13 @@ interface Props {
 	title: string;
 	description: string;
 	ogImage?: string;
+	ogType?: 'website' | 'article' | 'profile';
 	noindex?: boolean;
 	schema?: Record<string, unknown>[];
 	breadcrumbs?: Crumb[];
 }
 
-const { title, description, ogImage, noindex = false, schema, breadcrumbs } = Astro.props;
+const { title, description, ogImage, ogType, noindex = false, schema, breadcrumbs } = Astro.props;
 ---
 
 <html lang="en-IN">
@@ -51,7 +52,7 @@ const { title, description, ogImage, noindex = false, schema, breadcrumbs } = As
 				}, 3000);
 			})();
 		</script>
-		<SEO title={title} description={description} ogImage={ogImage} noindex={noindex} schema={schema} />
+		<SEO title={title} description={description} ogImage={ogImage} ogType={ogType} noindex={noindex} schema={schema} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="preload" href={serifFont} as="font" type="font/woff2" crossorigin />
 		<meta name="generator" content={Astro.generator} />

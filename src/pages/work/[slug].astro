@@ -1,0 +1,357 @@
+---
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Tag from '../../components/Tag.astro';
+import { SITE } from '../../data/site';
+import { cleanPlaceholders, hasPlaceholder, isRealUrl, showPlaceholders } from '../../lib/placeholders';
+
+export async function getStaticPaths() {
+	const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+	return projects.map((project, i) => ({
+		params: { slug: project.id },
+		// "Next project" wraps from the last back to the first.
+		props: { project, next: projects[(i + 1) % projects.length] },
+	}));
+}
+
+interface Props {
+	project: CollectionEntry<'projects'>;
+	next: CollectionEntry<'projects'>;
+}
+
+const { project, next } = Astro.props;
+const { data } = project;
+const path = `/work/${project.id}/`;
+const url = new URL(path, SITE.url).href;
+
+// Placeholder fields: hidden in production, highlighted in dev.
+const visible = (value?: string) => !!value && (showPlaceholders || !hasPlaceholder(value));
+
+const body = cleanPlaceholders(project.rendered?.html ?? '');
+
+const links = [
+	{ label: 'Live site', url: data.liveUrl },
+	{ label: 'View code', url: data.repoUrl },
+].filter((link) => isRealUrl(link.url) || (showPlaceholders && hasPlaceholder(link.url)));
+
+const schema = [
+	{
+		'@context': 'https://schema.org',
+		'@type': 'CreativeWork',
+		name: data.title,
+		...(hasPlaceholder(data.summary) ? {} : { description: data.summary }),
+		url,
+		dateCreated: String(data.year),
+		keywords: data.stack.join(', '),
+		author: {
+			'@type': 'Person',
+			'@id': `${SITE.url}/#person`,
+			name: SITE.name,
+			url: `${SITE.url}/`,
+		},
+	},
+];
+---
+
+<BaseLayout
+	title={data.metaTitle}
+	description={data.metaDescription}
+	ogType="article"
+	schema={schema}
+	breadcrumbs={[
+		{ name: 'Home', url: '/' },
+		{ name: 'Work', url: '/work/' },
+		{ name: data.title, url: path },
+	]}
+>
+	<article class="case">
+		<header class="case-head container">
+			<p class="label">{data.type} · {data.year}</p>
+			<h1 class="case-head__title" data-reveal="lines">{data.title}</h1>
+			<p class="case-head__subtitle" data-reveal style="--reveal-delay: 200ms">{data.subtitle}</p>
+			{
+				visible(data.summary) && (
+					<p class:list={['lead', 'case-head__summary', { placeholder: hasPlaceholder(data.summary) }]} data-reveal style="--reveal-delay: 300ms">
+						{data.summary}
+					</p>
+				)
+			}
+
+			<dl class="case-details" data-reveal style="--reveal-delay: 400ms">
+				{
+					visible(data.role) && (
+						<div>
+							<dt class="label">Role</dt>
+							<dd class:list={{ placeholder: hasPlaceholder(data.role) }}>{data.role}</dd>
+						</div>
+					)
+				}
+				<div>
+					<dt class="label">Year</dt>
+					<dd>{data.year}</dd>
+				</div>
+				<div class="case-details__stack">
+					<dt class="label">Stack</dt>
+					<dd>
+						<ul class="case-details__tags" role="list">
+							{
+								data.stack.map((item) => (
+									<li>
+										<Tag>{item}</Tag>
+									</li>
+								))
+							}
+						</ul>
+					</dd>
+				</div>
+				{
+					links.length > 0 && (
+						<div>
+							<dt class="label">Links</dt>
+							<dd>
+								<ul class="case-details__links" role="list">
+									{links.map((link) =>
+										isRealUrl(link.url) ? (
+											<li>
+												<a href={link.url} target="_blank" rel="noopener">
+													{link.label}
+													<span aria-hidden="true"> ↗</span>
+													<span class="visually-hidden"> (opens in a new tab)</span>
+												</a>
+											</li>
+										) : (
+											<li>
+												<mark class="placeholder">
+													{link.label}: {link.url}
+												</mark>
+											</li>
+										),
+									)}
+								</ul>
+							</dd>
+						</div>
+					)
+				}
+			</dl>
+		</header>
+
+		<div class="container">
+			{
+				data.cover ? (
+					<Image
+						class="case-cover"
+						src={data.cover}
+						alt={`${data.title}, ${data.subtitle}`}
+						widths={[480, 800, 1240, 1600]}
+						sizes="(min-width: 1340px) 1240px, 92vw"
+						loading="eager"
+					/>
+				) : (
+					<div class="case-cover case-cover--empty" aria-hidden="true">
+						<span>{data.title}</span>
+					</div>
+				)
+			}
+		</div>
+
+		<div class="container case-body">
+			<div class="grid">
+				<div class="col-content prose" set:html={body} />
+			</div>
+		</div>
+
+		<nav class="container case-next" aria-label="Next project">
+			<a class="case-next__link" href={`/work/${next.id}/`}>
+				<span class="label">Next project</span>
+				<span class="case-next__title">
+					{next.data.title}
+					<span class="case-next__arrow" aria-hidden="true">→</span>
+				</span>
+			</a>
+		</nav>
+	</article>
+</BaseLayout>
+
+<style>
+	/* --- Header --- */
+	.case-head {
+		padding-block: var(--space-7) var(--space-7);
+	}
+
+	.case-head__title {
+		margin-top: var(--space-5);
+	}
+
+	.case-head__subtitle {
+		margin-top: var(--space-3);
+		font-family: var(--font-serif);
+		font-style: italic;
+		font-size: var(--text-h3);
+		line-height: 1.2;
+		color: var(--accent);
+	}
+
+	.case-head__summary {
+		max-width: 40rem;
+		margin-top: var(--space-6);
+	}
+
+	/* --- Details strip --- */
+	.case-details {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-5);
+		margin-top: var(--space-7);
+		padding-block: var(--space-5);
+		border-block: var(--hairline);
+	}
+
+	.case-details dt {
+		margin-bottom: var(--space-2);
+	}
+
+	.case-details dd {
+		margin: 0;
+		font-family: var(--font-mono);
+		font-size: var(--text-small);
+		color: var(--ink-2);
+	}
+
+	.case-details__stack {
+		grid-column: 1 / -1;
+	}
+
+	.case-details__tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+
+	.case-details__links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1) var(--space-4);
+	}
+
+	.case-details__links a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+		color: var(--ink);
+	}
+
+	@media (min-width: 1024px) {
+		.case-details {
+			grid-template-columns: minmax(0, 3fr) minmax(0, 1fr) minmax(0, 5fr) minmax(0, 3fr);
+		}
+
+		.case-details__stack {
+			grid-column: auto;
+		}
+	}
+
+	/* --- Cover --- */
+	.case-cover {
+		display: block;
+		width: 100%;
+		height: auto;
+		aspect-ratio: 16 / 9;
+		object-fit: cover;
+		border-radius: var(--radius);
+	}
+
+	.case-cover--empty {
+		display: grid;
+		place-items: center;
+		padding: var(--space-5);
+		background: var(--paper-2);
+		border: var(--hairline);
+		text-align: center;
+	}
+
+	.case-cover--empty span {
+		font-family: var(--font-serif);
+		font-size: var(--text-h2);
+		line-height: 1.05;
+		color: var(--ink-3);
+	}
+
+	/* --- Body: comfortable reading width, serif H2s with a rule above --- */
+	.case-body {
+		padding-block: var(--section-pad);
+	}
+
+	.prose {
+		max-width: 65ch;
+	}
+
+	.prose :global(h2) {
+		margin-top: var(--space-8);
+		padding-top: var(--space-5);
+		border-top: var(--hairline);
+		font-size: clamp(1.75rem, 3vw, 2.5rem);
+		line-height: 1.1;
+	}
+
+	.prose :global(h2:first-child) {
+		margin-top: 0;
+	}
+
+	.prose :global(p),
+	.prose :global(ul) {
+		margin-top: var(--space-4);
+	}
+
+	.prose :global(ul) {
+		padding: 0;
+		list-style: none;
+	}
+
+	.prose :global(li) {
+		position: relative;
+		padding-left: 1.5em;
+	}
+
+	.prose :global(li + li) {
+		margin-top: var(--space-2);
+	}
+
+	/* Accent dash as the list marker */
+	.prose :global(li::before) {
+		content: '';
+		position: absolute;
+		top: 0.85em;
+		left: 0;
+		width: 0.75em;
+		border-top: 1.5px solid var(--accent);
+	}
+
+	/* --- Next project --- */
+	.case-next {
+		padding-bottom: var(--section-pad);
+	}
+
+	.case-next__link {
+		display: grid;
+		gap: var(--space-3);
+		padding-top: var(--space-6);
+		border-top: var(--hairline);
+		text-decoration: none;
+	}
+
+	.case-next__title {
+		font-family: var(--font-serif);
+		font-size: var(--text-h2);
+		line-height: 1.05;
+	}
+
+	.case-next__arrow {
+		display: inline-block;
+		transition: transform var(--dur-base) var(--ease-out);
+	}
+
+	.case-next__link:hover .case-next__arrow {
+		transform: translateX(8px);
+	}
+</style>

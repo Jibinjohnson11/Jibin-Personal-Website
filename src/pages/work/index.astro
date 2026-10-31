@@ -1,6 +1,10 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Container from '../../components/Container.astro';
+import CtaLine from '../../components/CtaLine.astro';
+import WorkList from '../../components/WorkList.astro';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
 ---
 
 <BaseLayout
@@ -8,8 +12,31 @@ import Container from '../../components/Container.astro';
 	description="Website, SEO, and Django projects: AQ Air, healthcare and education SEO campaigns, and an SEO Management Dashboard."
 	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Work', url: '/work/' }]}
 >
-	<Container as="section" class="section stack">
-		<h1>Web Development and SEO Projects</h1>
-		<p class="lead">[PLACEHOLDER] Page content coming soon.</p>
-	</Container>
+	<section class="work-intro container" aria-labelledby="work-title">
+		<h1 id="work-title" data-reveal="lines">Work and <em>projects</em></h1>
+		<p class="lead" data-reveal style="--reveal-delay: 250ms">
+			Websites, SEO campaigns and full-stack builds. Each one started with a real problem.
+		</p>
+	</section>
+
+	<div class="work-projects container">
+		<WorkList projects={projects} headingLevel={2} />
+
+		<CtaLine />
+	</div>
 </BaseLayout>
+
+<style>
+	.work-intro {
+		padding-block: var(--space-7) var(--space-8);
+	}
+
+	.work-intro .lead {
+		max-width: 38rem;
+		margin-top: var(--space-5);
+	}
+
+	.work-projects {
+		padding-bottom: var(--section-pad);
+	}
+</style>
