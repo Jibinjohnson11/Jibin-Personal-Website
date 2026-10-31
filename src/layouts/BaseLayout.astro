@@ -39,6 +39,17 @@ const { title, description, ogImage, noindex = false, schema, breadcrumbs } = As
 				}
 				document.documentElement.dataset.theme = theme;
 			})();
+
+			// Reveal animations hide content only while <html> has .js-reveal. If motion.ts never runs
+			// (blocked, failed, very slow network), drop the class so nothing stays hidden.
+			(() => {
+				if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+				const root = document.documentElement;
+				root.classList.add('js-reveal');
+				setTimeout(() => {
+					if (!root.classList.contains('motion-ready')) root.classList.remove('js-reveal');
+				}, 3000);
+			})();
 		</script>
 		<SEO title={title} description={description} ogImage={ogImage} noindex={noindex} schema={schema} />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -58,6 +69,9 @@ const { title, description, ogImage, noindex = false, schema, breadcrumbs } = As
 			<slot />
 		</main>
 		<Footer />
+		<script>
+			import '../scripts/motion';
+		</script>
 	</body>
 </html>
 

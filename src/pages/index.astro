@@ -1,14 +1,1030 @@
 ---
+import { Image, getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Container from '../components/Container.astro';
+import SectionLabel from '../components/SectionLabel.astro';
+import Button from '../components/Button.astro';
+import Rule from '../components/Rule.astro';
+import Tag from '../components/Tag.astro';
+import { SITE, SOCIAL } from '../data/site';
+import portrait from '../assets/images/jibin-johnson.jpg';
+
+const title = 'Web Developer in Kerala & SEO Specialist | Jibin Johnson';
+const description =
+	'Web developer and SEO specialist in Trivandrum, Kerala. I build fast, responsive websites ready for search, and custom Python Django apps.';
+
+const services = [
+	{
+		name: 'Website Development',
+		text: 'Responsive, fast websites with clean HTML, CSS, and JavaScript, built with search and usability in mind.',
+		url: '/services/web-development/',
+		anchor: 'Website development services in Kerala',
+	},
+	{
+		name: 'SEO Services',
+		text: 'Technical, on-page, and off-page SEO: keyword research, site fixes, content, and link building, tracked in Google Search Console and Google Analytics.',
+		url: '/services/seo/',
+		anchor: 'SEO services in Kerala',
+	},
+	{
+		name: 'Python & Django Development',
+		text: 'Custom web applications and internal tools, from database design to the interface your team uses every day.',
+		url: '/services/python-django-development/',
+		anchor: 'Python Django development',
+	},
+	{
+		name: 'AI-Assisted Development',
+		text: 'I use AI tools such as Claude and ChatGPT to research, build, and debug faster, and I review everything they produce before it ships.',
+	},
+];
+
+const skills = [
+	{ area: 'Front end', tools: 'HTML, CSS, JavaScript, Bootstrap, responsive design' },
+	{ area: 'Back end', tools: 'Python, Django, PostgreSQL, SQL' },
+	{ area: 'SEO & analytics', tools: 'Google Search Console, Google Analytics, keyword research, technical SEO audits' },
+	{ area: 'Workflow', tools: 'Git, GitHub, Claude, ChatGPT' },
+	{ area: 'AI & data (trained)', tools: 'Machine learning, deep learning, NLP, image processing, Pandas, NumPy' },
+];
+
+// TODO: switch each project's href to `/work/${slug}/` once the case study pages exist.
+const projects = [
+	{
+		slug: 'aq-air',
+		name: 'AQ Air',
+		kind: 'Product landing page',
+		text: 'A scroll-driven landing page for an AI air-quality monitor, built in vanilla JavaScript with smooth scrolling, reveal animations, and a fully responsive layout.',
+		tags: ['HTML', 'CSS', 'JavaScript'],
+		href: '/work/',
+	},
+	{
+		slug: 'seren-derma',
+		name: 'Seren Derma',
+		kind: 'Healthcare SEO',
+		text: 'I coordinated keyword research, content, backlink work, and client approvals for a healthcare brand, and helped move several target keywords into top search positions.',
+		tags: ['SEO', 'Keyword research', 'Link building'],
+		href: '/work/',
+	},
+	{
+		slug: 'blackbox-learning',
+		name: 'Blackbox Learning',
+		kind: 'Education SEO',
+		text: 'I lead the SEO and web team for an AI training academy, planning content around course searches and training interns to produce search-friendly work.',
+		tags: ['SEO', 'Content planning', 'Team leadership'],
+		href: '/work/',
+	},
+	{
+		slug: 'seo-management-dashboard',
+		name: 'SEO Management Dashboard',
+		kind: 'Python & Django',
+		text: "A web application I'm building to bring SEO campaigns, team tasks, content approvals, and reporting into one place, replacing scattered spreadsheets.",
+		tags: ['Python', 'Django', 'PostgreSQL'],
+		href: '/work/',
+	},
+];
+
+const reasons = [
+	{ lead: 'One person for code and search', text: 'Your site is built to rank, without a handover between a developer and an SEO agency.' },
+	{ lead: 'Responsive by default', text: 'Every page is tested on phones, tablets, and desktops before launch.' },
+	{ lead: 'Problem first, then code', text: "I start with what's slowing your business down and build only what solves it." },
+	{ lead: 'Faster delivery with AI tools', text: 'I use AI to speed up research and development, and I check every line it writes.' },
+	{ lead: 'Usability and performance', text: 'Clear layouts, readable text, and fast load times, measured with Lighthouse.' },
+];
+
+const steps = [
+	{ name: 'Discovery', text: 'We talk about your goals, audience, and the searches you want to be found for.' },
+	{ name: 'Planning', text: 'I map out the pages, content, and keywords, and agree a timeline with you.' },
+	{ name: 'Design and development', text: 'I build the site or app, sharing progress so you can give feedback early.' },
+	{ name: 'Testing and optimization', text: 'I check speed, mobile layout, accessibility, and on-page SEO before launch.' },
+	{ name: 'Launch and support', text: 'I set up Google Search Console and Analytics, launch, and stay available for fixes and updates.' },
+];
+
+// Shown on the page and reused word for word in the FAQPage schema.
+const faqs = [
+	{
+		q: 'How much does a website cost?',
+		a: "It depends on the number of pages, features, and content. Share what you need and I'll send a fixed quote with a breakdown before any work starts.",
+	},
+	{
+		q: 'How long does it take to build a website?',
+		a: "A small business site usually takes 2 to 4 weeks once content is ready. Larger sites and web applications take longer, and I'll give you a timeline during planning.",
+	},
+	{
+		q: 'Is SEO included with every website?',
+		a: 'Every site I build includes on-page SEO basics: clean structure, page titles, meta descriptions, fast loading, and a sitemap. Ongoing SEO, such as content and link building, is a separate service.',
+	},
+	{
+		q: 'How long does SEO take to show results?',
+		a: "Usually a few months, depending on your competition and your site's current state. I'll explain what to expect after looking at your site, and I don't promise rankings in a fixed time.",
+	},
+	{
+		q: 'What technologies do you use?',
+		a: 'HTML, CSS, and JavaScript for websites, and Python with Django and PostgreSQL for web applications. I recommend the simplest option that fits your needs.',
+	},
+	{
+		q: 'Can you work on my existing website?',
+		a: 'Yes. I can fix technical SEO issues, improve speed and mobile layout, or redesign specific pages without rebuilding everything.',
+	},
+	{
+		q: 'Do you work with clients outside Kerala?',
+		a: 'Yes. I work remotely with clients across India and abroad.',
+	},
+	{
+		q: 'Are you available for full-time roles?',
+		a: "Yes. I'm open to full-time roles in web development, Python and Django development, and SEO, as well as freelance projects.",
+	},
+];
+
+const pad = (n: number) => String(n).padStart(2, '0');
+
+const schemaImage = await getImage({ src: portrait, width: 800, format: 'jpg' });
+const homeUrl = `${SITE.url}/`;
+
+const schema = [
+	{
+		'@context': 'https://schema.org',
+		'@type': 'Person',
+		'@id': `${homeUrl}#person`,
+		name: SITE.name,
+		jobTitle: 'Web Developer and SEO Specialist',
+		url: homeUrl,
+		image: new URL(schemaImage.src, SITE.url).href,
+		email: `mailto:${SITE.email}`,
+		worksFor: { '@type': 'Organization', name: 'Prception Medialab' },
+		address: {
+			'@type': 'PostalAddress',
+			addressLocality: 'Thiruvananthapuram',
+			addressRegion: 'Kerala',
+			addressCountry: 'IN',
+		},
+		sameAs: SOCIAL.map((link) => link.url),
+		knowsAbout: [
+			'Web development',
+			'Search engine optimization',
+			'Technical SEO',
+			'HTML',
+			'CSS',
+			'JavaScript',
+			'Python',
+			'Django',
+			'PostgreSQL',
+			'Google Search Console',
+			'Google Analytics',
+		],
+	},
+	{
+		'@context': 'https://schema.org',
+		'@type': 'WebSite',
+		'@id': `${homeUrl}#website`,
+		name: SITE.name,
+		url: homeUrl,
+		inLanguage: 'en-IN',
+		publisher: { '@id': `${homeUrl}#person` },
+	},
+	{
+		'@context': 'https://schema.org',
+		'@type': 'FAQPage',
+		mainEntity: faqs.map((faq) => ({
+			'@type': 'Question',
+			name: faq.q,
+			acceptedAnswer: { '@type': 'Answer', text: faq.a },
+		})),
+	},
+];
 ---
 
-<BaseLayout
-	title="Web Developer in Kerala & SEO Specialist | Jibin Johnson"
-	description="Web developer and SEO specialist in Trivandrum, Kerala. I build fast, responsive websites ready for search, and custom Python Django apps."
->
-	<Container as="section" class="section stack">
-		<h1>Web Developer and SEO Specialist in Kerala</h1>
-		<p class="lead">[PLACEHOLDER] Page content coming soon.</p>
-	</Container>
+<BaseLayout title={title} description={description} schema={schema}>
+	<!-- Hero -->
+	<section class="hero container" aria-labelledby="hero-title">
+		<div class="grid hero__grid">
+			<div class="hero__text">
+				<SectionLabel text="Web developer · SEO · Thiruvananthapuram" />
+				<h1 id="hero-title" class="hero__title" data-reveal="lines">Web Developer and SEO Specialist <em>in Kerala</em></h1>
+				<p class="lead hero__lead" data-reveal style="--reveal-delay: 350ms">
+					I'm Jibin Johnson. I build fast, responsive websites that are ready for search from day one, and I use Python, Django, and AI tools to automate the work behind them. I'm based in Thiruvananthapuram (Trivandrum) and work with businesses across Kerala and beyond.
+				</p>
+				<div class="hero__actions" data-reveal style="--reveal-delay: 500ms">
+					<Button href="/contact/">Start a project</Button>
+					<Button variant="link" href="/work/">See my work</Button>
+				</div>
+			</div>
+
+			<figure class="hero__portrait" data-reveal style="--reveal-delay: 650ms">
+				<Image
+					src={portrait}
+					alt="Jibin Johnson smiling, wearing a navy blazer over a white T-shirt, against a plain cream wall"
+					widths={[320, 480, 640]}
+					sizes="(min-width: 1024px) 280px, (min-width: 768px) 30vw, 16rem"
+					quality={78}
+					loading="eager"
+					fetchpriority="high"
+				/>
+				<figcaption class="label">Jibin Johnson · Trivandrum, 2026</figcaption>
+			</figure>
+		</div>
+
+		<div class="hero__foot" data-reveal style="--reveal-delay: 800ms">
+			<Rule />
+			<p class="label">Available for freelance projects and full-time roles</p>
+		</div>
+	</section>
+
+	<!-- 01 About -->
+	<section class="home-section container" aria-labelledby="about-title">
+		<div class="grid">
+			<div class="col-label"><SectionLabel index="01" text="About" /></div>
+			<div class="col-content stack">
+				<h2 id="about-title" data-reveal="lines">Where web development <em>meets search</em></h2>
+				<p class="lead" data-reveal>
+					Most websites get built first and optimized later. I do both together. At Prception Medialab in Thiruvananthapuram, I build responsive websites and run SEO for clients in healthcare, education, and hospitality, and I lead the SEO and web team for Blackbox Learning, an AI training academy.
+				</p>
+				<p data-reveal>
+					Running SEO campaigns showed me how much time goes into manual coordination, so I started building software to handle it. That path led me to a PG in Artificial Intelligence and to full-stack work in Python and Django.
+				</p>
+				<div data-reveal><Button variant="link" href="/about/">More about me</Button></div>
+			</div>
+		</div>
+	</section>
+
+	<!-- 02 Services -->
+	<section class="home-section container" aria-labelledby="services-title">
+		<div class="grid section-head">
+			<div class="col-label"><SectionLabel index="02" text="Services" /></div>
+			<div class="col-content">
+				<h2 id="services-title" data-reveal="lines">What I can <em>help you with</em></h2>
+			</div>
+		</div>
+
+		<ol class="service-list" role="list">
+			{
+				services.map((service, i) => (
+					<li class:list={['service-row', { 'has-link': service.url }]} data-reveal>
+						<div class="service-row__inner">
+							<span class="service-row__num label">{pad(i + 1)}</span>
+							<div class="service-row__body">
+								<h3 class="service-row__name">{service.name}</h3>
+								<p class="service-row__text">{service.text}</p>
+							</div>
+							{service.url && (
+								<a class="service-row__link" href={service.url}>
+									{/* Last word and arrow share a no-wrap span so the arrow never ends up alone on a line. */}
+									<span class="service-row__anchor">
+										{service.anchor.split(' ').slice(0, -1).join(' ')}{' '}
+										<span class="nowrap">
+											{service.anchor.split(' ').at(-1)}
+											<span class="service-row__arrow" aria-hidden="true">→</span>
+										</span>
+									</span>
+								</a>
+							)}
+						</div>
+					</li>
+				))
+			}
+		</ol>
+	</section>
+
+	<!-- 03 Skills -->
+	<section class="home-section container" aria-labelledby="skills-title">
+		<div class="grid">
+			<div class="col-label"><SectionLabel index="03" text="Skills" /></div>
+			<div class="col-content">
+				<h2 id="skills-title" data-reveal="lines">Tools I <em>work with</em></h2>
+				<table class="skills" data-reveal>
+					<caption class="visually-hidden">Tools I use, grouped by area</caption>
+					<thead>
+						<tr>
+							<th scope="col" class="label">Area</th>
+							<th scope="col" class="label">Tools</th>
+						</tr>
+					</thead>
+					<tbody>
+						{
+							skills.map((row) => (
+								<tr>
+									<th scope="row">{row.area}</th>
+									<td>{row.tools}</td>
+								</tr>
+							))
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</section>
+
+	<!-- 04 Selected work -->
+	<section class="home-section container" aria-labelledby="work-title">
+		<div class="grid section-head">
+			<div class="col-label"><SectionLabel index="04" text="Work" /></div>
+			<div class="col-content">
+				<h2 id="work-title" data-reveal="lines">Selected <em>work</em></h2>
+			</div>
+		</div>
+
+		<ol class="work-list" role="list" data-work-list>
+			{
+				projects.map((project, i) => (
+					<li class="work-row" data-reveal data-preview={project.name}>
+						<div class="work-row__inner">
+							<span class="work-row__num label">{pad(i + 1)}</span>
+							<div class="work-row__head">
+								<h3 class="work-row__title">
+									<a class="work-row__link" href={project.href}>
+										{project.name}
+									</a>
+								</h3>
+								<p class="label">{project.kind}</p>
+							</div>
+							<div class="work-row__body">
+								<p>{project.text}</p>
+								<ul class="work-row__tags" role="list" aria-label="Tools">
+									{project.tags.map((tag) => (
+										<li>
+											<Tag>{tag}</Tag>
+										</li>
+									))}
+								</ul>
+							</div>
+						</div>
+					</li>
+				))
+			}
+		</ol>
+
+		<!-- Quiet mid-page call to action -->
+		<div class="work-cta" data-reveal>
+			<p class="work-cta__text">Like what you see? <em>Let's build yours.</em></p>
+			<Button variant="link" href="/contact/">Start a project</Button>
+		</div>
+
+		<!-- Cursor-following preview (desktop, fine pointer, motion allowed). Swap for screenshots later. -->
+		<div class="work-preview" aria-hidden="true" data-work-preview>
+			<span class="label" data-work-preview-label></span>
+		</div>
+	</section>
+
+	<!-- 05 Why work with me -->
+	<section class="home-section container" aria-labelledby="why-title">
+		<div class="grid">
+			<div class="col-label"><SectionLabel index="05" text="Why me" /></div>
+			<div class="col-content">
+				<h2 id="why-title" data-reveal="lines">Why clients <em>work with me</em></h2>
+				<ul class="why-list" role="list">
+					{
+						reasons.map((reason) => (
+							<li data-reveal>
+								<h3 class="why-list__lead">{reason.lead}</h3>
+								<p>{reason.text}</p>
+							</li>
+						))
+					}
+				</ul>
+			</div>
+		</div>
+	</section>
+
+	<!-- 06 Process -->
+	<section class="home-section container" aria-labelledby="process-title">
+		<div class="grid section-head">
+			<div class="col-label"><SectionLabel index="06" text="Process" /></div>
+			<div class="col-content">
+				<h2 id="process-title" data-reveal="lines">How a project <em>works</em></h2>
+			</div>
+		</div>
+
+		<ol class="process" role="list">
+			{
+				steps.map((step, i) => (
+					<li class="process__step" data-reveal style={`--reveal-delay: ${i * 80}ms`}>
+						<span class="label">{pad(i + 1)}</span>
+						<h3 class="process__name">{step.name}</h3>
+						<p>{step.text}</p>
+					</li>
+				))
+			}
+		</ol>
+	</section>
+
+	<!-- 07 Location -->
+	<section class="home-section container" aria-labelledby="location-title">
+		<div class="grid">
+			<div class="col-label"><SectionLabel index="07" text="Location" /></div>
+			<div class="col-content stack">
+				<h2 id="location-title" data-reveal="lines">Based in Trivandrum, <em>working across Kerala</em></h2>
+				<p class="lead" data-reveal>
+					I'm based in Thiruvananthapuram and work with businesses across Kerala, from Trivandrum to Kochi and Kozhikode. I also work remotely with clients elsewhere in India and abroad, over video calls, email, and WhatsApp.
+				</p>
+			</div>
+		</div>
+	</section>
+
+	<!-- 08 FAQ -->
+	<section class="home-section home-section--last container" aria-labelledby="faq-title">
+		<div class="grid">
+			<div class="col-label"><SectionLabel index="08" text="FAQ" /></div>
+			<div class="col-content">
+				<h2 id="faq-title" data-reveal="lines">Frequently asked <em>questions</em></h2>
+				<div class="faq-list" data-reveal>
+					{
+						faqs.map((faq) => (
+							<details class="faq">
+								<summary>
+									<h3 class="faq__q">{faq.q}</h3>
+									<span class="faq__icon" aria-hidden="true" />
+								</summary>
+								<div class="faq__a">
+									<p>{faq.a}</p>
+								</div>
+							</details>
+						))
+					}
+				</div>
+			</div>
+		</div>
+	</section>
 </BaseLayout>
+
+<script>
+	/* Selected work: a small preview that follows the cursor over each row.
+	   Only on wide screens with a mouse, and never for reduced-motion users. */
+	const list = document.querySelector<HTMLElement>('[data-work-list]');
+	const preview = document.querySelector<HTMLElement>('[data-work-preview]');
+	const label = preview?.querySelector<HTMLElement>('[data-work-preview-label]');
+	const enabled = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 768px) and (prefers-reduced-motion: no-preference)');
+
+	if (list && preview && label) {
+		const OFFSET = 24;
+		let x = 0;
+		let y = 0;
+		let targetX = 0;
+		let targetY = 0;
+		let pointerX = 0;
+		let pointerY = 0;
+		let frame = 0;
+		let active: HTMLElement | null = null;
+
+		const render = () => {
+			preview.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+		};
+
+		const tick = () => {
+			x += (targetX - x) * 0.2;
+			y += (targetY - y) * 0.2;
+			render();
+			frame = Math.abs(targetX - x) > 0.1 || Math.abs(targetY - y) > 0.1 ? requestAnimationFrame(tick) : 0;
+		};
+
+		const setTarget = (cx: number, cy: number) => {
+			// Keep the preview inside the viewport near the right and bottom edges.
+			targetX = Math.min(cx + OFFSET, window.innerWidth - preview.offsetWidth - OFFSET);
+			targetY = Math.min(cy + OFFSET, window.innerHeight - preview.offsetHeight - OFFSET);
+		};
+
+		const hide = () => {
+			active = null;
+			preview.classList.remove('is-visible');
+		};
+
+		const update = () => {
+			const row = document.elementFromPoint(pointerX, pointerY)?.closest<HTMLElement>('[data-preview]');
+			if (!row || !list.contains(row)) {
+				hide();
+				return;
+			}
+			if (row !== active) {
+				active = row;
+				label.textContent = row.dataset.preview ?? '';
+			}
+			setTarget(pointerX, pointerY);
+			if (!preview.classList.contains('is-visible')) {
+				// Appear at the cursor rather than sliding in from the last position.
+				x = targetX;
+				y = targetY;
+				render();
+				preview.classList.add('is-visible');
+			}
+			if (!frame) frame = requestAnimationFrame(tick);
+		};
+
+		list.addEventListener('pointermove', (event) => {
+			if (event.pointerType !== 'mouse' || !enabled.matches) return;
+			pointerX = event.clientX;
+			pointerY = event.clientY;
+			update();
+		});
+
+		list.addEventListener('pointerleave', hide);
+
+		// Scrolling moves rows under a still cursor, so re-check which row it's over.
+		window.addEventListener('scroll', () => active && update(), { passive: true });
+	}
+</script>
+
+<style>
+	/* --- Hero --- */
+	.hero {
+		padding-block: var(--space-8) var(--space-7);
+	}
+
+	.hero__grid {
+		align-items: end;
+		row-gap: var(--space-7);
+	}
+
+	.hero__title {
+		margin-block: var(--space-5) var(--space-6);
+	}
+
+	.hero__lead {
+		max-width: 38rem;
+	}
+
+	.hero__actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-4) var(--space-6);
+		margin-top: var(--space-6);
+	}
+
+	.hero__portrait {
+		max-width: 16rem;
+	}
+
+	.hero__portrait img {
+		width: 100%;
+		height: auto;
+		border-radius: var(--radius);
+		background: var(--paper-2);
+	}
+
+	.hero__portrait figcaption {
+		margin-top: var(--space-3);
+	}
+
+	.hero__foot {
+		margin-top: var(--space-8);
+	}
+
+	.hero__foot p {
+		margin-top: var(--space-4);
+	}
+
+	@media (min-width: 768px) {
+		.hero__grid > .hero__text {
+			grid-column: 1 / span 8;
+		}
+
+		.hero__grid > .hero__portrait {
+			grid-column: 9 / span 4;
+			justify-self: end;
+			width: 100%;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		.hero__grid > .hero__portrait {
+			grid-column: 10 / span 3;
+		}
+	}
+
+	/* --- Sections --- */
+	.home-section {
+		position: relative;
+		padding-block: calc(var(--section-pad) * 0.75);
+	}
+
+	.home-section--last {
+		padding-bottom: var(--section-pad);
+	}
+
+	/* Hairline across the top of each section, inside the container padding. */
+	.home-section::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		inset-inline: var(--container-pad);
+		border-top: var(--hairline);
+	}
+
+	.section-head {
+		margin-bottom: var(--space-7);
+	}
+
+	.col-content > h2 + :global(*) {
+		margin-top: var(--space-6);
+	}
+
+	/* --- Services --- */
+	.service-row {
+		position: relative;
+		border-top: var(--hairline);
+	}
+
+	.service-row:last-child {
+		border-bottom: var(--hairline);
+	}
+
+	.service-row__inner {
+		position: relative;
+		display: grid;
+		grid-template-columns: 2.5rem minmax(0, 1fr);
+		gap: var(--space-3) var(--space-4);
+		padding-block: var(--space-6);
+		transition: transform var(--dur-base) var(--ease-out);
+	}
+
+	.service-row__num {
+		padding-top: 0.6rem;
+	}
+
+	.service-row__name {
+		font-size: clamp(1.625rem, 3vw, 2.5rem);
+		line-height: 1.1;
+	}
+
+	.service-row__text {
+		margin-top: var(--space-3);
+		color: var(--ink-2);
+	}
+
+	.service-row__link {
+		grid-column: 2;
+		justify-self: start;
+		padding-block: var(--space-2);
+		font-size: var(--text-small);
+		font-weight: 500;
+		text-decoration: none;
+	}
+
+	.service-row__anchor {
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.22em;
+	}
+
+	/* The whole row is clickable through the link. */
+	.service-row__link::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+	}
+
+	.nowrap {
+		white-space: nowrap;
+	}
+
+	.service-row__arrow {
+		display: inline-block;
+		margin-left: 0.4em;
+		transition: transform var(--dur-base) var(--ease-out);
+	}
+
+	.service-row.has-link:hover .service-row__inner {
+		transform: translateX(var(--space-2));
+	}
+
+	.service-row.has-link:hover .service-row__name,
+	.service-row.has-link:hover .service-row__link {
+		color: var(--accent);
+	}
+
+	.service-row.has-link:hover .service-row__arrow,
+	.service-row__link:focus-visible .service-row__arrow {
+		transform: translateX(6px);
+	}
+
+	@media (min-width: 1024px) {
+		.service-row__inner {
+			grid-template-columns: 4rem minmax(0, 1fr) minmax(0, 18rem);
+			align-items: center;
+			gap: var(--space-6);
+		}
+
+		.service-row__body {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			gap: var(--space-6);
+			align-items: baseline;
+		}
+
+		.service-row__text {
+			margin-top: 0;
+		}
+
+		.service-row__num {
+			padding-top: 0;
+		}
+
+		.service-row__link {
+			grid-column: 3;
+			justify-self: end;
+			text-align: right;
+		}
+	}
+
+	/* --- Skills --- */
+	.skills {
+		width: 100%;
+		border-collapse: collapse;
+		text-align: left;
+	}
+
+	.skills th,
+	.skills td {
+		padding: var(--space-4) var(--space-4) var(--space-4) 0;
+		border-bottom: var(--hairline);
+		vertical-align: baseline;
+	}
+
+	.skills thead th {
+		padding-top: 0;
+		font-weight: 400;
+	}
+
+	.skills tbody th {
+		width: 38%;
+		font-weight: 500;
+	}
+
+	.skills td {
+		padding-right: 0;
+		font-family: var(--font-mono);
+		font-size: var(--text-small);
+		line-height: 1.7;
+		color: var(--ink-2);
+	}
+
+	/* --- Selected work --- */
+	.work-row {
+		position: relative;
+		border-top: var(--hairline);
+	}
+
+	.work-row:last-child {
+		border-bottom: var(--hairline);
+	}
+
+	.work-row__inner {
+		position: relative;
+		display: grid;
+		grid-template-columns: 2.5rem minmax(0, 1fr);
+		gap: var(--space-4);
+		padding-block: var(--space-7);
+	}
+
+	.work-row__num {
+		padding-top: 0.9rem;
+	}
+
+	.work-row__body {
+		grid-column: 2;
+	}
+
+	.work-row__title {
+		margin-bottom: var(--space-2);
+		font-size: clamp(2rem, 4.5vw, 3.5rem);
+		line-height: 1.05;
+	}
+
+	.work-row__link {
+		text-decoration: none;
+		transition: color var(--dur-fast) var(--ease-out);
+	}
+
+	.work-row__link::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+	}
+
+	.work-row:hover .work-row__link {
+		color: var(--accent);
+	}
+
+	.work-row__body p {
+		color: var(--ink-2);
+	}
+
+	.work-row__tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+		margin-top: var(--space-4);
+	}
+
+	@media (min-width: 1024px) {
+		.work-row__inner {
+			grid-template-columns: 4rem minmax(0, 7fr) minmax(0, 5fr);
+			gap: var(--space-6);
+		}
+
+		.work-row__body {
+			grid-column: 3;
+		}
+	}
+
+	.work-preview {
+		display: none;
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: 40;
+		width: 16rem;
+		aspect-ratio: 16 / 10;
+		place-items: center;
+		padding: var(--space-4);
+		background: var(--paper-2);
+		border: var(--hairline);
+		border-radius: var(--radius);
+		text-align: center;
+		pointer-events: none;
+		opacity: 0;
+		transition: opacity var(--dur-fast) var(--ease-out);
+	}
+
+	.work-preview.is-visible {
+		opacity: 1;
+	}
+
+	@media (hover: hover) and (pointer: fine) and (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+		.work-preview {
+			display: grid;
+		}
+	}
+
+	.work-cta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: var(--space-3) var(--space-6);
+		margin-top: var(--space-7);
+	}
+
+	.work-cta__text {
+		font-family: var(--font-serif);
+		font-size: var(--text-h3);
+		line-height: 1.2;
+	}
+
+	.work-cta__text em {
+		color: var(--accent);
+	}
+
+	/* --- Why work with me --- */
+	.why-list {
+		display: grid;
+		gap: var(--space-6) var(--space-7);
+	}
+
+	.why-list li {
+		padding-top: var(--space-4);
+		border-top: var(--hairline);
+	}
+
+	.why-list__lead {
+		margin-bottom: var(--space-2);
+	}
+
+	.why-list p {
+		color: var(--ink-2);
+	}
+
+	@media (min-width: 768px) {
+		.why-list {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+	}
+
+	/* --- Process: vertical line on mobile, horizontal row on desktop --- */
+	.process {
+		position: relative;
+		display: grid;
+		gap: var(--space-6);
+	}
+
+	.process::before {
+		content: '';
+		position: absolute;
+		top: 0.5rem;
+		bottom: 0;
+		left: 4px;
+		border-left: var(--hairline);
+	}
+
+	.process__step {
+		position: relative;
+		padding-left: var(--space-6);
+	}
+
+	/* Dot on the line */
+	.process__step::before {
+		content: '';
+		position: absolute;
+		top: 0.35rem;
+		left: 0;
+		width: 9px;
+		height: 9px;
+		border-radius: 50%;
+		background: var(--accent);
+	}
+
+	.process__name {
+		margin-block: var(--space-2) var(--space-3);
+	}
+
+	.process__step p {
+		color: var(--ink-2);
+	}
+
+	@media (min-width: 1024px) {
+		.process {
+			grid-template-columns: repeat(5, minmax(0, 1fr));
+			gap: var(--space-5);
+		}
+
+		.process::before {
+			top: 4px;
+			bottom: auto;
+			left: 0;
+			right: 0;
+			border-left: 0;
+			border-top: var(--hairline);
+		}
+
+		.process__step {
+			padding: var(--space-6) 0 0;
+		}
+
+		.process__step::before {
+			top: 0;
+		}
+	}
+
+	/* --- FAQ --- */
+	.faq {
+		border-bottom: var(--hairline);
+	}
+
+	.faq:first-child {
+		border-top: var(--hairline);
+	}
+
+	.faq summary {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-5);
+		padding-block: var(--space-5);
+		cursor: pointer;
+		list-style: none;
+	}
+
+	.faq summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.faq__q {
+		font-size: clamp(1.25rem, 2vw, 1.5rem);
+		transition: color var(--dur-fast) var(--ease-out);
+	}
+
+	.faq summary:hover .faq__q {
+		color: var(--accent);
+	}
+
+	/* A "+" drawn with two lines; rotating 45deg turns it into an "×". */
+	.faq__icon {
+		position: relative;
+		flex: none;
+		width: 1rem;
+		height: 1rem;
+		transition: transform var(--dur-base) var(--ease-out);
+	}
+
+	.faq__icon::before,
+	.faq__icon::after {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 0;
+		width: 100%;
+		height: 1.5px;
+		margin-top: -0.75px;
+		background: currentColor;
+	}
+
+	.faq__icon::after {
+		transform: rotate(90deg);
+	}
+
+	.faq[open] .faq__icon {
+		transform: rotate(45deg);
+		color: var(--accent);
+	}
+
+	.faq__a {
+		padding-bottom: var(--space-5);
+		color: var(--ink-2);
+	}
+</style>

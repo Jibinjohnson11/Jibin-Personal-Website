@@ -333,6 +333,38 @@ h3,
 	margin-top: var(--stack-gap, var(--space-5));
 }
 
+/* --- Reveal on scroll ---------------------------------------------------
+   <div data-reveal> fades up once. <h2 data-reveal="lines"> reveals line by line.
+   Stagger with style="--reveal-delay: 200ms". Only active while html.js-reveal is
+   set (see BaseLayout and src/scripts/motion.ts), so content shows without JS.
+   Opacity and transform only, so nothing shifts layout. */
+
+.js-reveal [data-reveal]:not([data-reveal='lines']),
+.js-reveal [data-reveal='lines'] .reveal-word {
+	opacity: 0;
+	transform: translateY(16px);
+	transition:
+		opacity var(--dur-slow) var(--ease-out),
+		transform var(--dur-slow) var(--ease-out);
+	transition-delay: var(--reveal-delay, 0ms);
+}
+
+.js-reveal [data-reveal='lines'] .reveal-word {
+	display: inline-block;
+	transition-delay: calc(var(--reveal-delay, 0ms) + var(--line, 0) * 90ms);
+}
+
+/* Hide a lines headline until motion.ts has split it into words. */
+.js-reveal [data-reveal='lines']:not(.is-split) {
+	opacity: 0;
+}
+
+.js-reveal [data-reveal].is-revealed,
+.js-reveal [data-reveal].is-revealed .reveal-word {
+	opacity: 1;
+	transform: none;
+}
+
 /* --- Reduced motion ----------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
