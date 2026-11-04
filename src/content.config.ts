@@ -9,6 +9,8 @@ import { z } from 'astro/zod';
  * liveUrl / repoUrl are plain strings so they can hold "[PLACEHOLDER]" until the real URL
  * exists; the templates only link to values that are real http(s) URLs.
  *
+ * coverLabel marks a cover that isn't real data (a demo or mockup); it's shown over the image.
+ *
  * homeTags / homeSummary are shorter versions for the homepage list only; when missing it
  * falls back to stack / summary. /work/ and the case studies always use the full fields.
  */
@@ -30,6 +32,8 @@ const projects = defineCollection({
 			liveUrl: z.string().optional(),
 			repoUrl: z.string().optional(),
 			cover: image().optional(),
+			/** Small label shown over the cover, e.g. "Demo preview" for sample data. */
+			coverLabel: z.string().optional(),
 			metaTitle: z.string().max(60),
 			metaDescription: z.string().max(160),
 		}),

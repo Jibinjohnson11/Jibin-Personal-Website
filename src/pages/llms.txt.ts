@@ -23,6 +23,7 @@ Email: ${SITE.email}
 - [Website Development Services in Kerala](${url('/services/web-development/')}): business websites, landing pages and portfolio sites with the SEO basics built in
 - [SEO Services in Kerala](${url('/services/seo/')}): technical, on-page, off-page and local SEO, with a monthly report
 - [Python Django Development](${url('/services/python-django-development/')}): dashboards, admin panels and internal tools
+- [Website Redesign Services in Kerala](${url('/services/website-redesign/')}): rebuilding outdated sites to be responsive, faster and easier to use, with redirects planned so existing pages are not lost
 
 ## Work
 

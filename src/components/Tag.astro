@@ -12,13 +12,14 @@ const { class: className } = Astro.props;
 	.tag {
 		display: inline-block;
 		padding: var(--space-1) var(--space-2);
-		border: 1px solid var(--rule);
+		border: 1px solid transparent;
 		border-radius: var(--radius);
+		background: var(--tag-bg);
 		font-family: var(--font-mono);
 		font-size: var(--text-label);
 		line-height: 1.4;
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
-		color: var(--ink-2);
+		color: var(--accent-hover);
 	}
 </style>

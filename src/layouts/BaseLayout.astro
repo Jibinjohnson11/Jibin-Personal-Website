@@ -7,7 +7,9 @@ import '../styles/global.css';
 import serifFont from '@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url';
 import SEO from '../components/SEO.astro';
 import Header from '../components/Header.astro';
+import Preloader from '../components/Preloader.astro';
 import Footer from '../components/Footer.astro';
+import FloatingActions from '../components/FloatingActions.astro';
 import Container from '../components/Container.astro';
 import Breadcrumbs, { type Crumb } from '../components/Breadcrumbs.astro';
 import { ogImageFor } from '../data/og';
@@ -34,18 +36,6 @@ const og = await ogImageFor(path);
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<script is:inline>
-			// Set the theme before first paint to avoid a flash: saved choice first, then the system preference.
-			(() => {
-				let theme = null;
-				try {
-					theme = localStorage.getItem('theme');
-				} catch {}
-				if (theme !== 'light' && theme !== 'dark') {
-					theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-				}
-				document.documentElement.dataset.theme = theme;
-			})();
-
 			// Reveal animations hide content only while <html> has .js-reveal. If motion.ts never runs
 			// (blocked, failed, very slow network), drop the class so nothing stays hidden.
 			(() => {
@@ -55,13 +45,26 @@ const og = await ogImageFor(path);
 				setTimeout(() => {
 					if (!root.classList.contains('motion-ready')) root.classList.remove('js-reveal');
 				}, 3000);
+
+				// Preloader: first page of a session only. Removed after 4s whatever happens.
+				try {
+					if (sessionStorage.getItem('preloaded')) return;
+					sessionStorage.setItem('preloaded', '1');
+				} catch {
+					return;
+				}
+				root.classList.add('is-preloading');
+				setTimeout(() => {
+					if (!root.classList.contains('is-preloading')) return;
+					root.classList.remove('is-preloading');
+					document.dispatchEvent(new Event('preloader:done'));
+				}, 4000);
 			})();
 		</script>
-		<!-- Without JavaScript: plain links instead of the JS-only menu, dropdown and theme buttons. -->
+		<!-- Without JavaScript: plain links instead of the JS-only menu and dropdown. -->
 		<noscript>
 			<style>
-				.menu-button,
-				.theme-toggle {
+				.menu-button {
 					display: none !important;
 				}
 				.dropdown:hover .dropdown__panel,
@@ -84,14 +87,15 @@ const og = await ogImageFor(path);
 			noindex={noindex}
 			schema={schema}
 		/>
-		<link rel="icon" href="/favicon.ico" sizes="32x32" />
-		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+		<link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		<link rel="manifest" href="/site.webmanifest" />
 		<link rel="preload" href={serifFont} as="font" type="font/woff2" crossorigin />
 		<meta name="generator" content={Astro.generator} />
 	</head>
 	<body>
+		<Preloader />
 		<Header />
 		<main id="main" tabindex="-1">
 			{
@@ -104,6 +108,7 @@ const og = await ogImageFor(path);
 			<slot />
 		</main>
 		<Footer />
+		<FloatingActions />
 		<script>
 			import '../scripts/motion';
 			import '../scripts/analytics';
@@ -117,6 +122,7 @@ const og = await ogImageFor(path);
 	}
 
 	main :global(.breadcrumbs-wrap) {
+		min-height: var(--crumbs-h);
 		padding-top: var(--space-6);
 	}
 </style>

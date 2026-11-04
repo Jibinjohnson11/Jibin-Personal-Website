@@ -31,7 +31,7 @@ const services = [
 	description="Website development, SEO and Python Django development for businesses in Kerala and beyond, from a web developer and SEO specialist in Trivandrum."
 	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Services', url: '/services/' }]}
 >
-	<section class="services-intro container" aria-labelledby="services-title">
+	<section class="services-intro screen screen--first container" aria-labelledby="services-title">
 		<SectionLabel text="Services" />
 		<h1 id="services-title" class="services-intro__title" data-reveal="lines">Services</h1>
 		<p class="lead" data-reveal style="--reveal-delay: 250ms">
@@ -39,7 +39,7 @@ const services = [
 		</p>
 	</section>
 
-	<div class="services-list container">
+	<div class="services-list screen container">
 		<ServiceList items={services} headingLevel={2} />
 		<CtaLine text="Not sure which one you need?" accent="Ask me." label="Get in touch" />
 	</div>

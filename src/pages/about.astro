@@ -54,7 +54,7 @@ const schema = [
 
 <BaseLayout title={title} description={description} schema={schema} breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'About', url: '/about/' }]}>
 	<!-- Hero -->
-	<section class="about-hero container" aria-labelledby="about-title">
+	<section class="about-hero screen screen--first container" aria-labelledby="about-title">
 		<div class="grid about-hero__grid">
 			<div class="about-hero__text">
 				<SectionLabel text="About" />
@@ -81,7 +81,7 @@ const schema = [
 	<!-- 01 Story -->
 	<section class="page-section container" aria-labelledby="story-title">
 		<div class="grid">
-			<div class="col-label"><SectionLabel index="01" text="My story" /></div>
+			<div class="col-label"><SectionLabel text="My story" /></div>
 			<div class="col-content stack">
 				<h2 id="story-title" data-reveal="lines">How I got <em>here</em></h2>
 				<p class="lead" data-reveal>
@@ -100,7 +100,7 @@ const schema = [
 	<!-- 02 Experience -->
 	<section class="page-section container" aria-labelledby="experience-title">
 		<div class="grid">
-			<div class="col-label"><SectionLabel index="02" text="Experience" /></div>
+			<div class="col-label"><SectionLabel text="Experience" /></div>
 			<div class="col-content">
 				<h2 id="experience-title" data-reveal="lines">Where I've <em>worked</em></h2>
 				<ol class="timeline" role="list">
@@ -122,7 +122,7 @@ const schema = [
 	<!-- 03 Education -->
 	<section class="page-section container" aria-labelledby="education-title">
 		<div class="grid">
-			<div class="col-label"><SectionLabel index="03" text="Education" /></div>
+			<div class="col-label"><SectionLabel text="Education" /></div>
 			<div class="col-content">
 				<h2 id="education-title" data-reveal="lines">What I've <em>studied</em></h2>
 				<ol class="timeline" role="list">
@@ -152,7 +152,7 @@ const schema = [
 	<!-- 04 Now -->
 	<section class="page-section page-section--last container" aria-labelledby="now-title">
 		<div class="grid">
-			<div class="col-label"><SectionLabel index="04" text="Now" /></div>
+			<div class="col-label"><SectionLabel text="Now" /></div>
 			<div class="col-content stack">
 				<h2 id="now-title" data-reveal="lines">What I'm <em>learning</em></h2>
 				<p class="lead" data-reveal>
@@ -196,7 +196,7 @@ const schema = [
 		width: 100%;
 		height: auto;
 		border-radius: var(--radius);
-		background: var(--paper-2);
+		background: var(--surface-muted);
 	}
 
 	@media (min-width: 768px) {
@@ -245,7 +245,7 @@ const schema = [
 		left: 0;
 		width: 9px;
 		height: 9px;
-		border-radius: 50%;
+		border-radius: var(--radius);
 		background: var(--accent);
 	}
 

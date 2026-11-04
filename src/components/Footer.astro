@@ -1,8 +1,9 @@
 ---
-import Button from './Button.astro';
+import { Image } from 'astro:assets';
 import Container from './Container.astro';
-import Rule from './Rule.astro';
 import { SERVICES, SITE, SOCIAL } from '../data/site';
+// The "J" favicon artwork with its background removed (cut from monogram-source.png).
+import monogram from '../assets/brand/monogram-mark.png';
 
 const year = new Date().getFullYear();
 
@@ -12,139 +13,404 @@ const pages = [
 	{ name: 'About', url: '/about/' },
 	{ name: 'Contact', url: '/contact/' },
 ];
+
+const services: { name: string; url?: string }[] = [...SERVICES];
+
+const linkedin = SOCIAL.find((link) => link.name === 'LinkedIn');
+const github = SOCIAL.find((link) => link.name === 'GitHub');
+
+const INSTAGRAM_URL = 'https://www.instagram.com/jibineyyyy/';
+
+type Icon = 'mail' | 'linkedin' | 'github' | 'instagram';
+type Social = { name: string; url: string; icon: Icon; external: boolean };
+
+const connect: Social[] = [
+	{ name: 'Email', url: `mailto:${SITE.email}`, icon: 'mail', external: false },
+	...(linkedin ? [{ name: 'LinkedIn', url: linkedin.url, icon: 'linkedin' as Icon, external: true }] : []),
+	...(github ? [{ name: 'GitHub', url: github.url, icon: 'github' as Icon, external: true }] : []),
+];
+
+const follow: Social[] = [
+	...(INSTAGRAM_URL ? [{ name: 'Instagram', url: INSTAGRAM_URL, icon: 'instagram' as Icon, external: true }] : []),
+	...(linkedin ? [{ name: 'LinkedIn', url: linkedin.url, icon: 'linkedin' as Icon, external: true }] : []),
+	...(github ? [{ name: 'GitHub', url: github.url, icon: 'github' as Icon, external: true }] : []),
+];
+
+const columns = [
+	{ id: 'footer-connect', title: 'Connect', links: connect },
+	{ id: 'footer-follow', title: 'Follow me', links: follow },
+];
 ---
 
 <footer class="site-footer">
+	<div class="footer-ambient" aria-hidden="true"></div>
+	<!-- The existing "J" mark as a large, faint watermark behind everything. -->
+	<Image
+		class="footer-watermark"
+		src={monogram}
+		alt=""
+		aria-hidden="true"
+		widths={[300, 418]}
+		sizes="(min-width: 768px) 418px, 92vw"
+		loading="lazy"
+		decoding="async"
+	/>
+
 	<Container>
-		<div class="footer-cta">
-			<h2 class="footer-cta__title">Have a project in <em>mind?</em></h2>
-			<div class="footer-cta__actions">
-				<Button href="/contact/">Start a project</Button>
-				<a class="footer-cta__email" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+		<div class="footer-main">
+			<div class="footer-brand">
+				<a class="footer-logo" href="/">{SITE.name}</a>
+				<p class="footer-tagline">Websites and SEO, built in Trivandrum at Prception Medialab.</p>
 			</div>
+
+			<nav id="footer-nav" class="footer-cols" aria-label="Footer">
+				<div class="footer-group">
+				<div class="footer-col">
+					<h2 class="footer-col__title">Quick links</h2>
+					<ul role="list">
+						{pages.map((page) => (
+							<li><a class="footer-link" href={page.url}>{page.name}</a></li>
+						))}
+					</ul>
+				</div>
+
+				<div class="footer-col">
+					<h2 class="footer-col__title">Services</h2>
+					<ul role="list">
+						{services.map((service) => (
+							<li>
+								{service.url ? (
+									<a class="footer-link" href={service.url}>{service.name}</a>
+								) : (
+									<span class="footer-link footer-link--static">{service.name}</span>
+								)}
+							</li>
+						))}
+						<li><a class="footer-link footer-link--more" href="/services/">All services</a></li>
+					</ul>
+				</div>
+				</div>
+
+				<div class="footer-group">
+				{columns.map((col) => (
+					<div class="footer-col">
+						<h2 class="footer-col__title">{col.title}</h2>
+						<ul role="list">
+							{col.links.map((link) => (
+								<li>
+									<a
+										class="footer-link footer-link--icon"
+										href={link.url}
+										{...(link.external ? { target: '_blank', rel: 'noopener' } : {})}
+									>
+										<svg class="footer-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+											{link.icon === 'mail' && (
+												<>
+													<rect x="3" y="5" width="18" height="14" rx="2" />
+													<path d="m3 7 9 6 9-6" />
+												</>
+											)}
+											{link.icon === 'linkedin' && (
+												<>
+													<rect x="2.5" y="2.5" width="19" height="19" rx="4" />
+													<path d="M7.5 10.5v6M7.5 7.5v.01M11.5 16.5v-6M11.5 13a2.5 2.5 0 0 1 5 0v3.5" />
+												</>
+											)}
+											{link.icon === 'github' && (
+												<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5a10.6 10.6 0 0 0-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4M9 18c-4.51 2-5-2-7-2" />
+											)}
+											{link.icon === 'instagram' && (
+												<>
+													<rect x="2.5" y="2.5" width="19" height="19" rx="5" />
+													<circle cx="12" cy="12" r="4" />
+													<path d="M17.5 6.5v.01" />
+												</>
+											)}
+										</svg>
+										<span>{link.name}</span>
+										{link.external && <span class="visually-hidden"> (opens in a new tab)</span>}
+									</a>
+								</li>
+							))}
+						</ul>
+					</div>
+				))}
+				</div>
+			</nav>
 		</div>
 
-		<Rule />
-
-		<nav id="footer-nav" class="footer-cols" aria-label="Footer">
-			<div>
-				<h2 id="footer-pages" class="label">Pages</h2>
-				<ul role="list">
-					{pages.map((page) => <li><a href={page.url}>{page.name}</a></li>)}
-				</ul>
-			</div>
-			<div>
-				<h2 id="footer-services" class="label">Services</h2>
-				<ul role="list">
-					<li><a href="/services/">All services</a></li>
-					{SERVICES.map((service) => <li><a href={service.url}>{service.name}</a></li>)}
-				</ul>
-			</div>
-			<div>
-				<h2 id="footer-connect" class="label">Connect</h2>
-				<ul role="list">
-					{
-						SOCIAL.map((link) => (
-							<li>
-								<a href={link.url} target="_blank" rel="noopener">
-									{link.name}
-									<span class="visually-hidden"> (opens in a new tab)</span>
-								</a>
-							</li>
-						))
-					}
-					<li><a href={`mailto:${SITE.email}`}>Email</a></li>
-				</ul>
-			</div>
-		</nav>
-
-		<div class="footer-bottom small">
-			<p>{SITE.location}</p>
-			<p>© {year} {SITE.name}</p>
+		<div class="footer-bottom">
+			<p class="footer-copy">© {year} {SITE.name}. All rights reserved.</p>
+			<p class="footer-place">
+				<svg class="footer-icon" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" focusable="false">
+					<path d="M12 21.5s6.5-6 6.5-11.5a6.5 6.5 0 0 0-13 0c0 5.5 6.5 11.5 6.5 11.5Z" />
+					<circle cx="12" cy="10" r="2.25" />
+				</svg>
+				<span>Based in Trivandrum, Kerala. Working with clients across India and worldwide.</span>
+			</p>
 		</div>
 	</Container>
 </footer>
 
 <style>
+	/* Black footer with Prception teal (#02A397, sampled from the logo). Local tokens
+	   so shared focus styles and helpers pick up the dark palette. */
 	.site-footer {
-		padding-top: var(--section-pad);
-		border-top: 1px solid var(--rule);
+		--f-bg: #050505;
+		--f-teal: #02a397; /* 6.6:1 on the background */
+		--f-text: #c9cfd1; /* 12:1 */
+		--f-muted: #8f9799; /* 6.4:1 */
+		--f-heading: #f4f6f6;
+		--f-rule: rgb(2 163 151 / 0.22);
+		--focus-ring: var(--f-teal);
+		--ink: var(--f-heading);
+		--accent: var(--f-teal);
+
+		position: relative;
+		overflow: hidden;
+		isolation: isolate;
+		padding-top: clamp(2rem, 4vw, 3rem);
+		background: var(--f-bg);
+		color: var(--f-text);
 	}
 
-	.footer-cta {
+	/* Hairline teal edge along the top, brightest in the middle. */
+	.site-footer::before {
+		content: '';
+		position: absolute;
+		inset: 0 0 auto;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, rgb(2 163 151 / 0.4), transparent);
+	}
+
+	.site-footer :focus-visible {
+		outline-color: var(--f-teal);
+	}
+
+	/* ---------- Watermark ---------- */
+	/* Soft teal glow centred behind the watermark, so the mark melts into the black. */
+	.footer-ambient {
+		position: absolute;
+		inset: 0;
+		z-index: -2;
+		pointer-events: none;
+		background: radial-gradient(closest-side at 50% 50%, rgb(2 163 151 / 0.13), rgb(2 163 151 / 0.04) 55%, transparent);
+	}
+
+	/* The existing monogram, untouched, only scaled up and faded. Height follows the
+	   footer on wide screens; on narrow ones the width cap takes over and object-fit
+	   keeps its proportions. The mask softens its outer edges into the background. */
+	.footer-watermark {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		z-index: -1;
+		width: auto;
+		height: 118%;
+		max-width: 92vw;
+		object-fit: contain;
+		transform: translate(-50%, -50%);
+		opacity: 0.07;
+		filter: drop-shadow(0 0 40px rgb(2 163 151 / 0.6));
+		pointer-events: none;
+		user-select: none;
+		-webkit-mask-image: radial-gradient(closest-side, #000 70%, transparent);
+		mask-image: radial-gradient(closest-side, #000 70%, transparent);
+	}
+
+	/* ---------- Layout ---------- */
+	/* Phone: brand, then two rows of two columns. Tablet: brand, then all four columns
+	   in one row. Desktop: brand on the left, the two pairs beside it. */
+	.footer-main {
 		display: grid;
-		gap: var(--space-6);
-		padding-bottom: var(--space-8);
+		gap: var(--space-5);
+		padding-bottom: clamp(1.5rem, 3vw, 2.25rem);
 	}
 
-	.footer-cta__title {
-		font-size: var(--text-display);
-		line-height: 1;
-		letter-spacing: -0.02em;
+	@media (min-width: 1024px) {
+		.footer-main {
+			grid-template-columns: minmax(14rem, 0.8fr) 2fr;
+			align-items: start;
+			gap: var(--space-7);
+		}
 	}
 
-	.footer-cta__actions {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: var(--space-4);
+	/* ---------- Brand ---------- */
+	.footer-brand {
+		display: grid;
+		justify-items: start;
+		gap: var(--space-1);
 	}
 
-	.footer-cta__email {
+	.footer-logo {
 		display: inline-flex;
 		align-items: center;
-		min-height: 3rem;
-		color: var(--ink-2);
-		overflow-wrap: anywhere;
+		min-height: 2.75rem;
+		font-family: var(--font-serif);
+		font-size: 1.625rem;
+		line-height: 1;
+		color: var(--f-heading);
+		text-decoration: none;
+		transition: color var(--dur-fast) var(--ease-out);
 	}
 
-	@media (min-width: 768px) {
-		.footer-cta {
-			grid-template-columns: 1fr auto;
-			align-items: end;
-		}
-
-		.footer-cta__actions {
-			align-items: flex-end;
-		}
+	.footer-logo:hover {
+		color: var(--f-teal);
 	}
 
+	.footer-tagline {
+		max-width: 32ch;
+		margin: 0;
+		font-size: var(--text-small);
+		line-height: 1.55;
+		color: var(--f-muted);
+	}
+
+	/* ---------- Columns ---------- */
 	.footer-cols {
 		display: grid;
-		gap: var(--space-6);
-		padding-block: var(--space-7);
+		gap: var(--space-5);
+		padding-top: var(--space-5);
+		border-top: 1px solid var(--f-rule);
+	}
+
+	.footer-group {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-5);
 	}
 
 	@media (min-width: 640px) {
 		.footer-cols {
-			grid-template-columns: repeat(3, 1fr);
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: var(--space-5);
 		}
 	}
 
-	.footer-cols h2 {
-		margin-bottom: var(--space-3);
-		font-family: var(--font-mono);
+	/* Desktop: the brand sits beside the columns, so the rule moves to a fine vertical
+	   line between the two pairs. */
+	@media (min-width: 1024px) {
+		.footer-cols {
+			padding-top: 0;
+			border-top: 0;
+			gap: var(--space-6);
+		}
+
+		.footer-group + .footer-group {
+			padding-left: var(--space-6);
+			border-left: 1px solid var(--f-rule);
+		}
 	}
 
-	.footer-cols a {
+	.footer-col ul {
+		display: grid;
+		margin: 0;
+		padding: 0;
+	}
+
+	.footer-col__title {
+		margin: 0 0 var(--space-2);
+		font-family: var(--font-sans);
+		font-size: var(--text-label);
+		font-weight: 600;
+		letter-spacing: 0.16em;
+		line-height: 1.4;
+		text-transform: uppercase;
+		color: var(--f-heading);
+	}
+
+	.footer-col__title::after {
+		content: '';
+		display: block;
+		width: 1.25rem;
+		height: 1px;
+		margin-top: var(--space-2);
+		background: var(--f-teal);
+	}
+
+	.footer-link {
 		display: inline-flex;
 		align-items: center;
-		min-height: 2.75rem;
+		gap: var(--space-2);
+		min-height: 2rem; /* 32px, above the 24px minimum target size */
+		padding-block: 0.125rem;
 		font-size: var(--text-small);
-		text-decoration-color: transparent;
+		line-height: 1.3;
+		color: var(--f-text);
+		text-decoration: none;
+		background: linear-gradient(var(--f-teal), var(--f-teal)) no-repeat 0 calc(50% + 0.8em) / 0 1px;
+		transition:
+			color var(--dur-fast) var(--ease-out),
+			background-size var(--dur-base) var(--ease-out);
 	}
 
-	.footer-cols a:hover {
-		text-decoration-color: currentColor;
+	.footer-link--icon {
+		background-position: 1.5rem calc(50% + 0.8em);
 	}
 
+	a.footer-link:hover {
+		color: var(--f-teal);
+		background-size: 100% 1px;
+	}
+
+	a.footer-link--icon:hover {
+		background-size: calc(100% - 1.5rem) 1px;
+	}
+
+	.footer-link--static,
+	.footer-link--more {
+		color: var(--f-muted);
+	}
+
+	.footer-icon {
+		flex: none;
+		fill: none;
+		stroke: var(--f-teal);
+		stroke-width: 1.6;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		transition: filter var(--dur-fast) var(--ease-out);
+	}
+
+	a.footer-link:hover .footer-icon {
+		filter: drop-shadow(0 0 4px rgb(2 163 151 / 0.7));
+	}
+
+	/* ---------- Bottom bar ---------- */
 	.footer-bottom {
+		position: relative;
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
-		gap: var(--space-2) var(--space-5);
-		padding-block: var(--space-5);
-		border-top: 1px solid var(--rule);
-		color: var(--ink-3);
+		align-items: center;
+		gap: var(--space-2) var(--space-6);
+		padding-block: var(--space-3) var(--space-4);
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		color: var(--f-muted);
+	}
+
+	/* Thin teal-to-grey divider. */
+	.footer-bottom::before {
+		content: '';
+		position: absolute;
+		inset: 0 0 auto;
+		height: 1px;
+		background: linear-gradient(90deg, rgb(2 163 151 / 0.45), rgb(143 151 153 / 0.18) 55%, rgb(143 151 153 / 0.06));
+	}
+
+	.footer-bottom p {
+		margin: 0;
+		max-width: none;
+	}
+
+	.footer-place {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--space-2);
+	}
+
+	.footer-place .footer-icon {
+		margin-top: 0.2em;
 	}
 </style>

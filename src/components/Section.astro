@@ -8,17 +8,16 @@ import SectionLabel from './SectionLabel.astro';
 
 interface Props {
 	id: string;
-	index: string;
 	label: string;
 	last?: boolean;
 }
 
-const { id, index, label, last = false } = Astro.props;
+const { id, label, last = false } = Astro.props;
 ---
 
 <section class:list={['page-section', 'container', { 'page-section--last': last }]} aria-labelledby={id}>
 	<div class="grid">
-		<div class="col-label"><SectionLabel index={index} text={label} /></div>
+		<div class="col-label"><SectionLabel text={label} /></div>
 		<div class="col-content">
 			<h2 id={id} data-reveal="lines"><slot name="heading" /></h2>
 			<div class="section-body" data-reveal>
@@ -152,7 +151,7 @@ const { id, index, label, last = false } = Astro.props;
 		left: 0;
 		width: 9px;
 		height: 9px;
-		border-radius: 50%;
+		border-radius: var(--radius);
 		background: var(--accent);
 	}
 

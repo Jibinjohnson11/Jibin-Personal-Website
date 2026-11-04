@@ -12,14 +12,14 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
 	description="Website, SEO, and Django projects: AQ Air, healthcare and education SEO campaigns, and an SEO Management Dashboard."
 	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Work', url: '/work/' }]}
 >
-	<section class="work-intro container" aria-labelledby="work-title">
+	<section class="work-intro screen screen--first container" aria-labelledby="work-title">
 		<h1 id="work-title" data-reveal="lines">Work and <em>projects</em></h1>
 		<p class="lead" data-reveal style="--reveal-delay: 250ms">
 			Websites, SEO campaigns and full-stack builds. Each one started with a real problem.
 		</p>
 	</section>
 
-	<div class="work-projects container">
+	<div class="work-projects screen container">
 		<WorkList projects={projects} headingLevel={2} />
 
 		<CtaLine />

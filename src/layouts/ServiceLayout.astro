@@ -27,14 +27,11 @@ interface Props {
 	lead: string;
 	/** Case study slugs for the Related work block, in display order */
 	related: string[];
-	/** Section numbers for the shared blocks, continuing the page's own numbering */
-	relatedIndex: string;
-	faqIndex: string;
 	faqs: FaqItem[];
 	closing: { text: string; accent: string; label: string };
 }
 
-const { title, description, name, serviceType, keyword, accent, lead, related, relatedIndex, faqIndex, faqs, closing } = Astro.props;
+const { title, description, name, serviceType, keyword, accent, lead, related, faqs, closing } = Astro.props;
 
 const path = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
 
@@ -74,7 +71,7 @@ const schema = [
 	schema={schema}
 	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Services', url: '/services/' }, { name, url: path }]}
 >
-	<section class="service-hero container" aria-labelledby="service-title">
+	<section class="service-hero screen screen--first container" aria-labelledby="service-title">
 		<SectionLabel text="Services" />
 		<h1 id="service-title" class="service-hero__title" data-reveal="lines">{keyword} <em>{accent}</em></h1>
 		<p class="lead service-hero__lead" data-reveal style="--reveal-delay: 300ms">{lead}</p>
@@ -87,7 +84,7 @@ const schema = [
 
 	<section class="page-section container" aria-labelledby="related-title">
 		<div class="grid section-head">
-			<div class="col-label"><SectionLabel index={relatedIndex} text="Related work" /></div>
+			<div class="col-label"><SectionLabel text="Related work" /></div>
 			<div class="col-content">
 				<h2 id="related-title" data-reveal="lines">Related <em>work</em></h2>
 			</div>
@@ -95,7 +92,7 @@ const schema = [
 		<WorkList projects={projects} />
 	</section>
 
-	<Section id="faq-title" index={faqIndex} label="FAQ">
+	<Section id="faq-title" label="FAQ">
 		<Fragment slot="heading">Common <em>questions</em></Fragment>
 		<Faq items={faqs} />
 	</Section>

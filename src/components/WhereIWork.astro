@@ -1,0 +1,1359 @@
+---
+/**
+ * "Where I create impact": a pinned, scroll-driven scene directly below About.
+ *
+ *   Scene 1  Only the title, huge and centred, on the cream page.
+ *   Scene 2  The title zooms toward the viewer, the stage turns dark with a soft teal glow,
+ *            and the first company reveals: oversized name left, large visual right.
+ *   Scene 3  The second company pushes in from the right and shoves the first one off left.
+ *
+ * How it works: the section is several screens tall and holds a sticky, one-screen stage.
+ * A small script turns scroll position into progress values (--wi-zoom, --wi-dark, --wi-in,
+ * --wi-slide, each 0 to 1) and the CSS maps them onto transforms. No animation library.
+ *
+ * The cinematic mode (.wi--cinematic) is switched on by the script at every screen size,
+ * phones and tablets included, whenever motion is allowed. Narrow screens get the same scene
+ * with the copy laid over the bottom of each full-bleed visual. Reduced motion and no JS get
+ * the title followed by each company stacked as a dark panel, with a light fade-in where the
+ * browser supports CSS scroll-driven animations. Data lives in src/data/experience.ts.
+
+ */
+import { Image } from 'astro:assets';
+import Button from './Button.astro';
+import { EXPERIENCE } from '../data/experience';
+
+const total = EXPERIENCE.length;
+const pad = (n: number) => String(n).padStart(2, '0');
+const isExternal = (href: string) => /^https?:\/\//.test(href);
+---
+
+<section class="wi" aria-labelledby="wi-title" data-wi>
+	<div class="wi__stage">
+		<!-- Dark backdrop with teal lighting; fades in as the title zooms away -->
+		<div class="wi__backdrop" aria-hidden="true"></div>
+
+		<!-- Scene 1: the title on its own -->
+		<div class="wi__intro">
+			<h2 id="wi-title" class="wi__title">
+				<span class="wi__title-line">Where I create</span>
+				<em class="wi__title-line">impact.</em>
+			</h2>
+		</div>
+
+		<!-- Scenes 2 and 3: one panel per company on a horizontal track -->
+		<ol class="wi__track" role="list">
+			{
+				EXPERIENCE.map((job, i) => (
+					<li class:list={['wi__panel', job.theme && `wi__panel--${job.theme}`]} data-wi-panel={i}>
+						{job.mascot && (
+							<div class="wi__bg">
+								<Image
+									class="wi__bg-img"
+									src={job.mascot.src}
+									alt={job.mascot.alt}
+									widths={[640, 960, 1280, 1600, 2048]}
+									sizes="100vw"
+									loading="lazy"
+									decoding="async"
+								/>
+								<div class="wi__bg-shade" aria-hidden="true" />
+							</div>
+						)}
+						<div class="wi__inner container">
+							<div class="wi__copy">
+								<p class="label wi__meta">
+									<span>
+										<span class="wi__count-now">{pad(i + 1)}</span> / {pad(total)}
+									</span>
+									<time datetime={job.start}>{job.dates}</time>
+									{job.current && (
+										<span class="wi__now">
+											<span class="wi__dot" aria-hidden="true" />
+											Current
+										</span>
+									)}
+								</p>
+
+								{job.theme === 'prception' && job.logo && (
+									<Image class="wi__brand" src={job.logo} alt="" width={220} loading="lazy" decoding="async" />
+								)}
+
+								<h3 class="wi__name" aria-label={job.company}>
+									<span class="wi__name-main">{job.nameLines[0]}</span>
+									{job.nameLines.length > 1 && <em class="wi__name-sub">{job.nameLines.slice(1).join(' ')}</em>}
+								</h3>
+
+								<div class="wi__role-row">
+									{!job.theme && (
+										<div class="wi__logo">
+											{job.logo ? (
+												<Image src={job.logo} alt={`${job.company} logo`} width={96} height={96} loading="lazy" />
+											) : (
+												<span aria-hidden="true">{job.monogram}</span>
+											)}
+										</div>
+									)}
+									<div>
+										<p class="wi__role">{job.role}</p>
+										{(job.note ?? job.place) && <p class="wi__note">{job.note ?? job.place}</p>}
+									</div>
+								</div>
+
+								<p class="wi__text">{job.text}</p>
+
+								{job.skills && (
+									<ul class="wi__skills" role="list" aria-label={`Skills at ${job.company}`}>
+										{job.skills.map((skill) => (
+											<li class="wi__skill">{skill}</li>
+										))}
+									</ul>
+								)}
+
+								{job.cta ? (
+									<div class="wi__actions">
+										{isExternal(job.cta.href) ? (
+											<a class="wi__cta" href={job.cta.href} target="_blank" rel="noopener">
+												<span class="wi__cta-icon" aria-hidden="true">
+													<svg width="16" height="16" viewBox="0 0 16 16" focusable="false">
+														<path d="M4.5 11.5l7-7M5.5 4.5h6v6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+													</svg>
+												</span>
+												{job.cta.label}
+												<span class="visually-hidden"> (opens in a new tab)</span>
+											</a>
+										) : (
+											<a class="wi__cta wi__cta--internal" href={job.cta.href}>
+												<span class="wi__cta-icon" aria-hidden="true">
+													<svg width="16" height="16" viewBox="0 0 16 16" focusable="false">
+														<path d="M3 8h10M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+													</svg>
+												</span>
+												{job.cta.label}
+											</a>
+										)}
+										{job.link && (
+											<Button variant="link" href={job.link.href} class="wi__link">
+												{job.link.label}
+											</Button>
+										)}
+									</div>
+								) : (
+									job.link && (
+										<Button variant="link" href={job.link.href} class="wi__link">
+											{job.link.label}
+										</Button>
+									)
+								)}
+							</div>
+
+							{!job.mascot && job.preview && (
+							<figure class="wi__visual">
+								<div class="wi__glow" aria-hidden="true" />
+								<div class="wi__frame">
+									<Image
+											src={job.preview.src}
+											alt={job.preview.alt}
+											widths={[640, 960, 1400]}
+											sizes="(min-width: 1024px) 52vw, 92vw"
+											loading="lazy"
+											decoding="async"
+										/>
+								</div>
+								<figcaption class="label">{job.preview.caption}</figcaption>
+							</figure>
+							)}
+						</div>
+					</li>
+				))
+			}
+		</ol>
+	</div>
+</section>
+
+<script>
+	const section = document.querySelector<HTMLElement>('[data-wi]');
+
+	if (section) {
+		// Same scene on every screen size; only reduced motion opts out.
+		const query = window.matchMedia('(prefers-reduced-motion: no-preference)');
+		const stage = section.querySelector<HTMLElement>('.wi__stage')!;
+		const panels = Array.from(section.querySelectorAll<HTMLElement>('[data-wi-panel]'));
+
+		// Scroll progress (0 to 1 across the pinned run) at which each phase starts and ends.
+		const PHASES: Record<string, [number, number]> = {
+			'--wi-zoom': [0, 0.26],
+			'--wi-dark': [0.08, 0.28],
+			'--wi-in': [0.2, 0.44],
+			'--wi-slide': [0.56, 0.88],
+		};
+		// Where to land when keyboard focus moves into a panel that's off screen.
+		const PANEL_AT = [0.48, 0.94];
+
+		const clamp = (v: number) => Math.min(1, Math.max(0, v));
+		// Ease-in-out so each phase starts and settles gently.
+		const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+		let ticking = false;
+		let visible = false;
+
+		const update = () => {
+			ticking = false;
+			const rect = section.getBoundingClientRect();
+			// Measured against the sticky stage, not innerHeight, so a mobile address bar
+			// showing or hiding mid-scroll doesn't make the scene jump.
+			const run = rect.height - stage.offsetHeight;
+			const p = run > 0 ? clamp(-rect.top / run) : 0;
+			for (const [name, [a, b]] of Object.entries(PHASES)) {
+				section.style.setProperty(name, ease(clamp((p - a) / (b - a))).toFixed(4));
+			}
+		};
+
+		const onScroll = () => {
+			if (!visible || ticking) return;
+			ticking = true;
+			requestAnimationFrame(update);
+		};
+
+		// Each panel is one screen. If its copy is taller than the room left under the header
+		// (small phones, landscape phones, short laptop windows), zoom the copy down to fit so
+		// nothing is clipped. 1 everywhere it already fits, so desktop is unchanged.
+		const px = (el: Element, prop: string) => parseFloat(getComputedStyle(el).getPropertyValue(prop)) || 0;
+		const fit = () => {
+			for (const panel of panels) {
+				const copy = panel.querySelector<HTMLElement>('.wi__copy');
+				const inner = copy?.parentElement;
+				if (!copy || !inner) continue;
+				copy.style.setProperty('--wi-fit', '1');
+				const room =
+					panel.clientHeight - px(panel, 'padding-top') - px(panel, 'padding-bottom') - px(inner, 'padding-top') - px(inner, 'padding-bottom');
+				const scale = Math.min(1, room / copy.offsetHeight);
+				copy.style.setProperty('--wi-fit', Math.max(0.55, scale).toFixed(3));
+			}
+		};
+
+		let resizing = false;
+		const onResize = () => {
+			if (resizing) return;
+			resizing = true;
+			requestAnimationFrame(() => {
+				resizing = false;
+				if (!query.matches) return;
+				fit();
+				update();
+			});
+		};
+
+		// Only do work while the section is on screen.
+		const io = new IntersectionObserver(([entry]) => {
+			visible = entry.isIntersecting;
+			if (visible) update();
+		});
+
+		const onFocus = (event: FocusEvent) => {
+			const panel = (event.target as HTMLElement).closest<HTMLElement>('[data-wi-panel]');
+			if (!panel) return;
+			const run = section.offsetHeight - window.innerHeight;
+			const top = section.getBoundingClientRect().top + window.scrollY;
+			window.scrollTo({ top: top + run * (PANEL_AT[Number(panel.dataset.wiPanel)] ?? 0), behavior: 'instant' });
+		};
+
+		const apply = () => {
+			const on = query.matches;
+			section.classList.toggle('wi--cinematic', on);
+			if (on) {
+				io.observe(section);
+				window.addEventListener('scroll', onScroll, { passive: true });
+				window.addEventListener('resize', onResize, { passive: true });
+				section.addEventListener('focusin', onFocus);
+				fit();
+				update();
+				document.fonts?.ready.then(onResize);
+			} else {
+				io.disconnect();
+				window.removeEventListener('scroll', onScroll);
+				window.removeEventListener('resize', onResize);
+				section.removeEventListener('focusin', onFocus);
+				Object.keys(PHASES).forEach((name) => section.style.removeProperty(name));
+				panels.forEach((panel) => panel.querySelector<HTMLElement>('.wi__copy')?.style.removeProperty('--wi-fit'));
+			}
+		};
+
+		query.addEventListener('change', apply);
+		apply();
+	}
+</script>
+
+<style>
+	/* =========================================================================
+	   Base: stacked layout for mobile, tablet, reduced motion and no JS
+	   ========================================================================= */
+	.wi {
+		position: relative;
+		overflow-x: clip; /* never a horizontal scrollbar; clip keeps sticky working */
+		background: var(--grain), var(--paper);
+	}
+
+	.wi::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		inset-inline: var(--container-pad);
+		border-top: var(--hairline);
+	}
+
+	.wi__backdrop {
+		display: none;
+	}
+
+	/* Scene 1 title */
+	.wi__intro {
+		display: grid;
+		place-items: center;
+		min-height: 70vh;
+		min-height: 70svh;
+		padding: var(--space-9) var(--container-pad);
+		text-align: center;
+	}
+
+	.wi__title {
+		font-family: var(--font-serif);
+		font-weight: 400;
+		font-size: clamp(3.5rem, 13vw, 11.5rem);
+		line-height: 0.9;
+		letter-spacing: -0.035em;
+		color: var(--ink);
+		text-wrap: balance;
+	}
+
+	.wi__title-line {
+		display: block;
+	}
+
+	.wi__title em {
+		color: var(--accent);
+		padding-right: 0.06em; /* italic overhang */
+	}
+
+	/* --- Company panels: dark, with the site's midnight palette scoped in --- */
+	.wi__track {
+		--ink: var(--on-accent);
+		--ink-2: #cfd3d5;
+		--ink-3: #a3a9ac;
+		--label: #a3a9ac;
+		--accent: #b5e4d8;
+		--accent-hover: var(--on-accent);
+		--rule: rgb(250 246 232 / 0.16);
+		--focus-ring: var(--on-accent);
+		--wi-night: #050708;
+		color: var(--ink-2);
+	}
+
+	.wi__panel {
+		position: relative;
+		overflow: hidden;
+		background:
+			radial-gradient(60% 55% at 78% 45%, rgb(11 95 86 / 0.38), transparent 70%),
+			radial-gradient(40% 40% at 8% 100%, rgb(11 95 86 / 0.18), transparent 70%),
+			var(--wi-night);
+	}
+
+	.wi__panel + .wi__panel {
+		border-top: 1px solid var(--rule);
+	}
+
+	.wi__inner {
+		position: relative;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--space-7);
+		padding-block: var(--space-9);
+	}
+
+	.wi__copy {
+		min-width: 0;
+	}
+
+	.wi__meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2) var(--space-5);
+	}
+
+	.wi__count-now,
+	.wi__now {
+		color: var(--accent);
+	}
+
+	.wi__now {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	.wi__dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--accent);
+		box-shadow: 0 0 10px 2px rgb(181 228 216 / 0.45);
+	}
+
+	/* Oversized company name: bold sans wordmark with a serif italic second line */
+	.wi__name {
+		margin-top: var(--space-6);
+		color: var(--ink);
+	}
+
+	.wi__name-main {
+		display: block;
+		font-family: var(--font-sans);
+		font-weight: 700;
+		font-size: clamp(3rem, 15vw, 7rem);
+		line-height: 0.86;
+		letter-spacing: -0.045em;
+		text-transform: uppercase;
+		overflow-wrap: anywhere;
+	}
+
+	.wi__name-sub {
+		display: block;
+		margin-top: 0.1em;
+		font-family: var(--font-serif);
+		font-weight: 400;
+		font-size: clamp(2rem, 8vw, 3.75rem);
+		line-height: 1;
+		letter-spacing: -0.02em;
+		color: var(--accent);
+	}
+
+	.wi__role-row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-4);
+		margin-top: var(--space-6);
+		padding-top: var(--space-5);
+		border-top: 1px solid var(--rule);
+	}
+
+	/* Logo tile: shows the monogram until a real logo is set in experience.ts */
+	.wi__logo {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 3.25rem;
+		aspect-ratio: 1;
+		border: 1px solid rgb(181 228 216 / 0.35);
+		border-radius: var(--radius);
+		background: rgb(11 95 86 / 0.35);
+		font-family: var(--font-serif);
+		font-style: italic;
+		font-size: 1.3rem;
+		line-height: 1;
+		color: var(--accent);
+	}
+
+	.wi__logo :global(img) {
+		width: 70%;
+		height: 70%;
+		object-fit: contain;
+	}
+
+	.wi__role {
+		font-family: var(--font-serif);
+		font-size: clamp(1.35rem, 2vw, 1.7rem);
+		line-height: 1.15;
+		color: var(--ink);
+	}
+
+	.wi__note {
+		margin-top: 0.15rem;
+		font-size: var(--text-small);
+		color: var(--ink-3);
+	}
+
+	.wi__text {
+		max-width: 48ch;
+		margin-top: var(--space-4);
+		color: var(--ink-2);
+	}
+
+	.wi__copy :global(.wi__link) {
+		margin-top: var(--space-5);
+	}
+
+	/* Large visual with a teal glow behind it */
+	.wi__visual {
+		position: relative;
+		min-width: 0;
+	}
+
+	.wi__glow {
+		position: absolute;
+		inset: 8% 6%;
+		border-radius: 50%;
+		background: rgb(31 160 140 / 0.45);
+		filter: blur(70px);
+		opacity: 0.7;
+	}
+
+	.wi__frame {
+		position: relative;
+		overflow: hidden;
+		aspect-ratio: 16 / 10;
+		border: 1px solid rgb(250 246 232 / 0.14);
+		border-radius: 6px;
+		background: #11161b;
+		box-shadow:
+			0 40px 80px -30px rgb(0 0 0 / 0.8),
+			0 0 0 1px rgb(0 0 0 / 0.4);
+	}
+
+	.wi__frame :global(img) {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: top center;
+	}
+
+	.wi__visual figcaption {
+		position: relative;
+		margin-top: var(--space-3);
+	}
+
+	/* Light fade-in for the stacked layout, only where CSS scroll timelines exist */
+	@supports (animation-timeline: view()) {
+		@media (prefers-reduced-motion: no-preference) {
+			.wi:not(.wi--cinematic) .wi__title,
+			.wi:not(.wi--cinematic) .wi__copy,
+			.wi:not(.wi--cinematic) .wi__visual {
+				animation: wi-rise linear both;
+				animation-timeline: view();
+				animation-range: entry 5% entry 70%;
+			}
+		}
+	}
+
+	@keyframes wi-rise {
+		from {
+			opacity: 0;
+			transform: translateY(2.5rem);
+		}
+	}
+
+	/* =========================================================================
+	   Cinematic: every screen size, switched on by the script (narrow-screen
+	   layout adjustments are at the end of this block)
+	   ========================================================================= */
+	.wi--cinematic {
+		--wi-zoom: 0;
+		--wi-dark: 0;
+		--wi-in: 0;
+		--wi-slide: 0;
+		height: 380vh; /* scroll length of the whole scene */
+		height: 380svh; /* same on desktop; steady on mobile as the address bar moves */
+	}
+
+	/* Shrinks the copy only when it wouldn't fit one screen (set by the script, 1 otherwise) */
+	.wi--cinematic .wi__copy {
+		zoom: var(--wi-fit, 1);
+	}
+
+	.wi--cinematic .wi__stage {
+		position: sticky;
+		top: 0;
+		height: 100vh;
+		height: 100svh;
+		overflow: hidden;
+	}
+
+	/* The cream page turns to night */
+	.wi--cinematic .wi__backdrop {
+		display: block;
+		position: absolute;
+		inset: 0;
+		background:
+			radial-gradient(55% 60% at 72% 48%, rgb(0 169 157 / 0.2), transparent 70%),
+			radial-gradient(60% 35% at 50% 110%, rgb(0 169 157 / 0.16), transparent 70%),
+			#050708;
+		opacity: var(--wi-dark);
+	}
+
+	/* Scene 1 to 2: the title zooms toward the viewer and dissolves */
+	.wi--cinematic .wi__intro {
+		position: absolute;
+		inset: 0;
+		z-index: 2;
+		min-height: 0;
+		padding-top: var(--header-h);
+		pointer-events: none;
+	}
+
+	.wi--cinematic .wi__title {
+		transform: scale(calc(1 + var(--wi-zoom) * 3));
+		opacity: calc(1 - var(--wi-zoom) * 1.2);
+		filter: blur(calc(var(--wi-zoom) * 8px));
+		will-change: transform, opacity;
+	}
+
+	/* Title turns cream as the backdrop darkens behind it */
+	.wi--cinematic .wi__title-line:first-child {
+		color: color-mix(in srgb, var(--paper) calc(var(--wi-dark) * 100%), var(--ink));
+	}
+
+	/* The track holds both panels side by side; in scene 3 it slides one full screen left,
+	   so the incoming panel physically pushes the first one out */
+	.wi--cinematic .wi__track {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		display: flex;
+		width: 200%;
+		transform: translate3d(calc(var(--wi-slide) * -50%), 0, 0);
+		will-change: transform;
+	}
+
+	.wi--cinematic .wi__panel {
+		display: flex;
+		align-items: center;
+		flex: 0 0 50%;
+		height: 100%;
+		padding-top: var(--header-h);
+		overflow: visible;
+		background: none; /* the shared backdrop lights the stage */
+	}
+
+	.wi--cinematic .wi__panel + .wi__panel {
+		border-top: 0;
+	}
+
+	.wi--cinematic .wi__inner {
+		width: 100%;
+		grid-template-columns: repeat(12, minmax(0, 1fr));
+		column-gap: var(--grid-gap);
+		align-items: center;
+		padding-block: var(--space-6);
+	}
+
+	.wi--cinematic .wi__copy {
+		grid-column: 1 / span 5;
+		position: relative;
+		z-index: 1;
+	}
+
+	/* No visual: the copy takes the wider column */
+	.wi--cinematic .wi__copy:only-child {
+		grid-column: 1 / span 8;
+	}
+
+	.wi--cinematic .wi__visual {
+		grid-column: 6 / -1;
+		margin-right: calc(var(--container-pad) * -1);
+		perspective: 1400px;
+	}
+
+	.wi--cinematic .wi__name-main {
+		font-size: clamp(5rem, 10.5vw, 11rem);
+		/* Let the wordmark run under the visual, agency style */
+		width: max-content;
+		max-width: 62vw;
+		overflow-wrap: normal;
+	}
+
+	.wi--cinematic .wi__name-sub {
+		font-size: clamp(2.5rem, 4vw, 4.25rem);
+	}
+
+	/* --- Panel 1: reveals once the title is gone --- */
+	.wi--cinematic .wi__panel:first-child .wi__copy > * {
+		opacity: var(--wi-in);
+		transform: translateY(calc((1 - var(--wi-in)) * 3rem));
+	}
+
+	.wi--cinematic .wi__panel:first-child .wi__copy > :nth-child(2) {
+		transform: translateY(calc((1 - var(--wi-in)) * 5rem));
+	}
+
+	.wi--cinematic .wi__panel:first-child .wi__frame {
+		clip-path: inset(calc((1 - var(--wi-in)) * 22%) 0 calc((1 - var(--wi-in)) * 22%) calc((1 - var(--wi-in)) * 40%) round 6px);
+		transform: rotateY(calc(-14deg + var(--wi-in) * 8deg - var(--wi-slide) * 10deg)) scale(calc(1.06 - var(--wi-in) * 0.06));
+	}
+
+	.wi--cinematic .wi__panel:first-child .wi__glow {
+		opacity: calc(var(--wi-in) * 0.7);
+	}
+
+	/* As it's pushed off, panel 1 sinks back a touch for depth (no cross-fade) */
+	.wi--cinematic .wi__panel:first-child .wi__inner {
+		transform: scale(calc(1 - var(--wi-slide) * 0.06));
+		transform-origin: 100% 50%;
+		filter: brightness(calc(1 - var(--wi-slide) * 0.45));
+	}
+
+	/* --- Panel 2: rides in with the track; its visual swings round and its name trails in --- */
+	.wi--cinematic .wi__panel:last-child .wi__frame {
+		transform: rotateY(calc(-6deg + (1 - var(--wi-slide)) * 18deg));
+	}
+
+	.wi--cinematic .wi__frame {
+		transform-origin: 0% 50%;
+		will-change: transform;
+	}
+
+	/* Short desktop windows: tighten so nothing clips */
+	@media (max-height: 820px) {
+		.wi--cinematic .wi__name-main {
+			font-size: clamp(4.5rem, 8.5vw, 8.5rem);
+		}
+
+		.wi--cinematic .wi__name,
+		.wi--cinematic .wi__role-row {
+			margin-top: var(--space-4);
+		}
+
+		.wi--cinematic .wi__text {
+			margin-top: var(--space-3);
+		}
+	}
+	/* =========================================================================
+	   BlackBox Learning: the red panda image fills the whole panel edge to edge.
+	   Copy sits on the left over a dark brown gradient; the panda stays clear on
+	   the right. Mobile stacks the image above the copy so the panda isn't cropped.
+	   ========================================================================= */
+	.wi__panel--blackbox {
+		--bb-orange: #ff6500;
+		--bb-orange-text: #ff7a2e; /* italic accent, 6:1+ on the dark shade */
+		--bb-charcoal: #1c1c1c;
+		--bb-brown: #1a0b03;
+		--ink: #fbf3ea;
+		--ink-2: #eadfd3;
+		--ink-3: #d3c2b1;
+		--label: #d3c2b1;
+		--accent: var(--bb-orange-text);
+		--accent-hover: var(--ink);
+		--rule: rgb(255 255 255 / 0.2);
+		--focus-ring: var(--ink);
+		--cta-bg: var(--bb-orange);
+		--cta-fg: var(--bb-charcoal); /* 5.8:1 on #FF6500 */
+		--cta-glow: rgb(255 101 0 / 0.75);
+		--cta-glow-strong: rgb(255 101 0 / 0.95);
+		--tag-bg: rgb(26 11 3 / 0.35);
+		--tag-hover-border: var(--bb-orange);
+		--tag-hover-bg: rgb(255 101 0 / 0.18);
+		isolation: isolate;
+		color: var(--ink-2);
+		background: var(--bb-brown);
+	}
+
+	/* --- Background image --- */
+	.wi__bg {
+		position: relative;
+		overflow: hidden;
+		aspect-ratio: 4 / 5; /* mobile: the panda gets its own frame-free block */
+	}
+
+	.wi__bg :global(.wi__bg-img) {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover; /* same as background-size: cover, with responsive sources */
+		object-position: 72% 50%;
+		scale: 1.08; /* headroom for the parallax drift */
+	}
+
+	/* Mobile: fade the bottom of the image into the copy below */
+	.wi__bg-shade {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(180deg, transparent 55%, rgb(26 11 3 / 0.85) 88%, var(--bb-brown) 100%);
+	}
+
+	.wi__panel--blackbox .wi__inner {
+		position: relative;
+		margin-top: calc(var(--space-8) * -1); /* tuck the copy up into the fade */
+		padding-top: 0;
+	}
+
+	.wi__panel--blackbox .wi__copy {
+		max-width: 40rem;
+	}
+
+	/* Heading: bold condensed cream, italic orange */
+	.wi__panel--blackbox .wi__name-main {
+		font-stretch: 80%;
+		letter-spacing: -0.035em;
+		color: var(--ink);
+		text-shadow: 0 2px 30px rgb(26 11 3 / 0.35);
+	}
+
+	.wi__panel--blackbox .wi__name-sub {
+		color: var(--bb-orange-text);
+	}
+
+	.wi__panel--blackbox .wi__count-now,
+	.wi__panel--blackbox .wi__now {
+		color: var(--bb-orange-text);
+	}
+
+	.wi__panel--blackbox .wi__dot {
+		background: var(--bb-orange);
+		box-shadow: 0 0 10px 2px rgb(255 101 0 / 0.6);
+	}
+
+	.wi__panel--blackbox .wi__role-row {
+		border-top-color: rgb(255 122 46 / 0.45);
+	}
+
+	.wi__panel--blackbox .wi__text {
+		max-width: 46ch;
+	}
+
+	/* --- Skill tags --- */
+	.wi__skills {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+		margin-top: var(--space-5);
+	}
+
+	.wi__skill {
+		padding: 0.4rem 0.9rem;
+		border: 1px solid rgb(255 255 255 / 0.24);
+		border-radius: 999px;
+		background: var(--tag-bg, rgb(255 255 255 / 0.04));
+		backdrop-filter: blur(6px);
+		font-size: var(--text-small);
+		line-height: 1.3;
+		color: var(--ink);
+		transition:
+			border-color var(--dur-fast) var(--ease-out),
+			background-color var(--dur-fast) var(--ease-out),
+			color var(--dur-fast) var(--ease-out),
+			box-shadow var(--dur-fast) var(--ease-out),
+			transform var(--dur-fast) var(--ease-out);
+	}
+
+	/* --- CTA: brand-coloured pill (per theme); a cream fill sweeps in on hover --- */
+	.wi__actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-4) var(--space-6);
+		margin-top: var(--space-6);
+	}
+
+	.wi__actions :global(.wi__link) {
+		margin-top: 0;
+	}
+
+	.wi__cta {
+		position: relative;
+		isolation: isolate;
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-3);
+		padding: 0.45rem 1.4rem 0.45rem 0.45rem;
+		overflow: hidden;
+		border-radius: 999px;
+		background: var(--cta-bg);
+		font-weight: 600;
+		font-size: 0.975rem;
+		color: var(--cta-fg);
+		text-decoration: none;
+		box-shadow: 0 14px 34px -14px var(--cta-glow);
+		transition:
+			box-shadow var(--dur-base) var(--ease-out),
+			transform var(--dur-base) var(--ease-out);
+	}
+
+	.wi__cta::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		border-radius: inherit;
+		background: var(--ink);
+		transform: scaleX(0);
+		transform-origin: 0 50%;
+		transition: transform var(--dur-base) var(--ease-out);
+	}
+
+	.wi__cta-icon {
+		display: grid;
+		place-items: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: 50%;
+		background: var(--cta-fg);
+		color: var(--cta-bg);
+		transition: transform var(--dur-base) var(--ease-out);
+	}
+
+	.wi__cta:focus-visible {
+		outline: 2px solid var(--ink);
+		outline-offset: 3px;
+	}
+
+	@media (hover: hover) {
+		.wi__skill:hover {
+			border-color: var(--tag-hover-border);
+			background: var(--tag-hover-bg);
+			color: var(--ink);
+		}
+
+		.wi__cta:hover {
+			box-shadow: 0 20px 44px -14px var(--cta-glow-strong);
+			transform: translateY(-2px);
+		}
+
+		.wi__cta:hover::before {
+			transform: scaleX(1);
+		}
+
+		.wi__cta:hover .wi__cta-icon {
+			transform: rotate(45deg);
+		}
+
+		.wi__cta--internal:hover .wi__cta-icon {
+			transform: translateX(3px);
+		}
+	}
+
+	/* --- Tablet and up: the image becomes the full panel background --- */
+	@media (min-width: 768px) {
+		.wi__panel--blackbox {
+			display: flex;
+			align-items: center;
+			min-height: 100vh;
+			min-height: 100svh;
+		}
+
+		.wi__bg {
+			position: absolute;
+			inset: 0;
+			z-index: -1;
+			aspect-ratio: auto;
+		}
+
+		/* Dark brown on the left for the copy, clear on the right for the panda */
+		.wi__bg-shade {
+			background:
+				linear-gradient(90deg, rgb(26 11 3 / 0.9) 0%, rgb(26 11 3 / 0.78) 30%, rgb(26 11 3 / 0.35) 52%, transparent 66%),
+				linear-gradient(0deg, rgb(26 11 3 / 0.35) 0%, transparent 30%);
+		}
+
+		.wi__panel--blackbox .wi__inner {
+			width: 100%;
+			margin-top: 0;
+			padding-block: var(--space-9);
+		}
+
+		.wi__panel--blackbox .wi__copy {
+			max-width: 58%;
+		}
+	}
+
+	@media (min-width: 768px) and (max-width: 1023px) {
+		.wi__bg :global(.wi__bg-img) {
+			object-position: 74% 50%;
+		}
+	}
+
+	/* --- Desktop: copy held to about 45% of the screen --- */
+	@media (min-width: 1024px) {
+		.wi__bg :global(.wi__bg-img) {
+			object-position: 60% 50%;
+		}
+
+		.wi__panel--blackbox .wi__copy {
+			max-width: min(45vw, 40rem);
+		}
+
+		.wi__panel--blackbox .wi__name-main {
+			font-size: clamp(5rem, 7.4vw, 7.5rem);
+		}
+
+		.wi__panel--blackbox .wi__name-sub {
+			font-size: clamp(2.5rem, 3.6vw, 3.75rem);
+		}
+	}
+
+	/* --- Stacked layout: copy fades and rises line by line, background drifts --- */
+	.wi__copy > :nth-child(1) { --n: 0; }
+	.wi__copy > :nth-child(2) { --n: 1; }
+	.wi__copy > :nth-child(3) { --n: 2; }
+	.wi__copy > :nth-child(4) { --n: 3; }
+	.wi__copy > :nth-child(5) { --n: 4; }
+	.wi__copy > :nth-child(6) { --n: 5; }
+	.wi__copy > :nth-child(7) { --n: 6; }
+
+	@supports (animation-timeline: view()) {
+		@media (prefers-reduced-motion: no-preference) {
+			.wi:not(.wi--cinematic) :is(.wi__panel--blackbox, .wi__panel--prception) .wi__copy {
+				animation: none;
+			}
+
+			.wi:not(.wi--cinematic) :is(.wi__panel--blackbox, .wi__panel--prception) .wi__copy > * {
+				animation: wi-rise linear both;
+				animation-timeline: view();
+				animation-range: entry calc(5% + var(--n) * 7%) entry calc(55% + var(--n) * 7%);
+			}
+
+			.wi:not(.wi--cinematic) .wi__bg :global(.wi__bg-img) {
+				animation: bb-parallax linear both;
+				animation-timeline: view(block);
+				animation-range: cover 0% cover 100%;
+			}
+		}
+	}
+
+	@keyframes bb-parallax {
+		from {
+			transform: translateY(-3%);
+		}
+		to {
+			transform: translateY(3%);
+		}
+	}
+
+	/* --- Cinematic: BlackBox pushes in carrying its own full-bleed background --- */
+	.wi--cinematic .wi__panel--blackbox {
+		background: var(--bb-brown);
+		padding-top: 0; /* the image runs under the header too; the copy keeps its offset below */
+		/* Depth on the leading edge. Waiting just off screen, this shadow spilled onto the cream
+		   title scene, so it only shows once the stage has turned dark (identical from then on). */
+		box-shadow: -50px 0 90px -30px rgb(0 0 0 / calc(0.75 * var(--wi-dark)));
+	}
+
+	.wi--cinematic .wi__panel--blackbox .wi__inner {
+		display: block;
+		padding-top: calc(var(--header-h) + var(--space-6));
+	}
+
+	/* Very light parallax: the photo drifts a little against the slide */
+	.wi--cinematic .wi__bg :global(.wi__bg-img) {
+		transform: translate3d(calc((1 - var(--wi-slide)) * -5%), 0, 0);
+		will-change: transform;
+	}
+
+	/* Copy fades and rises line by line once the panel is mostly on screen */
+	.wi--cinematic .wi__panel--blackbox .wi__copy > * {
+		--k: clamp(0, calc((var(--wi-slide) - 0.22 - var(--n) * 0.06) * 2.8), 1);
+		opacity: var(--k);
+		transform: translateY(calc((1 - var(--k)) * 1.75rem));
+	}
+
+	@media (max-height: 820px) {
+		.wi--cinematic .wi__panel--blackbox .wi__name-main {
+			font-size: clamp(4rem, 6.2vw, 6.25rem);
+		}
+
+		.wi--cinematic .wi__skills,
+		.wi--cinematic .wi__actions {
+			margin-top: var(--space-4);
+		}
+	}
+
+	/* =========================================================================
+	   Prception Medialab: the brand visual (glowing logo disc, right) fills the
+	   panel; copy sits on its dark left side. Below 900px the visual stacks on top.
+	   ========================================================================= */
+	.wi__panel--prception {
+		--pr-teal: #00a99d; /* the logo's teal */
+		--pr-cyan: #5ff3e6; /* light and glow only, never text */
+		--pr-black: #050708;
+		--pr-night: #010e12; /* the visual's own dark tone, so edges blend */
+		--ink: #f4f1ea; /* off-white */
+		--ink-2: #cfd4d3;
+		--ink-3: #9aa3a3; /* 7.4:1 on the black */
+		--label: #9aa3a3;
+		--accent: var(--pr-teal); /* 7.1:1 on the night tone */
+		--accent-hover: var(--ink);
+		--rule: rgb(244 241 234 / 0.14);
+		--focus-ring: var(--ink);
+		--cta-bg: var(--pr-teal);
+		--cta-fg: var(--pr-black); /* 7.6:1 on the teal */
+		--cta-glow: rgb(0 169 157 / 0.6);
+		--cta-glow-strong: rgb(0 169 157 / 0.9);
+		--tag-bg: rgb(0 169 157 / 0.04);
+		--tag-hover-border: var(--pr-teal);
+		--tag-hover-bg: rgb(0 169 157 / 0.14);
+		isolation: isolate;
+		background: var(--pr-night);
+	}
+
+	/* --- Copy --- */
+	.wi__copy :global(.wi__brand) {
+		display: block;
+		width: auto;
+		height: 2.25rem;
+		margin-top: var(--space-6);
+	}
+
+	.wi__panel--prception .wi__name {
+		margin-top: var(--space-4);
+	}
+
+	.wi__panel--prception .wi__name-main {
+		font-size: clamp(2.75rem, 13vw, 6.5rem);
+		font-weight: 800;
+		letter-spacing: -0.05em;
+		overflow-wrap: normal;
+		color: var(--ink);
+		text-shadow: 0 0 60px rgb(0 169 157 / 0.18);
+	}
+
+	.wi__panel--prception .wi__name-sub {
+		font-style: italic;
+		color: var(--pr-teal);
+	}
+
+	.wi__panel--prception .wi__count-now,
+	.wi__panel--prception .wi__now {
+		color: var(--pr-teal);
+	}
+
+	.wi__panel--prception .wi__dot {
+		background: var(--pr-teal);
+		box-shadow: 0 0 10px 2px rgb(0 169 157 / 0.7);
+	}
+
+	/* The rule above the role becomes a short teal accent line */
+	.wi__panel--prception .wi__role-row {
+		position: relative;
+		border-top: 0;
+	}
+
+	.wi__panel--prception .wi__role-row::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 4.5rem;
+		height: 2px;
+		border-radius: 2px;
+		background: linear-gradient(90deg, var(--pr-teal), rgb(95 243 230 / 0));
+		box-shadow: 0 0 12px rgb(0 169 157 / 0.6);
+	}
+
+	.wi__panel--prception .wi__text {
+		max-width: 46ch;
+	}
+
+	.wi__panel--prception .wi__skill {
+		border-color: rgb(0 169 157 / 0.45);
+		letter-spacing: 0.01em;
+	}
+
+	@media (hover: hover) {
+		.wi__panel--prception .wi__skill:hover {
+			box-shadow: 0 0 18px rgb(0 169 157 / 0.28);
+			transform: translateY(-1px);
+		}
+	}
+
+	/* --- Visual: stacked on top below 900px, emblem kept in frame --- */
+	.wi__panel--prception .wi__bg {
+		aspect-ratio: 1;
+		max-height: 75svh;
+		width: 100%;
+	}
+
+	.wi__panel--prception .wi__bg :global(.wi__bg-img) {
+		object-position: 100% 50%;
+	}
+
+	.wi__panel--prception .wi__bg-shade {
+		background: linear-gradient(180deg, transparent 60%, rgb(1 14 18 / 0.85) 88%, var(--pr-night) 100%);
+	}
+
+	.wi__panel--prception .wi__inner {
+		margin-top: calc(var(--space-7) * -1);
+		padding-top: 0;
+	}
+
+	@media (min-width: 600px) and (max-width: 899px) {
+		.wi__panel--prception .wi__bg {
+			position: relative;
+			inset: auto;
+			z-index: auto;
+			aspect-ratio: 16 / 11;
+		}
+	}
+
+	/* --- Full-screen panel from 900px: the visual becomes the whole background --- */
+	@media (min-width: 900px) {
+		.wi__panel--prception .wi__bg {
+			position: absolute;
+			inset: 0;
+			z-index: -1;
+			aspect-ratio: auto;
+			max-height: none;
+		}
+
+		.wi__panel--prception .wi__bg :global(.wi__bg-img) {
+			object-position: 60% 50%;
+		}
+
+		/* Darken the left a touch more so the copy always reads, the right stays clear */
+		.wi__panel--prception .wi__bg-shade {
+			background:
+				linear-gradient(90deg, rgb(1 14 18 / 0.75) 0%, rgb(1 14 18 / 0.45) 32%, transparent 52%),
+				linear-gradient(0deg, rgb(1 14 18 / 0.4) 0%, transparent 25%);
+		}
+
+		.wi__panel--prception .wi__inner {
+			width: 100%;
+			margin-top: 0;
+		}
+
+		.wi__panel--prception .wi__copy {
+			max-width: min(46vw, 40rem);
+		}
+
+		.wi:not(.wi--cinematic) .wi__panel--prception {
+			display: flex;
+			align-items: center;
+			min-height: 100vh;
+			min-height: 100svh;
+		}
+
+		.wi:not(.wi--cinematic) .wi__panel--prception .wi__inner {
+			padding-block: var(--space-9);
+		}
+
+		.wi__panel--prception .wi__name-main {
+			font-size: clamp(3.5rem, 6.6vw, 6.5rem);
+		}
+	}
+
+	@media (min-width: 1280px) {
+		.wi__panel--prception .wi__bg :global(.wi__bg-img) {
+			object-position: 72% 50%;
+		}
+	}
+
+	/* --- Cinematic (script on) --- */
+	.wi--cinematic .wi__panel--prception {
+		background: none; /* the intro title must show through until the visual fades in */
+	}
+
+	/* The visual fades in as the title clears, then drifts slightly as the panel is pushed off */
+	.wi--cinematic .wi__panel--prception .wi__bg {
+		opacity: var(--wi-in);
+	}
+
+	.wi--cinematic .wi__panel--prception .wi__bg :global(.wi__bg-img) {
+		transform: translate3d(calc(var(--wi-slide) * 3%), 0, 0);
+	}
+
+	.wi--cinematic .wi__panel--prception .wi__name-main {
+		width: auto;
+		max-width: none;
+	}
+
+	/* Copy reveals line by line as the title clears (overrides the generic panel-1 reveal) */
+	.wi.wi--cinematic .wi__panel--prception:first-child .wi__copy > * {
+		--k: clamp(0, calc(var(--wi-in) * 2.2 - var(--n) * 0.17), 1);
+		opacity: var(--k);
+		transform: translateY(calc((1 - var(--k)) * 2.5rem));
+	}
+
+	@media (max-height: 820px) {
+		.wi--cinematic .wi__copy :global(.wi__brand) {
+			height: 1.75rem;
+			margin-top: var(--space-4);
+		}
+
+		.wi--cinematic .wi__panel--prception .wi__name-main {
+			font-size: clamp(3.25rem, 5.6vw, 5.25rem);
+		}
+
+		.wi--cinematic .wi__panel--prception .wi__name-sub {
+			font-size: clamp(2rem, 3vw, 3rem);
+		}
+	}
+
+	/* =========================================================================
+	   Cinematic on phones and tablets (below 900px): the same scene, with each
+	   visual filling its panel and the copy laid over the bottom of it
+	   ========================================================================= */
+	@media (max-width: 899px) {
+		.wi.wi--cinematic .wi__panel {
+			align-items: flex-end;
+			padding-top: var(--header-h);
+		}
+
+		.wi.wi--cinematic .wi__inner {
+			display: block;
+			margin-top: 0;
+			padding-block: var(--space-5) var(--space-6);
+		}
+
+		.wi.wi--cinematic .wi__copy {
+			max-width: 40rem;
+		}
+
+		.wi.wi--cinematic .wi__bg {
+			position: absolute;
+			inset: 0;
+			z-index: -1;
+			width: auto;
+			max-height: none;
+			aspect-ratio: auto;
+		}
+
+		/* Visual clear at the top, dark under the copy */
+		.wi.wi--cinematic .wi__panel--prception .wi__bg-shade {
+			background: linear-gradient(180deg, rgb(1 14 18 / 0.15) 0%, rgb(1 14 18 / 0.2) 22%, rgb(1 14 18 / 0.82) 52%, var(--pr-night) 82%);
+		}
+
+		.wi.wi--cinematic .wi__panel--blackbox .wi__bg-shade {
+			background: linear-gradient(180deg, rgb(26 11 3 / 0.1) 0%, rgb(26 11 3 / 0.2) 22%, rgb(26 11 3 / 0.85) 52%, var(--bb-brown) 82%);
+		}
+
+		.wi.wi--cinematic .wi__panel--prception .wi__bg :global(.wi__bg-img) {
+			object-position: 75% 50%;
+		}
+
+		.wi.wi--cinematic .wi__panel--blackbox .wi__bg :global(.wi__bg-img) {
+			object-position: 62% 50%;
+		}
+
+		.wi.wi--cinematic .wi__name-main,
+		.wi.wi--cinematic .wi__panel--prception .wi__name-main {
+			width: auto;
+			max-width: none;
+			font-size: clamp(2.75rem, 12vw, 5.5rem);
+			overflow-wrap: normal;
+		}
+
+		.wi.wi--cinematic .wi__name-sub {
+			font-size: clamp(1.75rem, 6.5vw, 3rem);
+		}
+
+		/* Slightly tighter rhythm so a full panel fits one phone screen */
+		.wi.wi--cinematic .wi__copy :global(.wi__brand) {
+			height: 1.85rem;
+			margin-top: var(--space-4);
+		}
+
+		.wi.wi--cinematic .wi__name,
+		.wi.wi--cinematic .wi__role-row,
+		.wi.wi--cinematic .wi__skills,
+		.wi.wi--cinematic .wi__actions {
+			margin-top: var(--space-4);
+		}
+
+		.wi.wi--cinematic .wi__role-row {
+			padding-top: var(--space-4);
+		}
+
+		.wi.wi--cinematic .wi__text {
+			margin-top: var(--space-3);
+		}
+	}
+
+</style>

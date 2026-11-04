@@ -10,6 +10,8 @@ stack: [Python, Django, PostgreSQL, HTML, CSS, JavaScript]
 summary: One place for SEO campaigns, team tasks, content approvals and reporting.
 homeTags: [Python, Django, PostgreSQL]
 homeSummary: One place for SEO campaigns, approvals and reporting.
+cover: ../../assets/images/work/seo-management-dashboard.webp
+coverLabel: Demo preview
 metaTitle: SEO Management Dashboard – Case Study | Jibin Johnson
 metaDescription: A Django and PostgreSQL app I'm building to bring SEO campaigns, team tasks, content approvals and reporting into one place.
 ---

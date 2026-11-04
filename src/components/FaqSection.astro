@@ -1,0 +1,251 @@
+---
+/**
+ * Homepage FAQ section: intro (label, heading, description, button, faint "J" logo)
+ * on the left, the accordion on the right. The section is full width so the
+ * decorative curves can sit at the screen edges; the content stays inside .container.
+ * All styles are scoped to this component. Accordion row styles live in Faq.astro.
+ */
+import { Image } from 'astro:assets';
+import SectionLabel from './SectionLabel.astro';
+import Button from './Button.astro';
+import Faq, { type FaqItem } from './Faq.astro';
+import monogram from '../assets/brand/monogram-mark.png';
+
+interface Props {
+	items: FaqItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<section class="page-section page-section--last faq-section" aria-labelledby="faq-title">
+	<!-- Thin teal curves at the top-right and bottom-left screen edges -->
+	<svg class="faq-curve faq-curve--tr" viewBox="0 0 400 400" fill="none" aria-hidden="true" focusable="false">
+		<path d="M100 0A300 300 0 0 0 400 300" />
+		<path d="M30 0A370 370 0 0 0 400 370" />
+	</svg>
+	<svg class="faq-curve faq-curve--bl" viewBox="0 0 400 400" fill="none" aria-hidden="true" focusable="false">
+		<path d="M0 100A300 300 0 0 1 300 400" />
+		<path d="M0 30A370 370 0 0 1 370 400" />
+	</svg>
+
+	<div class="container faq-layout">
+		<div class="faq-intro">
+			<SectionLabel text="FAQ" class="faq-label" />
+			<h2 id="faq-title" data-reveal="lines">Frequently asked <em>questions</em></h2>
+			<p class="faq-intro__text" data-reveal>
+				Quick answers on cost, timelines, SEO, and how I work. Can't find yours?
+			</p>
+			<div class="faq-intro__cta" data-reveal>
+				<Button href="/contact/" class="faq-cta">
+					Send me a message <span class="faq-cta__arrow" aria-hidden="true">→</span>
+				</Button>
+			</div>
+
+			<!-- The existing "J" logo, faded. It fills whatever height the column has left,
+			     so its left edge lines up with the text and its foot with the last divider. -->
+			<div class="faq-mark" aria-hidden="true">
+				<Image
+					src={monogram}
+					alt=""
+					widths={[260, 418]}
+					sizes="(min-width: 1024px) 418px, 260px"
+					loading="lazy"
+					decoding="async"
+				/>
+			</div>
+		</div>
+
+		<div class="faq-body">
+			<Faq items={items} openFirst />
+		</div>
+	</div>
+</section>
+
+<style>
+	/* ---------- Shared (all sizes) ---------- */
+	/* Height follows the content (no full-screen minimum, like the Process section) */
+	.faq-section {
+		min-height: 0;
+		overflow: clip; /* the curves bleed off the screen edges */
+		padding-block: clamp(3.5rem, 7vw, 6rem);
+	}
+
+	.faq-layout {
+		position: relative;
+		display: grid;
+	}
+
+	.faq-intro,
+	.faq-body {
+		position: relative;
+		z-index: 1; /* above the curves */
+		min-width: 0;
+	}
+
+	.faq-intro {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	/* Small uppercase label led by a thin teal rule */
+	.faq-section :global(.faq-label) {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-3);
+		letter-spacing: 0.14em;
+	}
+
+	.faq-section :global(.faq-label)::before {
+		content: '';
+		flex: none;
+		width: 2rem;
+		height: 1px;
+		background: var(--accent);
+	}
+
+	.faq-section h2 {
+		margin-top: var(--space-4);
+		font-size: clamp(2.125rem, 4.2vw, 3.5rem);
+		line-height: 1.02;
+	}
+
+	.faq-intro__text {
+		max-width: 24rem;
+		margin-top: var(--space-4);
+		font-size: 0.9375rem;
+		line-height: 1.6;
+		color: var(--ink-2);
+	}
+
+	.faq-intro__cta {
+		margin-top: var(--space-5);
+	}
+
+	.faq-cta__arrow {
+		display: inline-block;
+		transition: transform var(--dur-base) var(--ease-out);
+	}
+
+	.faq-section :global(.faq-cta:hover) .faq-cta__arrow {
+		transform: translateX(3px);
+	}
+
+	/* Decorative curves: hairline arcs in the accent at low opacity */
+	.faq-curve {
+		position: absolute;
+		z-index: 0;
+		width: clamp(8.5rem, 20vw, 18rem);
+		height: auto;
+		pointer-events: none;
+	}
+
+	.faq-curve path {
+		stroke: var(--accent);
+		stroke-width: 1;
+		vector-effect: non-scaling-stroke;
+		opacity: 0.14;
+	}
+
+	.faq-curve path + path {
+		opacity: 0.08;
+	}
+
+	.faq-curve--tr {
+		top: 0;
+		right: 0;
+	}
+
+	.faq-curve--bl {
+		bottom: 0;
+		left: 0;
+	}
+
+	/* Faint logo: hidden on phones, shown in the left column from 768px */
+	.faq-mark {
+		display: none;
+		pointer-events: none;
+		user-select: none;
+	}
+
+	/* Smooth open and close for the answers, in browsers that can animate details
+	   content to its auto height. Others open instantly. Reduced motion sets the
+	   durations to 0 globally. */
+	@supports (interpolate-size: allow-keywords) and selector(::details-content) {
+		.faq-section :global(.faq) {
+			interpolate-size: allow-keywords;
+		}
+
+		.faq-section :global(.faq::details-content) {
+			block-size: 0;
+			overflow: clip;
+			opacity: 0;
+			transition:
+				block-size var(--dur-slow) var(--ease-out),
+				opacity var(--dur-slow) var(--ease-out),
+				content-visibility var(--dur-slow) allow-discrete;
+		}
+
+		.faq-section :global(.faq[open]::details-content) {
+			block-size: auto;
+			opacity: 1;
+		}
+	}
+
+	/* ---------- Phones (below 768px): stacked, compact ---------- */
+	@media (max-width: 767.98px) {
+		.faq-layout {
+			row-gap: var(--space-6);
+		}
+	}
+
+	/* ---------- Tablet and desktop: two columns ---------- */
+	@media (min-width: 768px) {
+		.faq-layout {
+			grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+		}
+
+		.faq-intro {
+			padding-right: clamp(1.5rem, 3.5vw, 3.5rem);
+		}
+
+		.faq-intro__text {
+			font-size: 1rem;
+		}
+
+		.faq-body {
+			padding-left: clamp(1.5rem, 3.5vw, 3.5rem);
+			border-left: var(--hairline);
+		}
+
+		/* Takes the column's remaining height (never adds to it) */
+		.faq-mark {
+			position: relative;
+			display: block;
+			flex: 1 1 0;
+			align-self: stretch;
+			min-height: 9rem;
+			max-height: 22rem;
+			margin-top: var(--space-6);
+		}
+
+		.faq-mark :global(img) {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			max-width: none;
+			object-fit: contain;
+			object-position: left bottom;
+			opacity: 0.12;
+		}
+	}
+
+	/* ---------- Desktop (1024px and up) ---------- */
+	@media (min-width: 1024px) {
+		.faq-layout {
+			grid-template-columns: minmax(0, 4.5fr) minmax(0, 7fr);
+		}
+	}
+</style>

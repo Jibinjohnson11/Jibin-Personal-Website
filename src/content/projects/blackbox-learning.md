@@ -9,7 +9,8 @@ type: Client work at Prception Medialab
 stack: [Keyword research, Content planning, Link building, Team leadership]
 summary: Leading SEO for an AI training academy while training the team behind it.
 homeTags: [SEO, Content planning, Team leadership]
-liveUrl: '[PLACEHOLDER]'
+liveUrl: https://blackboxlearning.in/
+cover: ../../assets/images/work/blackbox-learning-hero.webp
 metaTitle: Blackbox Learning – Case Study | Jibin Johnson
 metaDescription: Leading SEO for an AI training academy, from content planned around course searches to running the team and training interns in SEO.
 ---

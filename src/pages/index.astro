@@ -4,14 +4,43 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionLabel from '../components/SectionLabel.astro';
 import Button from '../components/Button.astro';
-import Rule from '../components/Rule.astro';
 import CtaLine from '../components/CtaLine.astro';
-import Faq from '../components/Faq.astro';
-import ServiceList from '../components/ServiceList.astro';
-import WorkList from '../components/WorkList.astro';
+import FaqSection from '../components/FaqSection.astro';
+import ServiceCards from '../components/ServiceCards.astro';
+import WorkStack from '../components/WorkStack.astro';
+import Toolkit from '../components/Toolkit.astro';
+import WhereIWork from '../components/WhereIWork.astro';
+import {
+	siHtml5,
+	siCss,
+	siJavascript,
+	siBootstrap,
+	siPython,
+	siDjango,
+	siPostgresql,
+	siMongodb,
+	siGit,
+	siGithub,
+	siGooglesearchconsole,
+	siGoogleanalytics,
+	siPandas,
+	siNumpy,
+	siClaude,
+} from 'simple-icons';
 import { SITE } from '../data/site';
 import { getPerson, PERSON_ID } from '../lib/person';
 import portrait from '../assets/images/jibin-johnson.jpg';
+import heroImage from '../assets/images/hero/jibin-johnson-hero-v2.png';
+import webArt from '../assets/images/services/website-development-services-kerala.webp';
+import seoArt from '../assets/images/services/seo-services-kerala.webp';
+import djangoArt from '../assets/images/services/python-django-developer-kerala.webp';
+import aiArt from '../assets/images/services/ai-assisted-development-kerala.webp';
+import webAppArt from '../assets/images/services/web-application-development-kerala.webp';
+import landingArt from '../assets/images/services/landing-page-development-kerala.webp';
+import hostingArt from '../assets/images/services/website-hosting-deployment-kerala.webp';
+import performanceArt from '../assets/images/services/website-performance-optimization-kerala.webp';
+import deskPhoto from '../assets/images/why/jibin-at-desk.webp';
+import redesignArt from '../assets/images/services/website-redesign-services-kerala.webp';
 
 const title = 'Web Developer in Kerala & SEO Specialist | Jibin Johnson';
 const description =
@@ -23,31 +52,109 @@ const services = [
 		text: 'Responsive, fast websites with clean HTML, CSS, and JavaScript, built with search and usability in mind.',
 		url: '/services/web-development/',
 		anchor: 'Website development services in Kerala',
+		image: webArt,
+		alt: 'Laptop on a dark stone desk in warm evening light, showing a code editor beside a live website preview',
+		position: '40% center',
+		tint: '#120d08',
+		accent: '#d4a373',
 	},
 	{
 		name: 'SEO Services',
 		text: 'Technical, on-page, and off-page SEO: keyword research, site fixes, content, and link building, tracked in Google Search Console and Google Analytics.',
 		url: '/services/seo/',
 		anchor: 'SEO services in Kerala',
+		image: seoArt,
+		alt: 'Laptop showing a search engine home page, with glowing green, blue and red ranking charts rising behind it',
+		tint: '#060b08',
+		accent: '#7ed98a',
 	},
 	{
 		name: 'Python & Django Development',
 		text: 'Custom web applications and internal tools, from database design to the interface your team uses every day.',
 		url: '/services/python-django-development/',
 		anchor: 'Python Django development',
+		image: djangoArt,
+		alt: 'Developer in headphones at a desk with a laptop and six monitors showing code, an API architecture diagram and a traffic chart',
+		tint: '#060c12',
+		accent: '#6cb8e6',
 	},
 	{
 		name: 'AI-Assisted Development',
 		text: 'I use AI tools such as Claude and ChatGPT to research, build, and debug faster, and I review everything they produce before it ships.',
+		image: aiArt,
+		alt: 'Friendly white robot on a glowing desk platform, surrounded by AI tool and coding icons, with an open notebook of sketches in front',
+		tint: '#0a0a1c',
+		accent: '#9aa6ff',
+	},
+	{
+		name: 'Web Application Development',
+		text: 'Browser-based apps with user accounts, dashboards, and forms that save to a real database, built in Django and tested before launch.',
+		url: '/services/python-django-development/',
+		anchor: 'Django web application development',
+		image: webAppArt,
+		alt: 'Laptop showing a web app dashboard with a sidebar, performance chart and project progress ring, beside a floating code snippet',
+		tint: '#050b18',
+		accent: '#4fa8ff',
+	},
+	{
+		name: 'Landing Page Development',
+		text: 'Single pages built around one goal, like enquiries or sign-ups, with a clear layout, fast load times, and tracking set up from day one.',
+		url: '/services/web-development/',
+		anchor: 'Landing page development',
+		image: landingArt,
+		alt: 'Laptop showing a green and white landing page, with three more sample landing pages for travel, fitness and furniture stacked behind it',
+		tint: '#0a1a13',
+		accent: '#a8d5ba',
+	},
+	{
+		name: 'Hosting & Deployment',
+		text: "I put your site live, set up the domain and HTTPS, and make sure updates go out without breaking what's already working.",
+		url: '/services/web-development/',
+		anchor: 'Website hosting and deployment',
+		image: hostingArt,
+		alt: 'Laptop showing a deployment pipeline from code to live, in front of glowing green servers and a cloud with an upload arrow',
+		tint: '#06140e',
+		accent: '#4fd18b',
+	},
+	{
+		name: 'Website Performance Optimization',
+		text: 'I find what slows your pages down, from heavy images to blocking scripts, fix it, and measure the result with Lighthouse.',
+		url: '/services/seo/',
+		anchor: 'Technical SEO and site speed',
+		image: performanceArt,
+		alt: 'Isometric glowing platform with a globe, rising green bar charts, a speed gauge, a code window and a search bar',
+		tint: '#050a1e',
+		accent: '#8ee04f',
+	},
+	{
+		name: 'Website Revamp & Redesign',
+		text: 'Transform outdated websites into modern, responsive, and user-friendly experiences with improved design, performance, and usability.',
+		url: '/services/website-redesign/',
+		anchor: 'Website redesign services in Kerala',
+		image: redesignArt,
+		alt: 'Old laptop with a dull grey website and an arrow pointing to a new laptop showing a bright, modern redesign, on a marble desk',
+		tint: '#071615',
+		accent: '#5fd6c9',
 	},
 ];
 
-const skills = [
-	{ area: 'Front end', tools: 'HTML, CSS, JavaScript, Bootstrap, responsive design' },
-	{ area: 'Back end', tools: 'Python, Django, PostgreSQL, SQL' },
-	{ area: 'SEO & analytics', tools: 'Google Search Console, Google Analytics, keyword research, technical SEO audits' },
-	{ area: 'Workflow', tools: 'Git, GitHub, Claude, ChatGPT' },
-	{ area: 'AI & data (trained)', tools: 'Machine learning, deep learning, NLP, image processing, Pandas, NumPy' },
+const tools = [
+	{ name: 'HTML5', icon: siHtml5 },
+	{ name: 'CSS3', icon: siCss },
+	{ name: 'JavaScript', icon: siJavascript },
+	{ name: 'Bootstrap', icon: siBootstrap },
+	{ name: 'Python', icon: siPython },
+	{ name: 'Django', icon: siDjango },
+	{ name: 'PostgreSQL', icon: siPostgresql },
+	{ name: 'MongoDB', icon: siMongodb },
+	{ name: 'Git', icon: siGit },
+	{ name: 'GitHub', icon: siGithub },
+	{ name: 'Google Search Console', icon: siGooglesearchconsole },
+	{ name: 'Google Analytics', icon: siGoogleanalytics },
+	{ name: 'Pandas', icon: siPandas },
+	{ name: 'NumPy', icon: siNumpy },
+	{ name: 'Claude', icon: siClaude },
+	{ name: 'ChatGPT', mono: 'GPT', hex: '10a37f' },
 ];
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
@@ -133,45 +240,56 @@ const schema = [
 
 <BaseLayout title={title} description={description} schema={schema}>
 	<!-- Hero -->
-	<section class="hero container" aria-labelledby="hero-title">
-		<div class="grid hero__grid">
-			<div class="hero__text">
-				<SectionLabel text="Web developer · SEO · Thiruvananthapuram" />
-				<h1 id="hero-title" class="hero__title" data-reveal="lines">Web Developer and SEO Specialist <em>in Kerala</em></h1>
-				<p class="lead hero__lead" data-reveal style="--reveal-delay: 350ms">
-					I'm Jibin Johnson. I build fast, responsive websites that are ready for search from day one, and I use Python, Django, and AI tools to automate the work behind them. I'm based in Thiruvananthapuram (Trivandrum) and work with businesses across Kerala and beyond.
-				</p>
-				<div class="hero__actions" data-reveal style="--reveal-delay: 500ms">
-					<Button href="/contact/">Start a project</Button>
-					<Button variant="link" href="/work/">See my work</Button>
+	<section class="hero screen screen--first" aria-labelledby="hero-title">
+		<div class="container">
+			<div class="grid hero__grid">
+				<div class="hero__text">
+					<SectionLabel text="Web developer · SEO · Thiruvananthapuram" />
+					<h1 id="hero-title" class="hero__title" data-reveal="lines">Web Developer and SEO Specialist <em>in Kerala</em></h1>
+					<p class="lead hero__lead" data-reveal style="--reveal-delay: 350ms">
+						I'm Jibin Johnson. I build fast, responsive websites that are ready for search from day one, and I use Python, Django, and AI tools to automate the work behind them. I'm based in Thiruvananthapuram (Trivandrum) and work with businesses across Kerala and beyond.
+					</p>
+					<div class="hero__actions" data-reveal style="--reveal-delay: 500ms">
+						<Button href="/contact/">Start a project</Button>
+						<Button variant="link" href="/work/">See my work</Button>
+					</div>
 				</div>
+				<figure class="hero__media" data-reveal style="--reveal-delay: 450ms">
+					<Image
+						src={heroImage}
+						alt="Jibin Johnson in a cream linen shirt and olive chinos, leaning on a large glowing teal letter J"
+						widths={[360, 540, 720, 1018]}
+						sizes="(min-width: 960px) 30vw, (min-width: 768px) 45vw, 80vw"
+						quality={80}
+						loading="eager"
+						fetchpriority="high"
+					/>
+				</figure>
 			</div>
-
-			<figure class="hero__portrait" data-reveal style="--reveal-delay: 650ms">
-				<Image
-					src={portrait}
-					alt="Jibin Johnson smiling, wearing a navy blazer over a white T-shirt, against a plain cream wall"
-					widths={[320, 480, 640]}
-					sizes="(min-width: 1024px) 280px, (min-width: 768px) 30vw, 16rem"
-					quality={78}
-					loading="eager"
-					fetchpriority="high"
-				/>
-				<figcaption class="label">Jibin Johnson · Trivandrum, 2026</figcaption>
-			</figure>
-		</div>
-
-		<div class="hero__foot" data-reveal style="--reveal-delay: 800ms">
-			<Rule />
-			<p class="label">Available for freelance projects and full-time roles</p>
 		</div>
 	</section>
 
 	<!-- 01 About -->
-	<section class="page-section container" aria-labelledby="about-title">
-		<div class="grid">
-			<div class="col-label"><SectionLabel index="01" text="About" /></div>
-			<div class="col-content stack">
+	<section class="page-section container about" aria-labelledby="about-title">
+		<div class="grid about__grid">
+			<div class="col-label about__label"><SectionLabel text="About" /></div>
+
+			<figure class="about__portrait" data-reveal>
+				<div class="about__frame">
+					<Image
+						src={portrait}
+						alt="Jibin Johnson smiling, wearing a navy blazer over a white T-shirt, against a plain cream wall"
+						widths={[320, 480, 640, 832]}
+						sizes="(min-width: 900px) 28rem, 20rem"
+						quality={78}
+					/>
+				</div>
+				<figcaption class="label">Jibin Johnson · Trivandrum</figcaption>
+			</figure>
+
+			<span class="about__divider" aria-hidden="true" data-reveal></span>
+
+			<div class="col-content stack about__content">
 				<h2 id="about-title" data-reveal="lines">Where web development <em>meets search</em></h2>
 				<p class="lead" data-reveal>
 					Most websites get built first and optimized later. I do both together. At Prception Medialab in Thiruvananthapuram, I build responsive websites and run SEO for clients in healthcare, education, and hospitality, and I lead the SEO and web team for Blackbox Learning, an AI training academy.
@@ -179,90 +297,98 @@ const schema = [
 				<p data-reveal>
 					Running SEO campaigns showed me how much time goes into manual coordination, so I started building software to handle it. That path led me to a PG in Artificial Intelligence and to full-stack work in Python and Django.
 				</p>
-				<div data-reveal><Button variant="link" href="/about/">More about me</Button></div>
+				<div class="about__actions" data-reveal>
+					<Button href={SITE.resume} download="Jibin-Johnson-Resume.pdf" class="about__resume">
+						Download Resume<span class="visually-hidden"> (PDF)</span>
+						<svg class="about__resume-icon" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+							<path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+						</svg>
+					</Button>
+					<Button variant="link" href="/about/">More about me</Button>
+				</div>
 			</div>
 		</div>
 	</section>
 
-	<!-- 02 Services -->
-	<section class="page-section container" aria-labelledby="services-title">
+	<!-- 01b Where I work: pinned company showcase (data in src/data/experience.ts) -->
+	<WhereIWork />
+
+	<!-- 02 Services and skills: one screen on desktop, cards on top and the toolkit below -->
+	<section class="page-section container services-skills" aria-labelledby="services-title">
 		<div class="grid section-head">
-			<div class="col-label"><SectionLabel index="02" text="Services" /></div>
+			<div class="col-label"><SectionLabel text="Services" /></div>
 			<div class="col-content">
 				<h2 id="services-title" data-reveal="lines">What I can <em>help you with</em></h2>
 			</div>
 		</div>
 
-		<ServiceList items={services} />
-	</section>
+		<ServiceCards items={services} />
 
-	<!-- 03 Skills -->
-	<section class="page-section container" aria-labelledby="skills-title">
-		<div class="grid">
-			<div class="col-label"><SectionLabel index="03" text="Skills" /></div>
-			<div class="col-content">
+		<div class="skills">
+			<Toolkit tools={tools}>
 				<h2 id="skills-title" data-reveal="lines">Tools I <em>work with</em></h2>
-				<table class="skills" data-reveal>
-					<caption class="visually-hidden">Tools I use, grouped by area</caption>
-					<thead>
-						<tr>
-							<th scope="col" class="label">Area</th>
-							<th scope="col" class="label">Tools</th>
-						</tr>
-					</thead>
-					<tbody>
-						{
-							skills.map((row) => (
-								<tr>
-									<th scope="row">{row.area}</th>
-									<td>{row.tools}</td>
-								</tr>
-							))
-						}
-					</tbody>
-				</table>
-			</div>
+			</Toolkit>
 		</div>
 	</section>
 
+	<!-- 04 + 05: Why me slides up over Selected work (see .cover-stack in global.css) -->
+	<div class="cover-stack" data-cover-stack>
 	<!-- 04 Selected work -->
-	<section class="page-section container" aria-labelledby="work-title">
+	<section class="page-section page-section--midnight container" aria-labelledby="work-title" data-cover-under>
 		<div class="grid section-head">
-			<div class="col-label"><SectionLabel index="04" text="Work" /></div>
+			<div class="col-label"><SectionLabel text="Work" /></div>
 			<div class="col-content">
 				<h2 id="work-title" data-reveal="lines">Selected <em>work</em></h2>
 			</div>
 		</div>
 
-		<WorkList projects={projects} home />
+		<WorkStack projects={projects} />
 
 		<CtaLine />
 	</section>
 
 	<!-- 05 Why work with me -->
-	<section class="page-section container" aria-labelledby="why-title">
-		<div class="grid">
-			<div class="col-label"><SectionLabel index="05" text="Why me" /></div>
-			<div class="col-content">
-				<h2 id="why-title" data-reveal="lines">Why clients <em>work with me</em></h2>
-				<ul class="why-list" role="list">
-					{
-						reasons.map((reason) => (
-							<li data-reveal>
+	<section class="page-section page-section--cover why container" aria-labelledby="why-title" data-cover-over>
+		<div class="why__layout">
+			<div class="why__head">
+				<div class="why__intro">
+					<SectionLabel text="Why me" class="why__label" />
+					<h2 id="why-title" class="why__title" data-reveal="lines">Why work <em>with me</em></h2>
+				</div>
+				<Image
+					src={deskPhoto}
+					alt="Working on a laptop at a wooden desk, with a notebook and a black coffee mug"
+					class="why__art"
+					data-reveal
+					style="--reveal-delay: 150ms"
+					widths={[420, 640, 830]}
+					sizes="(min-width: 1240px) 600px, (min-width: 1024px) 48vw, (min-width: 640px) 46vw, calc(100vw - 2.5rem)"
+					loading="lazy"
+					decoding="async"
+				/>
+			</div>
+
+			<ol class="why-list" role="list">
+				{
+					reasons.map((reason, i) => (
+						<li class="why-list__item" data-reveal style={`--reveal-delay: ${i * 90}ms`}>
+							<span class="why-list__num" aria-hidden="true">{pad(i + 1)}</span>
+							<div class="why-list__body">
 								<h3 class="why-list__lead">{reason.lead}</h3>
 								<p>{reason.text}</p>
-							</li>
-						))
-					}
-				</ul>
-			</div>
+							</div>
+						</li>
+					))
+				}
+			</ol>
 		</div>
 	</section>
+	</div>
 
 	<!-- 06 Process -->
-	<section class="page-section container" aria-labelledby="process-title">
+	<section class="page-section page-section--midnight process-section container" aria-labelledby="process-title">
 		<div class="grid section-head">
-			<div class="col-label"><SectionLabel index="06" text="Process" /></div>
+			<div class="col-label"><SectionLabel text="Process" /></div>
 			<div class="col-content">
 				<h2 id="process-title" data-reveal="lines">How a project <em>works</em></h2>
 			</div>
@@ -281,161 +407,923 @@ const schema = [
 		</ol>
 	</section>
 
-	<!-- 07 Location -->
-	<section class="page-section container" aria-labelledby="location-title">
-		<div class="grid">
-			<div class="col-label"><SectionLabel index="07" text="Location" /></div>
-			<div class="col-content stack">
-				<h2 id="location-title" data-reveal="lines">Based in Trivandrum, <em>working across Kerala</em></h2>
-				<p class="lead" data-reveal>
-					I'm based in Thiruvananthapuram and work with businesses across Kerala, from Trivandrum to Kochi and Kozhikode. I also work remotely with clients elsewhere in India and abroad, over video calls, email, and WhatsApp.
-				</p>
-			</div>
-		</div>
-	</section>
-
-	<!-- 08 FAQ -->
-	<section class="page-section page-section--last container" aria-labelledby="faq-title">
-		<div class="grid">
-			<div class="col-label"><SectionLabel index="08" text="FAQ" /></div>
-			<div class="col-content">
-				<h2 id="faq-title" data-reveal="lines">Frequently asked <em>questions</em></h2>
-				<Faq items={faqs} />
-			</div>
-		</div>
-	</section>
+	<!-- 07 FAQ -->
+	<FaqSection items={faqs} />
 </BaseLayout>
 
+<script>
+/* Why me covers Selected work. Selected work pins once its bottom edge reaches the
+   bottom of the screen (after the project cards have finished stacking), and Why me
+   scrolls up over it. Sticky needs a top offset, so this measures it:
+   screen height minus section height. CSS does the rest. */
+const motionOk = window.matchMedia('(prefers-reduced-motion: no-preference)');
+
+document.querySelectorAll<HTMLElement>('[data-cover-stack]').forEach((stack) => {
+	const under = stack.querySelector<HTMLElement>('[data-cover-under]');
+	const over = stack.querySelector<HTMLElement>('[data-cover-over]');
+	if (!under || !over) return;
+
+	const measure = () => {
+		const on = motionOk.matches;
+		stack.classList.toggle('is-covering', on);
+		if (on) under.style.setProperty('--pin-top', `${Math.min(0, window.innerHeight - under.offsetHeight)}px`);
+	};
+
+	new ResizeObserver(measure).observe(under);
+	window.addEventListener('resize', measure, { passive: true });
+	motionOk.addEventListener('change', measure);
+
+	// Tabbing back into Selected work while Why me covers it: scroll back until Why me
+	// is below the screen again, so the focused link is visible.
+	under.addEventListener('focusin', () => {
+		if (!stack.classList.contains('is-covering')) return;
+		const overTop = over.getBoundingClientRect().top;
+		if (overTop < window.innerHeight) window.scrollBy({ top: overTop - window.innerHeight, behavior: 'instant' });
+	});
+
+	measure();
+});
+</script>
+
 <style>
-	/* --- Hero --- */
+	/* --- Hero ---
+	   Phones: text, then the portrait, with fluid spacing so more of the portrait
+	   shows on the first screen. Tablet: text and portrait side by side.
+	   Desktop (960px+): unchanged. */
 	.hero {
-		padding-block: var(--space-8) var(--space-7);
+		padding-block: clamp(1.5rem, 7vw, 3rem) clamp(2.5rem, 9vw, 3rem);
 	}
 
 	.hero__grid {
 		align-items: end;
-		row-gap: var(--space-7);
+		row-gap: clamp(2rem, 9vw, 3rem);
 	}
 
 	.hero__title {
-		margin-block: var(--space-5) var(--space-6);
+		margin-block: clamp(1rem, 4vw, 1.5rem) clamp(1.25rem, 5vw, 2rem);
 	}
 
+	/* A touch smaller on phones so the hero reads lighter */
 	.hero__lead {
 		max-width: 38rem;
+		font-size: clamp(1rem, 0.93rem + 0.35vw, 1.0625rem);
+		line-height: 1.6;
 	}
 
 	.hero__actions {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: var(--space-4) var(--space-6);
-		margin-top: var(--space-6);
+		gap: var(--space-4) clamp(1.25rem, 6vw, 2rem);
+		margin-top: clamp(1.5rem, 6vw, 2rem);
 	}
 
-	.hero__portrait {
-		max-width: 16rem;
+	/* The whole figure always shows (no cropping): its size comes from the image's own
+	   proportions, capped by width and by screen height so head and feet both fit. */
+	.hero__media {
+		justify-self: center;
+		width: min(78vw, 20rem);
 	}
 
-	.hero__portrait img {
+	.hero__media img {
+		display: block;
 		width: 100%;
 		height: auto;
-		border-radius: var(--radius);
-		background: var(--paper-2);
+		max-height: min(70svh, 32rem);
+		margin-inline: auto;
+		object-fit: contain;
 	}
 
-	.hero__portrait figcaption {
-		margin-top: var(--space-3);
-	}
-
-	.hero__foot {
-		margin-top: var(--space-8);
-	}
-
-	.hero__foot p {
-		margin-top: var(--space-4);
-	}
-
-	@media (min-width: 768px) {
-		.hero__grid > .hero__text {
-			grid-column: 1 / span 8;
+	/* Phones: one column in reading order: eyebrow, heading, portrait, intro, buttons.
+	   The text wrapper steps aside (display: contents) so the portrait can sit between
+	   the heading and the intro without changing the markup. Every item shares the
+	   container's side margins and one vertical rhythm: the eyebrow sits close to the
+	   heading it labels, everything else shares one gap (1.5rem, up to 1.75rem on
+	   larger phones). The hero sizes to its content here instead of filling a whole
+	   screen, so there are no empty bands above or below it. */
+	@media (max-width: 767px) {
+		.hero {
+			--hero-gap: clamp(1.5rem, 6vw, 1.75rem);
+			min-height: auto;
+			padding-block: var(--space-4) var(--space-6);
 		}
 
-		.hero__grid > .hero__portrait {
-			grid-column: 9 / span 4;
+		.hero__grid {
+			display: flex;
+			flex-direction: column;
+			align-items: stretch;
+			gap: 0;
+		}
+
+		.hero__text {
+			display: contents;
+		}
+
+		.hero__text > :global(.section-label) {
+			order: 1;
+			margin: 0;
+		}
+
+		.hero__title {
+			order: 2;
+			margin: var(--space-4) 0 0;
+			line-height: 1.05;
+		}
+
+		/* About 12% smaller than before (was min(78vw, 20rem) wide, 70svh / 32rem tall).
+		   Still uncropped: height follows the image's own proportions. */
+		.hero__media {
+			order: 3;
+			align-self: center;
+			width: min(68vw, 17.5rem);
+			margin: var(--hero-gap) 0 0;
+		}
+
+		.hero__media img {
+			max-height: min(60svh, 28rem);
+		}
+
+		.hero__lead {
+			order: 4;
+			max-width: 34rem;
+			margin: var(--hero-gap) 0 0;
+		}
+
+		/* Both buttons the same height, centred on one line */
+		.hero__actions {
+			order: 5;
+			flex-wrap: nowrap;
+			align-items: center;
+			gap: var(--space-5);
+			margin-top: var(--hero-gap);
+		}
+
+		.hero__actions > :global(.btn) {
+			min-height: 3rem;
+			flex-shrink: 0;
+		}
+	}
+
+	/* Tablet: side by side, text 7 columns, portrait 5, centred on each other */
+	@media (min-width: 768px) {
+		.hero {
+			padding-block: var(--space-7);
+		}
+
+		.hero__grid {
+			align-items: center;
+		}
+
+		.hero__grid > .hero__text {
+			grid-column: 1 / span 7;
+		}
+
+		.hero__lead {
+			font-size: var(--text-lead);
+			line-height: 1.55;
+		}
+
+		.hero__grid > .hero__media {
+			grid-column: 8 / span 5;
 			justify-self: end;
 			width: 100%;
 		}
-	}
 
-	@media (min-width: 1024px) {
-		.hero__grid > .hero__portrait {
-			grid-column: 10 / span 3;
+		.hero__media img {
+			max-height: min(72svh, 40rem);
+			margin-inline: auto 0;
 		}
 	}
 
-	/* --- Skills --- */
-	.skills {
+	/* Tablet only (768 to 959px): the portrait about 12% smaller, still right-aligned */
+	@media (min-width: 768px) and (max-width: 959px) {
+		.hero__grid > .hero__media {
+			width: 88%;
+		}
+
+		.hero__media img {
+			max-height: min(63svh, 35rem);
+		}
+	}
+
+	/* Desktop: text left, photo right (as before) */
+	@media (min-width: 960px) {
+		.hero {
+			padding-block: var(--space-8) var(--space-7);
+		}
+
+		.hero__title {
+			margin-block: var(--space-5) var(--space-6);
+		}
+
+		.hero__actions {
+			gap: var(--space-4) var(--space-6);
+			margin-top: var(--space-6);
+		}
+
+		.hero__grid > .hero__media {
+			width: auto;
+		}
+
+		.hero__media img {
+			width: auto;
+			max-height: min(82svh, 46rem);
+		}
+	}
+
+	/* --- Services --- */
+	/* The card carousel is full-bleed (100vw, which includes any scrollbar). Clip sideways
+	   overflow at <main>, not the section, which is only container-wide. Home page only. */
+	:global(main) {
+		overflow-x: clip;
+	}
+
+	/* --- About --- */
+	.about__actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-4) var(--space-6);
+	}
+
+	.about__resume :global(.btn__text) {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	/* Arrow dips into the tray on hover */
+	.about__resume-icon {
+		transition: transform var(--dur-base) var(--ease-out);
+	}
+
+	.about__resume:hover .about__resume-icon {
+		transform: translateY(2px);
+	}
+
+	/* Mobile and tablet: label, portrait, then text, stacked */
+	.about__portrait {
+		width: min(100%, 20rem);
+	}
+
+	/* Thin teal frame with an inset gap around the photo */
+	.about__frame {
+		position: relative;
+		padding: var(--space-3);
+		border: 1px solid var(--accent);
+	}
+
+	/* Corner accents: four short L-shaped brackets just outside the frame */
+	.about__frame::before {
+		--c: 1.25rem;
+		--t: 2px;
+		content: '';
+		position: absolute;
+		inset: -0.5rem;
+		pointer-events: none;
+		background:
+			linear-gradient(var(--accent), var(--accent)) top left / var(--c) var(--t),
+			linear-gradient(var(--accent), var(--accent)) top left / var(--t) var(--c),
+			linear-gradient(var(--accent), var(--accent)) top right / var(--c) var(--t),
+			linear-gradient(var(--accent), var(--accent)) top right / var(--t) var(--c),
+			linear-gradient(var(--accent), var(--accent)) bottom left / var(--c) var(--t),
+			linear-gradient(var(--accent), var(--accent)) bottom left / var(--t) var(--c),
+			linear-gradient(var(--accent), var(--accent)) bottom right / var(--c) var(--t),
+			linear-gradient(var(--accent), var(--accent)) bottom right / var(--t) var(--c);
+		background-repeat: no-repeat;
+	}
+
+	.about__portrait img {
 		width: 100%;
-		border-collapse: collapse;
-		text-align: left;
+		height: auto;
+		border-radius: var(--radius);
+		background: var(--surface-muted);
 	}
 
-	.skills th,
-	.skills td {
-		padding: var(--space-4) var(--space-4) var(--space-4) 0;
-		border-bottom: var(--hairline);
-		vertical-align: baseline;
+	/* Caption centred under the photo at every width. The frame is always centred in
+	   the figure (full width on desktop, auto side margins below 900px), so centring
+	   the text across the figure puts its centre on the image's centre. The corner
+	   accents reach 0.5rem below the frame; a 1rem gap leaves 0.5rem clear. */
+	.about__portrait figcaption {
+		margin-top: var(--space-4);
+		text-align: center;
 	}
 
-	.skills thead th {
-		padding-top: 0;
-		font-weight: 400;
+	.about__divider {
+		display: none;
 	}
 
-	.skills tbody th {
-		width: 38%;
-		font-weight: 500;
-	}
-
-	.skills td {
-		padding-right: 0;
-		font-family: var(--font-mono);
-		font-size: var(--text-small);
-		line-height: 1.7;
-		color: var(--ink-2);
-	}
-
-	/* --- Why work with me --- */
-	.why-list {
-		display: grid;
-		gap: var(--space-6) var(--space-7);
-	}
-
-	.why-list li {
-		padding-top: var(--space-4);
-		border-top: var(--hairline);
-	}
-
-	.why-list__lead {
-		margin-bottom: var(--space-2);
-	}
-
-	.why-list p {
-		color: var(--ink-2);
+	.about__content p {
+		max-width: 36rem;
 	}
 
 	@media (min-width: 768px) {
-		.why-list {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
+		.about__grid > .about__label,
+		.about__grid > .about__content,
+		.about__grid > .about__portrait {
+			grid-column: 1 / -1;
+		}
+
+		.about__portrait {
+			width: min(100%, 22rem);
 		}
 	}
 
-	/* --- Process: vertical line on mobile, horizontal row on desktop --- */
+	/* Phones and tablets (under 900px): label with an emerald rule running right, the
+	   framed portrait centred, then caption, heading, text and buttons on one shared
+	   left edge. One vertical rhythm (--about-gap) between the blocks, and the
+	   section sizes to its content instead of filling a whole screen. */
+	@media (max-width: 899px) {
+		.about {
+			--about-gap: clamp(1.75rem, 6vw, 2.25rem);
+			min-height: auto;
+		}
+
+		.about__grid {
+			row-gap: var(--about-gap);
+		}
+
+		.about__label {
+			display: flex;
+			align-items: center;
+			gap: var(--space-4);
+		}
+
+		.about__label :global(.section-label) {
+			flex-shrink: 0;
+			margin: 0;
+		}
+
+		.about__label::after {
+			content: '';
+			flex: 1;
+			height: 1px;
+			background: var(--accent);
+			opacity: 0.55;
+		}
+
+		/* The figure spans the full width so its caption shares the text's left edge;
+		   only the framed photo is centred. Slightly smaller than before (was 20rem /
+		   22rem wide). 0.5rem of side room keeps the corner accents inside the margins. */
+		.about__grid > .about__portrait {
+			--about-frame-w: min(calc(100% - 1rem), 17.5rem);
+			width: 100%;
+			margin: 0;
+		}
+
+		.about__frame {
+			width: var(--about-frame-w);
+			margin-inline: auto;
+		}
+
+		.about__content {
+			--stack-gap: var(--space-5);
+		}
+
+		.about__content > h2 + * {
+			margin-top: var(--space-5);
+		}
+
+		/* Both buttons the same height, left-aligned; if they wrap on a narrow phone
+		   the second one starts on the same left edge. */
+		.about__actions {
+			margin-top: var(--about-gap);
+			gap: var(--space-3) var(--space-5);
+		}
+
+		.about__actions > :global(.btn) {
+			min-height: 3rem;
+		}
+	}
+
+	@media (min-width: 768px) and (max-width: 899px) {
+		.about__grid > .about__portrait {
+			--about-frame-w: min(calc(100% - 1rem), 19.5rem);
+		}
+	}
+
+	/* Side by side: photo left, hairline divider, label and text right */
+	@media (min-width: 900px) {
+		/* Empty 1fr rows above and below centre the label and text against the photo */
+		.about__grid {
+			grid-template-rows: 1fr auto auto 1fr;
+			row-gap: 0;
+		}
+
+		.about__grid > .about__portrait {
+			grid-column: 1 / span 5;
+			grid-row: 1 / -1;
+			align-self: center;
+			justify-self: start;
+			width: min(100%, 28rem);
+		}
+
+		.about__grid > .about__divider {
+			display: block;
+			grid-column: 6 / span 1;
+			grid-row: 1 / -1;
+			justify-self: center;
+			width: 1px;
+			background: var(--rule);
+		}
+
+		.about__grid > .about__label {
+			grid-column: 7 / span 6;
+			grid-row: 2;
+			margin-bottom: var(--space-6);
+		}
+
+		.about__grid > .about__content {
+			grid-column: 7 / span 6;
+			grid-row: 3;
+		}
+	}
+
+	/* Entrance: the photo wipes up inside its frame, the corners fade in after,
+	   and the divider draws down. Only while html.js-reveal is set, so reduced
+	   motion and no-JS visitors see everything static. */
+	:global(.js-reveal) .about__portrait img {
+		clip-path: inset(100% 0 0 0);
+		transition: clip-path 1.1s var(--ease-out) 150ms;
+	}
+
+	:global(.js-reveal) .about__portrait.is-revealed img {
+		clip-path: inset(0);
+	}
+
+	:global(.js-reveal) .about__frame::before {
+		opacity: 0;
+		transition: opacity var(--dur-slow) var(--ease-out) 700ms;
+	}
+
+	:global(.js-reveal) .about__portrait.is-revealed .about__frame::before {
+		opacity: 1;
+	}
+
+	:global(.js-reveal) .about__divider[data-reveal] {
+		opacity: 1;
+		transform: scaleY(0);
+		transform-origin: top;
+		transition: transform 1.2s var(--ease-out) 250ms;
+	}
+
+	:global(.js-reveal) .about__divider[data-reveal].is-revealed {
+		transform: none;
+	}
+
+	/* --- Services and skills --- */
+	/* On desktop the cards shrink with the screen height (--card-max is read by ServiceCards)
+	   so heading, cards and toolkit share one screen. Smaller screens let the section grow. */
+	.services-skills .section-head {
+		margin-bottom: var(--space-5);
+	}
+
+	@media (min-width: 1024px) {
+		.services-skills {
+			--card-max: clamp(15rem, 100svh - 36rem, 26rem);
+			padding-block: var(--space-6);
+		}
+	}
+
+	.skills {
+		margin-top: var(--space-5);
+		padding-top: var(--space-5);
+		border-top: var(--hairline);
+	}
+
+	/* --- Why work with me ---
+	   The section keeps .page-section--cover (it still slides up over Selected work);
+	   its background is the site's Warm Ivory (--paper, #FAF6E8).
+
+	   Three independent layouts, so a change at one size can't leak into another:
+	   - shared rules below: colours, number style, hover, transitions (all sizes)
+	   - max-width 1023.98px: phones (photo beside the title, bleeding off the edge)
+	     and, from 640px, tablets (photo back inside the margins)
+	   - min-width 1024px: desktop two-column editorial layout (heading and photo on
+	     the left, the list on the right of a faint vertical hairline) */
+	.why {
+		--ink: #101114; /* Midnight Black */
+		--ink-2: #33373d; /* body copy, 11:1 on the ivory */
+		--ink-3: #5c6367; /* muted grey, 5.7:1 on the ivory */
+		--accent: #006b5b; /* Deep Teal Green, 6.2:1 on the ivory */
+		--rule: rgb(16 17 20 / 0.11);
+		--why-gutter: clamp(2rem, 4.5vw, 4.5rem);
+		/* Width of the fixed back-to-top / WhatsApp column (FloatingActions.astro: size +
+		   edge inset), minus the page margin, plus a little air. On phones and tablets the
+		   list keeps this much clear on the right so the buttons never sit over a title
+		   or description. */
+		--why-fab: 2.75rem;
+		--why-fab-room: max(0px, calc(var(--why-fab) + clamp(0.875rem, 4vw, 1.5rem) + 0.5rem - var(--container-pad)));
+		padding-block: clamp(3.5rem, 8vh, 6rem) clamp(2.5rem, 6vh, 4.5rem);
+		color: var(--ink);
+	}
+
+	.why__layout {
+		display: grid;
+	}
+
+	.why :global(.why__label) {
+		letter-spacing: 0.14em;
+	}
+
+	.why__title {
+		line-height: 0.98;
+		letter-spacing: -0.02em;
+	}
+
+	/* "with me" on its own line, italic teal (colour from the global h2 em rule) */
+	.why__title em {
+		display: block;
+		letter-spacing: -0.01em;
+	}
+
+	/* Desk photo. Its wall is colour-matched to the ivory; the mask only lowers opacity
+	   at the edges (no dark overlay), so the sides and the desk dissolve into the page
+	   without a frame or a band. The fade stops are set per layout below. */
+	.why__art {
+		display: block;
+		height: auto;
+		-webkit-mask-image: var(--why-art-fade-x), var(--why-art-fade-y);
+		-webkit-mask-composite: source-in;
+		mask-image: var(--why-art-fade-x), var(--why-art-fade-y);
+		mask-composite: intersect;
+	}
+
+	.why-list {
+		position: relative;
+		min-width: 0;
+	}
+
+	.why-list__item {
+		position: relative;
+		display: grid;
+		align-items: baseline; /* number sits on the title's baseline */
+	}
+
+	/* Teal line that draws across the row's top hairline on hover */
+	.why-list__item + .why-list__item::before {
+		content: '';
+		position: absolute;
+		inset-inline: 0;
+		top: -1px;
+		height: 1px;
+		background: var(--accent);
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform var(--dur-slow) var(--ease-out);
+	}
+
+	/* Italic serif number followed by a fine light-grey slash */
+	.why-list__num {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		font-family: var(--font-serif);
+		font-style: italic;
+		line-height: 1;
+		font-variant-numeric: lining-nums tabular-nums;
+		color: var(--accent);
+		transition:
+			transform var(--dur-base) var(--ease-out),
+			opacity var(--dur-base) var(--ease-out);
+	}
+
+	.why-list__num::after {
+		content: '';
+		flex: none;
+		width: 1px;
+		height: 0.8em;
+		background: var(--ink-3);
+		opacity: 0.35;
+		transform: rotate(24deg);
+		transition:
+			background-color var(--dur-base) var(--ease-out),
+			opacity var(--dur-base) var(--ease-out);
+	}
+
+	.why-list__body {
+		min-width: 0;
+		transition: opacity var(--dur-base) var(--ease-out);
+	}
+
+	.why-list__lead {
+		line-height: 1.2;
+		letter-spacing: -0.005em;
+		transition: color var(--dur-base) var(--ease-out);
+	}
+
+	.why-list__body p {
+		line-height: 1.6;
+		color: var(--ink-2);
+		transition: color var(--dur-base) var(--ease-out);
+	}
+
+	/* Hover: the row takes the teal and its line draws in. Other rows stay at full
+	   opacity, so every item reads the same whatever the pointer is resting on. */
+	@media (hover: hover) {
+		.why-list__item:hover::before {
+			transform: scaleX(1);
+		}
+
+		.why-list__item:hover .why-list__num {
+			transform: translateX(4px);
+		}
+
+		.why-list__item:hover .why-list__num::after {
+			background-color: var(--accent);
+			opacity: 1;
+		}
+
+		.why-list__item:hover .why-list__lead {
+			color: var(--accent);
+		}
+
+		.why-list__item:hover p {
+			color: var(--ink);
+		}
+	}
+
+	/* --- Phones and tablets (below 1024px). Nothing here reaches desktop. --- */
+	@media (max-width: 1023.98px) {
+		.why__layout {
+			gap: clamp(2.5rem, 6vw, 4.5rem);
+		}
+
+		/* Heading row: title on the left, photo on the right. On phones the photo
+		   tucks in beside the title and runs off the right edge of the screen. */
+		.why__head {
+			display: grid;
+			grid-template-columns: auto minmax(0, 1fr);
+			align-items: center;
+		}
+
+		.why__intro {
+			position: relative;
+			z-index: 1; /* title stays above the photo's faded left edge */
+			min-width: 0;
+		}
+
+		/* Short emerald rule under the label */
+		.why :global(.why__label)::after {
+			content: '';
+			display: block;
+			width: 2rem;
+			height: 2px;
+			margin-top: var(--space-3);
+			background: var(--accent);
+		}
+
+		.why__title {
+			margin-top: var(--space-5);
+			font-size: clamp(2.5rem, 11vw, 5.5rem);
+		}
+
+		.why__art {
+			--why-art-fade-x: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+			--why-art-fade-y: linear-gradient(
+				to bottom,
+				transparent,
+				#000 6%,
+				#000 76%,
+				rgb(0 0 0 / 0.8) 85%,
+				rgb(0 0 0 / 0.45) 92%,
+				rgb(0 0 0 / 0.15) 97%,
+				transparent
+			);
+			width: calc(100% + var(--container-pad));
+			max-width: none;
+			margin-left: var(--space-2);
+			margin-right: calc(var(--container-pad) * -1);
+			margin-top: var(--space-5);
+		}
+
+		/* Numbered list: equal rows, a hairline only between rows */
+		.why-list__item {
+			grid-template-columns: 2.5rem minmax(0, 1fr);
+			column-gap: var(--space-3);
+			padding-block: var(--space-5);
+		}
+
+		.why-list__item:first-child {
+			padding-top: 0;
+		}
+
+		.why-list__item:last-child {
+			padding-bottom: 0;
+		}
+
+		.why-list__item + .why-list__item {
+			border-top: 1px solid rgb(16 17 20 / 0.09);
+		}
+
+		.why-list__num {
+			font-size: 1.875rem;
+		}
+
+		.why-list__body {
+			padding-right: var(--why-fab-room); /* text clears the floating buttons; dividers stay full width */
+		}
+
+		.why-list__lead {
+			margin-bottom: var(--space-2);
+			font-size: clamp(1.35rem, 2vw, 1.7rem);
+			text-wrap: balance;
+		}
+
+		/* Measure sized so each description sets in two lines: wide enough for the
+		   longest one to break once, narrow enough that the shortest still wraps. A rem
+		   cap (not ch) keeps the line length steady when the font size steps up. */
+		.why-list__body p {
+			max-width: 28.5rem;
+			font-size: 0.9375rem;
+			text-wrap: pretty;
+		}
+	}
+
+	/* Tablet: the photo comes back inside the margins, a larger number column */
+	@media (min-width: 640px) and (max-width: 1023.98px) {
+		.why__head {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+			align-items: end;
+			column-gap: var(--grid-gap);
+		}
+
+		.why__intro {
+			container-type: inline-size; /* the title sizes itself to this column */
+			padding-bottom: var(--space-5);
+		}
+
+		/* "Why work with me" on one line. The line is about 6.3em wide, so 15.4% of the
+		   column keeps it inside with a little room for the italic overhang. */
+		.why__title {
+			font-size: min(clamp(2.5rem, 11vw, 5.5rem), 15.4cqi);
+			white-space: nowrap;
+		}
+
+		.why__title em {
+			display: inline;
+		}
+
+		.why__art {
+			justify-self: end;
+			width: 100%;
+			max-width: 30rem;
+			margin: 0;
+		}
+
+		.why-list__item {
+			grid-template-columns: 4.5rem minmax(0, 1fr);
+			column-gap: var(--space-5);
+			padding-block: var(--space-6);
+		}
+
+		.why-list__num {
+			font-size: 2.75rem;
+		}
+
+		.why-list__body p {
+			font-size: 1rem;
+		}
+	}
+
+	@media (min-width: 768px) and (max-width: 1023.98px) {
+		.why {
+			--why-fab: 3rem;
+		}
+	}
+
+	/* --- Desktop (1024px and up): the original two-column editorial layout. ---
+	   45 / 55 columns split by a faint vertical hairline. Heading at the top left, the
+	   photo at the bottom left running into the gutter beside the divider, and the list
+	   centred in the right column. Nothing in the phone/tablet block applies here. */
+	@media (min-width: 1024px) {
+		.why__layout {
+			grid-template-columns: minmax(0, 45fr) minmax(0, 55fr);
+			gap: 0;
+		}
+
+		.why__head {
+			display: flex;
+			flex-direction: column;
+			min-width: 0;
+			padding-right: var(--why-gutter);
+		}
+
+		.why__intro {
+			container-type: inline-size; /* the title sizes itself to this column */
+			display: flex;
+			flex-direction: column;
+			min-width: 0;
+		}
+
+		/* "Why work with me" on one line, as large as the column allows (same 15.4%
+		   rule as on tablet), never above the original 4.75rem. */
+		.why__title {
+			margin-top: var(--space-4);
+			margin-bottom: var(--space-6);
+			font-size: min(clamp(2.75rem, 6vw, 4.75rem), 15.4cqi);
+			white-space: nowrap;
+		}
+
+		.why__title em {
+			display: inline;
+		}
+
+		/* The fade is lighter at the sides and the top, and eased at the bottom so the
+		   desk dissolves into the ivory without a band. The subject (above 74%) stays
+		   fully opaque. */
+		.why__art {
+			--why-art-fade-x: linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+			--why-art-fade-y: linear-gradient(
+				to bottom,
+				transparent,
+				#000 6%,
+				#000 74%,
+				rgb(0 0 0 / 0.94) 80%,
+				rgb(0 0 0 / 0.8) 85%,
+				rgb(0 0 0 / 0.6) 89.5%,
+				rgb(0 0 0 / 0.38) 93.5%,
+				rgb(0 0 0 / 0.18) 97%,
+				rgb(0 0 0 / 0.05) 99%,
+				transparent
+			);
+			width: calc(100% + 2rem + var(--why-gutter) * 0.85);
+			max-width: none;
+			margin-top: auto;
+			margin-inline: -2rem calc(var(--why-gutter) * -0.85);
+			/* Nudged up a little to close some of the space under the title. A relative
+			   offset (not transform, which the reveal animation uses; not margin, which
+			   would change the layout) moves only the photo. */
+			position: relative;
+			top: -2.25rem;
+		}
+
+		.why-list {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			padding-left: var(--why-gutter);
+		}
+
+		/* Divider: a single hairline that fades out at both ends */
+		.why-list::before {
+			content: '';
+			position: absolute;
+			inset-block: 0;
+			left: 0;
+			width: 1px;
+			background: linear-gradient(to bottom, transparent, var(--rule) 14%, var(--rule) 86%, transparent);
+		}
+
+		.why-list__item {
+			grid-template-columns: 4.5rem minmax(0, 1fr);
+			column-gap: var(--space-5);
+			padding-block: clamp(1rem, 2.4vh, 1.5rem);
+		}
+
+		.why-list__item + .why-list__item {
+			border-top: var(--hairline);
+		}
+
+		.why-list__num {
+			font-size: 2.625rem;
+		}
+
+		/* Same clearance for the floating buttons as on smaller screens. It only matters
+		   near 1024px, where the list column is narrow enough to reach them. */
+		.why-list__body {
+			padding-right: var(--why-fab-room);
+		}
+
+		.why-list__lead {
+			margin-bottom: 0.375rem;
+			font-size: clamp(1.3rem, 1.8vw, 1.55rem);
+		}
+
+		.why-list__body p {
+			max-width: 44ch;
+			font-size: 1rem;
+		}
+	}
+
+	/* --- Process: vertical line on mobile, horizontal row on desktop ---
+	   Sits on the Midnight band (.page-section--midnight). This section is shorter than a screen, so it drops the full-viewport min-height
+	   that other sections use and sizes to its content with tighter padding. */
+	.process-section {
+		min-height: 0;
+		padding-block: clamp(3.5rem, 7vw, 5.5rem);
+	}
+
+	/* Stacked on small screens: keep the label close to its heading */
+	.process-section .section-head {
+		row-gap: var(--space-3);
+		margin-bottom: var(--space-6);
+	}
+
 	.process {
 		position: relative;
 		display: grid;
-		gap: var(--space-6);
+		gap: var(--space-5);
 	}
 
 	.process::before {
@@ -445,6 +1333,8 @@ const schema = [
 		bottom: 0;
 		left: 4px;
 		border-left: var(--hairline);
+		/* On the Midnight band the default hairline is too faint for the timeline */
+		border-color: rgb(250 246 232 / 0.28);
 	}
 
 	.process__step {
@@ -460,12 +1350,12 @@ const schema = [
 		left: 0;
 		width: 9px;
 		height: 9px;
-		border-radius: 50%;
+		border-radius: var(--radius);
 		background: var(--accent);
 	}
 
 	.process__name {
-		margin-block: var(--space-2) var(--space-3);
+		margin-block: var(--space-1) var(--space-2);
 	}
 
 	.process__step p {
@@ -473,6 +1363,10 @@ const schema = [
 	}
 
 	@media (min-width: 1024px) {
+		.process-section .section-head {
+			margin-bottom: var(--space-7);
+		}
+
 		.process {
 			grid-template-columns: repeat(5, minmax(0, 1fr));
 			gap: var(--space-5);
@@ -485,15 +1379,15 @@ const schema = [
 			right: 0;
 			border-left: 0;
 			border-top: var(--hairline);
+			border-top-color: rgb(250 246 232 / 0.28);
 		}
 
 		.process__step {
-			padding: var(--space-6) 0 0;
+			padding: var(--space-5) 0 0;
 		}
 
 		.process__step::before {
 			top: 0;
 		}
 	}
-
 </style>

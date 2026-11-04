@@ -9,8 +9,9 @@ type: Personal project
 stack: [HTML, CSS, JavaScript, Lenis]
 summary: A scroll-driven landing page for an AI air-quality monitor, built without a framework.
 homeTags: [HTML, CSS, JavaScript]
-liveUrl: '[PLACEHOLDER]'
+liveUrl: https://jibinjohnson11.github.io/AQAir/
 repoUrl: https://github.com/Jibinjohnson11/AQAir
+cover: ../../assets/images/work/aq-air-hero.webp
 metaTitle: AQ Air – Case Study | Jibin Johnson
 metaDescription: How I built a scroll-driven landing page for an AI air-quality monitor in vanilla JavaScript, with Lenis smooth scrolling and reveal animations.
 ---

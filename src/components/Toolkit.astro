@@ -1,0 +1,158 @@
+---
+/**
+ * Toolkit: a grid of tools, each its logo in its own brand colour, drawn straight on the
+ * page (no tile behind it), next to its name (logos from simple-icons). A tool without a
+ * logo in simple-icons gets a short monogram in its brand colour instead. Logos are
+ * decorative; the tool name is the text.
+ * 8 columns on wide screens, 4 on tablets and laptops, 2 on phones.
+ *
+ * The default slot goes at the start of the head row, before the "My toolkit" label,
+ * so a section heading can sit on the same line.
+ */
+import type { SimpleIcon } from 'simple-icons';
+
+interface Tool {
+	name: string;
+	icon?: SimpleIcon;
+	/** Monogram and tile colour for tools simple-icons doesn't cover */
+	mono?: string;
+	hex?: string;
+}
+
+interface Props {
+	tools: Tool[];
+	label?: string;
+}
+
+const { tools, label = 'My toolkit' } = Astro.props;
+
+const tiles = tools.map((tool) => ({ ...tool, color: `#${tool.icon?.hex ?? tool.hex ?? '0b0f14'}` }));
+---
+
+<div class="toolkit">
+	<div class="toolkit__head">
+		<slot />
+		<p class="toolkit__meta">
+			<span class="label">{label}</span>
+			<span class="toolkit__count">{tools.length} tools</span>
+		</p>
+	</div>
+	<ul class="toolkit__list" role="list">
+		{
+			tiles.map((tool) => (
+				<li class="toolkit__item">
+					<span class="toolkit__badge" style={`--brand: ${tool.color}`} aria-hidden="true">
+						{tool.icon ? (
+							<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+								<path d={tool.icon.path} />
+							</svg>
+						) : (
+							<span class="toolkit__mono">{tool.mono}</span>
+						)}
+					</span>
+					<span class="toolkit__name">{tool.name}</span>
+				</li>
+			))
+		}
+	</ul>
+</div>
+
+<style>
+	.toolkit__head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: var(--space-2) var(--space-5);
+		margin-bottom: var(--space-4);
+	}
+
+	.toolkit__meta {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-3);
+	}
+
+	.toolkit__count {
+		font-family: var(--font-serif);
+		font-style: italic;
+		font-size: 1.375rem;
+		line-height: 1;
+		color: var(--accent);
+	}
+
+	/* One open strip across the content width, no boxes or lines */
+	.toolkit__list {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-auto-rows: 1fr; /* every cell the same height, even when a name wraps */
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.toolkit__item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		min-width: 0;
+		padding: var(--space-4) var(--space-2);
+	}
+
+	@media (min-width: 640px) {
+		.toolkit__list {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+	}
+
+	/* 8 columns once every name has room next to its icon */
+	@media (min-width: 1200px) {
+		.toolkit__list {
+			grid-template-columns: repeat(8, minmax(0, 1fr));
+		}
+	}
+
+	/* The logo itself in its brand colour: no tile, border or shadow. Same box for every
+	   tool, so logos and monograms line up and names start at the same distance. */
+	.toolkit__badge {
+		display: grid;
+		flex: none;
+		place-items: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		color: var(--brand);
+		transition: transform var(--dur-fast) var(--ease-out);
+	}
+
+	.toolkit__badge svg {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+
+	.toolkit__item:hover .toolkit__badge {
+		transform: translateY(-2px);
+	}
+
+	.toolkit__mono {
+		font-family: var(--font-sans);
+		font-size: 0.6875rem;
+		font-weight: 700;
+		line-height: 1;
+		letter-spacing: 0.02em;
+		white-space: nowrap;
+	}
+
+	.toolkit__name {
+		font-size: 0.875rem;
+		font-weight: 500;
+		line-height: 1.25;
+		color: var(--secondary);
+		text-wrap: balance;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.toolkit__item:hover .toolkit__badge {
+			transform: none;
+		}
+	}
+</style>

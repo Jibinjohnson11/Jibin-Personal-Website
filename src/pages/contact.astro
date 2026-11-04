@@ -33,7 +33,7 @@ const schema = [
 ---
 
 <BaseLayout title={title} description={description} schema={schema} breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Contact', url: '/contact/' }]}>
-	<section class="contact container" aria-labelledby="contact-title">
+	<section class="contact screen screen--first container" aria-labelledby="contact-title">
 		<div class="grid contact__grid">
 			<!-- Info -->
 			<div class="contact__info">
@@ -350,12 +350,25 @@ const schema = [
 		width: 100%;
 		min-height: 3rem;
 		padding: var(--space-3) var(--space-4);
-		border: 1px solid var(--ink-3);
+		border: 1px solid var(--rule-strong);
 		border-radius: var(--radius);
 		background: var(--paper);
 		color: var(--ink);
 		line-height: 1.5;
 		transition: border-color var(--dur-fast) var(--ease-out);
+	}
+
+	.field input:focus-visible,
+	.field select:focus-visible,
+	.field textarea:focus-visible {
+		border-color: var(--accent);
+	}
+
+	.field input:disabled,
+	.field select:disabled,
+	.field textarea:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 
 	.field textarea {
@@ -374,8 +387,8 @@ const schema = [
 	}
 
 	.field [aria-invalid='true'] {
-		border-color: var(--accent);
-		box-shadow: inset 3px 0 0 var(--accent);
+		border-color: var(--negative);
+		box-shadow: inset 3px 0 0 var(--negative);
 	}
 
 	.field__select {
@@ -404,7 +417,7 @@ const schema = [
 
 	.field__error {
 		font-size: var(--text-small);
-		color: var(--accent);
+		color: var(--negative-text);
 	}
 
 	.field__error:empty {
@@ -417,7 +430,7 @@ const schema = [
 
 	.form-status.is-error {
 		padding: var(--space-3) var(--space-4);
-		border-left: 3px solid var(--accent);
+		border-left: 3px solid var(--negative);
 		background: var(--paper-2);
 	}
 
@@ -437,7 +450,7 @@ const schema = [
 		display: none;
 		padding: var(--space-6);
 		border: var(--hairline);
-		border-left: 3px solid var(--accent);
+		border-left: 3px solid var(--positive);
 		background: var(--paper-2);
 	}
 

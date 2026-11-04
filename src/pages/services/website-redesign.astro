@@ -1,0 +1,106 @@
+---
+import ServiceLayout from '../../layouts/ServiceLayout.astro';
+import Section from '../../components/Section.astro';
+
+const faqs = [
+	{
+		q: 'Will a redesign hurt my Google rankings?',
+		a: "It can, if old page addresses disappear without a plan. Before I start, I list every page your current site has. I keep the same URLs where I can and set up redirects where they change. Some movement in the first few weeks is normal. The aim is to keep what you've built and improve on it.",
+	},
+	{
+		q: 'Can you keep my existing content?',
+		a: "Yes. We go through it page by page and decide what stays, what gets rewritten and what goes. Good content that already ranks is worth keeping, so I won't throw it away just to make things look new.",
+	},
+	{
+		q: 'Do you redesign WordPress sites?',
+		a: "I rebuild sites with HTML, CSS and JavaScript, and with Python and Django when a site needs a back end. If you need to stay on WordPress or another platform, tell me early and I'll say honestly whether I'm the right fit.",
+	},
+	{
+		q: 'Will my website go offline during the redesign?',
+		a: "No. I build the new version separately while your current site stays live. We switch over only once the new one is tested and you've approved it.",
+	},
+	{
+		q: 'How long does a redesign take?',
+		a: "It depends on how many pages you have and how much of the content changes. I'll give you a timeline once we've agreed the scope, before any work starts.",
+	},
+];
+---
+
+<ServiceLayout
+	title="Website Redesign Services in Kerala | Jibin Johnson"
+	description="Turn an outdated website into a fast, responsive site that's easier to use and ready for search. Website redesign in Trivandrum and across Kerala."
+	name="Website Redesign"
+	serviceType="Website redesign"
+	keyword="Website Redesign Services"
+	accent="in Kerala"
+	lead="I offer website redesign services in Kerala for businesses whose site looks dated, loads slowly or is hard to use on a phone. I rebuild it with clean, responsive code and plan the move carefully, so the pages Google already knows about don't simply vanish."
+	related={['aq-air']}
+	faqs={faqs}
+	closing={{ text: 'Ready to give your website', accent: 'a fresh start?', label: 'Get a redesign quote' }}
+>
+	<Section id="signs-title" label="When to redesign">
+		<Fragment slot="heading">Signs it's time for <em>a redesign</em></Fragment>
+		<p class="lead">
+			A website doesn't have to be broken to be holding you back. If a few of these sound familiar, a redesign is probably worth a conversation.
+		</p>
+		<ul class="dash" role="list">
+			<li>It looks cramped or hard to read on a phone</li>
+			<li>Pages take a long time to load</li>
+			<li>The design no longer matches how your business looks today</li>
+			<li>Visitors struggle to find your contact details or services</li>
+			<li>Small text changes need a developer every time</li>
+			<li>It doesn't show up in Google for the services you offer</li>
+		</ul>
+	</Section>
+
+	<Section id="changes-title" label="What changes">
+		<Fragment slot="heading">What a redesign <em>changes</em></Fragment>
+		<ul class="items items--2" role="list">
+			<li>
+				<h3>A layout that works on every screen</h3>
+				<p>I rebuild each page to be responsive, then test it on phones, tablets and desktops before it goes live.</p>
+			</li>
+			<li>
+				<h3>Faster pages</h3>
+				<p>Heavy images, unused scripts and old plugins come out. I check the speed with Lighthouse before and after, so you can see the difference.</p>
+			</li>
+			<li>
+				<h3>Clearer paths for visitors</h3>
+				<p>Navigation, headings and buttons get reorganised around what your customers come to do, like calling you or sending an enquiry.</p>
+			</li>
+			<li>
+				<h3>A clean SEO foundation</h3>
+				<p>Every page gets a proper title, meta description and heading structure, with a fresh sitemap submitted to Google Search Console.</p>
+			</li>
+		</ul>
+	</Section>
+
+	<Section id="process-title" label="Process">
+		<Fragment slot="heading">How I <em>work</em></Fragment>
+		<ol class="steps" role="list">
+			<li>
+				<h3>Review</h3>
+				<p>I go through your current site: what works, what doesn't, how fast it loads and which pages bring in visitors from Google.</p>
+			</li>
+			<li>
+				<h3>Planning</h3>
+				<p>We agree the new page structure, which content stays, and the scope and timeline. I map every old URL to its new home.</p>
+			</li>
+			<li>
+				<h3>Design and development</h3>
+				<p>I build the new site separately and share progress as I go, while your current site stays live.</p>
+			</li>
+			<li>
+				<h3>Testing</h3>
+				<p>Every page gets checked on different screen sizes, tested for speed and accessibility, and every redirect gets tested too.</p>
+			</li>
+			<li>
+				<h3>Launch and follow-up</h3>
+				<p>I switch the site over, submit the new sitemap and watch Search Console in the weeks after launch to catch and fix any problems early.</p>
+			</li>
+		</ol>
+		<p>
+			Starting from scratch instead? My <a href="/services/web-development/">website development services</a> cover new builds.
+		</p>
+	</Section>
+</ServiceLayout>

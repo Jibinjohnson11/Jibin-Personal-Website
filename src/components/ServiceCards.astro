@@ -1,0 +1,411 @@
+---
+/**
+ * Homepage services as a slow, continuous horizontal carousel of dark image cards.
+ * The strip is full-bleed: it spans the whole viewport while the heading above stays in the
+ * content container, so cards enter at the right edge of the screen and leave at the left.
+ *
+ * Without JavaScript it is a plain horizontal scroll strip (with snap points), so every
+ * card stays reachable. The script adds the auto-scroll on desktop: it clones the card set
+ * once for a seamless loop, pauses on hover, focus and manual scrolling, and eases back in
+ * afterwards. Touch devices and reduced-motion users get manual scrolling only.
+ *
+ * On those same desktop setups, GSAP ScrollTrigger pins the section while vertical scrolling
+ * moves the strip through one full card set (down = right to left, up = back), added to the
+ * auto-scroll in the same frame loop. Then the pin releases and the page carries on.
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+export interface ServiceCard {
+	name: string;
+	text: string;
+	url?: string;
+	/** Link text, usually the page's target keyword */
+	anchor?: string;
+	image: ImageMetadata;
+	alt: string;
+	/** object-position for the cover crop, to keep the subject in view (default: center) */
+	position?: string;
+	/** The card's own colour identity: a very dark tint for the background and bottom fade,
+	    and a lighter accent for the link underline, arrow and hover border */
+	tint: string;
+	accent: string;
+}
+
+interface Props {
+	items: ServiceCard[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="service-carousel" data-carousel data-lenis-prevent-horizontal>
+	<ul class="service-track" role="list" data-carousel-track>
+		{
+			items.map((service, i) => (
+				<li class:list={['service-card', { 'has-link': service.url }]} style={`--card-tint: ${service.tint}; --card-accent: ${service.accent}`}>
+					<div class="service-card__media">
+						<Image
+							src={service.image}
+							alt={service.alt}
+							widths={[560, 1120]}
+							sizes="(min-width: 1100px) 540px, (min-width: 640px) 70vw, 140vw"
+							quality={85}
+							loading={i < 4 ? 'eager' : 'lazy'}
+							style={service.position ? `object-position: ${service.position}` : undefined}
+						/>
+					</div>
+					<div class="service-card__body">
+						<h3 class="service-card__name">{service.name}</h3>
+						<p class="service-card__text">{service.text}</p>
+						{service.url && (
+							<a class="service-card__link" href={service.url}>
+								{/* Last word and arrow share a no-wrap span so the arrow never ends up alone or adrift. */}
+								<span class="service-card__anchor">{service.anchor!.split(' ').slice(0, -1).join(' ')} </span>
+								<span class="nowrap">
+									<span class="service-card__anchor">{service.anchor!.split(' ').at(-1)}</span>
+									<span class="service-card__arrow" aria-hidden="true">→</span>
+								</span>
+							</a>
+						)}
+					</div>
+				</li>
+			))
+		}
+	</ul>
+</div>
+
+<script>
+	const SECONDS_PER_LOOP = 52; // one full pass through the original card set
+	const RESUME_AFTER = 1500; // ms of calm after manual scrolling before moving again
+
+	const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+	const touch = window.matchMedia('(hover: none), (pointer: coarse)');
+
+	document.querySelectorAll<HTMLElement>('[data-carousel]').forEach((carousel) => {
+		const track = carousel.querySelector<HTMLElement>('[data-carousel-track]');
+		if (!track || reduceMotion.matches || touch.matches) return;
+
+		// Two more copies of the cards so the strip can wrap without a visible jump, even on very
+		// wide screens. Hidden from assistive tech and the tab order; still clickable with a mouse.
+		const originals = Array.from(track.children);
+		for (let copy = 0; copy < 2; copy++) {
+			for (const card of originals) {
+				const clone = card.cloneNode(true) as HTMLElement;
+				clone.setAttribute('aria-hidden', 'true');
+				clone.querySelectorAll('a').forEach((a) => a.setAttribute('tabindex', '-1'));
+				clone.querySelectorAll('img').forEach((img) => img.setAttribute('loading', 'lazy'));
+				track.append(clone);
+			}
+		}
+		carousel.classList.add('is-auto');
+
+		// Width of one card set including its gaps, measured from the first original to the first clone.
+		const loopWidth = () => (track.children[originals.length] as HTMLElement).offsetLeft - (track.children[0] as HTMLElement).offsetLeft;
+
+		// Start with the first card lined up under the heading (its copy in the middle set),
+		// so the screen's left edge already shows the end of the previous set.
+		const section = carousel.parentElement!;
+		const edge = section.getBoundingClientRect().left + parseFloat(getComputedStyle(section).paddingLeft);
+		let pos = loopWidth() - edge;
+		carousel.scrollLeft = pos;
+		let speed = 0; // px per ms, eases towards the target
+		let hovering = false;
+		let focused = false;
+		let visible = true;
+		let calmUntil = 0;
+		let last = performance.now();
+
+		// Scroll-driven part: while the section is pinned, vertical scrolling adds the same
+		// distance to the strip (one full card set across the pinned run), on top of the
+		// auto-scroll. Both feed `pos` in the tick below, so there is only one motion source.
+		let pinStart = 0;
+		let pinEnd = 0; // 0 = no pin set up (yet)
+		let lastOffset = 0;
+		const scrollOffset = (width: number) => {
+			if (!pinEnd) return 0;
+			const p = (window.scrollY - pinStart) / (pinEnd - pinStart);
+			return Math.min(1, Math.max(0, p)) * width;
+		};
+
+		Promise.all([import('gsap'), import('gsap/ScrollTrigger')]).then(([{ gsap }, { ScrollTrigger }]) => {
+			gsap.registerPlugin(ScrollTrigger);
+			const mm = gsap.matchMedia();
+			// Desktop: the whole section fits one screen, so it pins at the top. Narrower windows:
+			// the section is taller than the screen, so only the strip pins, centred.
+			mm.add({ wide: '(min-width: 1024px)' }, (context) => {
+				const wide = Boolean(context.conditions?.wide);
+				const st = ScrollTrigger.create({
+					trigger: wide ? section : carousel,
+					start: wide ? 'top top' : 'center center',
+					end: () => `+=${loopWidth()}`, // one complete card set, 1px of scroll per 1px sideways
+					pin: true,
+					anticipatePin: 1,
+					invalidateOnRefresh: true,
+					onRefresh: (self) => {
+						pinStart = self.start;
+						pinEnd = self.end;
+						lastOffset = scrollOffset(loopWidth()); // re-measured: no jump
+					},
+				});
+				pinStart = st.start;
+				pinEnd = st.end;
+				lastOffset = scrollOffset(loopWidth());
+				return () => {
+					pinEnd = 0;
+					lastOffset = 0;
+				};
+			});
+			// Layout settles after the preloader lifts and the web fonts load: measure again then.
+			document.addEventListener('preloader:done', () => ScrollTrigger.refresh(), { once: true });
+			document.fonts?.ready.then(() => ScrollTrigger.refresh());
+		});
+
+		const tick = (now: number) => {
+			const dt = Math.min(now - last, 50);
+			last = now;
+
+			// Manual scroll moved the strip: follow it and hold still for a moment.
+			if (Math.abs(carousel.scrollLeft - pos) > 2) {
+				pos = carousel.scrollLeft;
+				calmUntil = now + RESUME_AFTER;
+			}
+
+			const width = loopWidth();
+			const running = !hovering && !focused && visible && !document.hidden && now > calmUntil;
+			const target = running ? width / (SECONDS_PER_LOOP * 1000) : 0;
+			speed += (target - speed) * Math.min(dt / 400, 1); // smooth start and stop
+
+			if (speed > 0.0005) pos += speed * dt;
+
+			// Vertical scroll since the last frame, while pinned: down moves the cards left, up reverses.
+			const offset = scrollOffset(width);
+			const scrolled = offset !== lastOffset;
+			if (scrolled) {
+				pos += offset - lastOffset;
+				lastOffset = offset;
+			}
+
+			// Keep pos inside the middle stretch. Each set is identical, so a jump of exactly one
+			// set width is invisible. Covers manual scrolling in either direction too.
+			const wrapped = pos < 1 ? pos + width : pos >= 2 * width ? pos - width : pos;
+			if (speed > 0.0005 || scrolled || wrapped !== pos) {
+				pos = wrapped;
+				// Keep the exact float in pos: some browsers round scrollLeft, which would stall
+				// a movement of about one pixel per frame.
+				carousel.scrollLeft = pos;
+			}
+
+			requestAnimationFrame(tick);
+		};
+
+		carousel.addEventListener('mouseenter', () => (hovering = true));
+		carousel.addEventListener('mouseleave', () => (hovering = false));
+		carousel.addEventListener('focusin', () => (focused = true));
+		carousel.addEventListener('focusout', (event) => {
+			if (!carousel.contains(event.relatedTarget as Node | null)) focused = false;
+		});
+		new IntersectionObserver(([entry]) => (visible = entry.isIntersecting)).observe(carousel);
+
+		requestAnimationFrame(tick);
+	});
+</script>
+
+<style>
+	.service-carousel {
+		/* Cards in view: about 1.1 on phones, 2 on tablets, 3 on desktop */
+		--visible: 1.1;
+		--gap: var(--space-5);
+		/* Left edge of the content container, and its inner width. Cards are sized from the
+		   container (not the full-bleed strip) so they stay the same size as before. */
+		--edge: max(var(--container-pad), calc((100vw - var(--container-max)) / 2 + var(--container-pad)));
+		--inner: calc(100vw - 2 * var(--edge));
+
+		/* Full-bleed: break out of the container to span the whole viewport */
+		width: 100vw;
+		margin-left: calc(50% - 50vw);
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scroll-snap-type: x mandatory;
+		scrollbar-width: thin;
+		scrollbar-color: var(--rule-strong) transparent;
+		padding-bottom: var(--space-4);
+	}
+
+	@media (min-width: 640px) {
+		.service-carousel {
+			--visible: 2.15;
+		}
+	}
+
+	@media (min-width: 1100px) {
+		.service-carousel {
+			--visible: 3.15;
+		}
+	}
+
+	/* Auto-scrolling: no snapping (it would fight the motion) and no moving scrollbar */
+	.service-carousel.is-auto {
+		scroll-snap-type: none;
+		scrollbar-width: none;
+		padding-bottom: 0;
+	}
+
+	.service-carousel.is-auto::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* Manual mode (touch, reduced motion, no JS): first card lines up with the heading,
+	   and the last one ends with the same margin. */
+	.service-carousel:not(.is-auto) {
+		scroll-padding-inline: var(--edge);
+	}
+
+	.service-carousel:not(.is-auto) .service-track {
+		width: max-content;
+		padding-inline: var(--edge);
+	}
+
+	.service-track {
+		display: flex;
+		gap: var(--gap);
+		padding-block: 1px; /* room for the hover border */
+		list-style: none;
+	}
+
+	/* Square cards. Inner spacing and type are set in cqi (percent of the card's width),
+	   so every card keeps the same proportions at any screen size and the text always fits. */
+	.service-track {
+		align-items: flex-start;
+	}
+
+	.service-card {
+		position: relative;
+		display: flex;
+		/* --card-max lets a page cap the card size, e.g. to fit a screen's height */
+		flex: 0 0 min(calc((var(--inner) - (var(--visible) - 1) * var(--gap)) / var(--visible)), var(--card-max, 100vw));
+		flex-direction: column;
+		aspect-ratio: 1;
+		container-type: inline-size;
+		isolation: isolate; /* keeps the image layer (z-index: -1) inside the card */
+		overflow: hidden;
+		border: 1px solid transparent;
+		border-radius: 16px;
+		background: var(--card-tint, var(--ink));
+		color: var(--paper);
+		scroll-snap-align: start;
+		transition: border-color var(--dur-base) var(--ease-out);
+	}
+
+	/* Full-bleed image behind the text, cropped to fill the square (object-position per card) */
+	.service-card__media {
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		overflow: hidden;
+	}
+
+	.service-card__media img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		transition: transform 900ms var(--ease-out);
+	}
+
+	/* Fades the image into the card's own dark tint behind the text */
+	.service-card__media::after {
+		--t: var(--card-tint, var(--ink));
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			to bottom,
+			transparent 22%,
+			color-mix(in srgb, var(--t) 60%, transparent) 46%,
+			color-mix(in srgb, var(--t) 90%, transparent) 68%,
+			color-mix(in srgb, var(--t) 97%, transparent) 100%
+		);
+	}
+
+	/* Text sits on top, anchored to the bottom of the card */
+	.service-card__body {
+		display: flex;
+		flex-direction: column;
+		gap: 2.6cqi;
+		margin-top: auto;
+		padding: 6cqi;
+	}
+
+	.service-card__name {
+		font-size: max(1.125rem, 6.6cqi);
+		line-height: 1.1;
+		color: var(--paper);
+	}
+
+	.service-card__text {
+		font-size: max(0.75rem, 3.9cqi);
+		line-height: 1.5;
+		color: rgb(250 246 232 / 0.8);
+	}
+
+	.service-card__link {
+		display: block;
+		margin-top: 1.4cqi;
+		font-size: max(0.75rem, 3.9cqi);
+		font-weight: 500;
+		color: var(--paper);
+		text-decoration: none;
+	}
+
+	.service-card__link:focus-visible {
+		outline-color: var(--card-accent);
+	}
+
+	.service-card__anchor {
+		text-decoration: underline;
+		text-decoration-color: var(--card-accent);
+		text-decoration-thickness: 1px;
+		text-underline-offset: 0.22em;
+	}
+
+	/* The whole card is clickable through the link. */
+	.service-card__link::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+	}
+
+	.nowrap {
+		white-space: nowrap;
+	}
+
+	.service-card__arrow {
+		display: inline-block;
+		margin-left: 0.4em;
+		color: var(--card-accent);
+		transition: transform var(--dur-base) var(--ease-out);
+	}
+
+	/* Hover: the image zooms gently behind the text, the border turns teal, the arrow moves on */
+	.service-card:hover .service-card__media img {
+		transform: scale(1.05);
+	}
+
+	.service-card:hover,
+	.service-card:focus-within {
+		border-color: var(--card-accent);
+	}
+
+	.service-card.has-link:hover .service-card__arrow,
+	.service-card__link:focus-visible .service-card__arrow {
+		transform: translateX(6px);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.service-card:hover .service-card__media img,
+		.service-card.has-link:hover .service-card__arrow,
+		.service-card__link:focus-visible .service-card__arrow {
+			transform: none;
+		}
+	}
+</style>

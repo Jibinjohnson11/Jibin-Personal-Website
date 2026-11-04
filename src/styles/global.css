@@ -1,46 +1,39 @@
 /* ==========================================================================
-   Editorial ink — design tokens and base styles
+   Brand palette — design tokens and base styles
    ========================================================================== */
 
 /* --- Tokens ------------------------------------------------------------- */
 
-:root,
-[data-theme='light'] {
+/* Palette (60–30–10)
+   60  Background  Warm Ivory #FAF6E8 page, Linen Beige #F1E8DA sections and the footer,
+                   Ivory White #FEFCF7 cards, Sand Taupe #D8C9B8 image wells
+   30  Content     Midnight Black #0B0F14 headings and body
+   10  Accent      Deep Teal Green #0B5F56 links, buttons, key actions; #0A3F3A hover
+   Supporting      Espresso Brown #4B3621 secondary accents, Sage Green #6B7F6A tags and success,
+                   Stone Grey #A3A9AC borders (darkened below where text or field borders need AA).
+   Status          Error #EF4444 for bars and borders, darkened to #B42318 for error text. Light theme only. */
+
+:root {
 	color-scheme: light;
-	--paper: #f4f1ea;
-	--paper-2: #ebe6da;
-	--ink: #1a1a1a;
-	--ink-2: #4a4740;
-	--ink-3: #69655c; /* darkened from #6E6A60 to pass AA on --paper-2 */
-	--rule: rgb(26 26 26 / 0.15);
-	--accent: #a54c26; /* darkened from #B4532A to pass AA on --paper and --paper-2 */
-	--label: #7a5f2f;
-}
-
-@media (prefers-color-scheme: dark) {
-	:root:not([data-theme='light']) {
-		color-scheme: dark;
-		--paper: #141210;
-		--paper-2: #1d1a16;
-		--ink: #ede8dd;
-		--ink-2: #bdb6a8;
-		--ink-3: #8f887b;
-		--rule: rgb(237 232 221 / 0.15);
-		--accent: #e07a4f;
-		--label: #c9a66b;
-	}
-}
-
-[data-theme='dark'] {
-	color-scheme: dark;
-	--paper: #141210;
-	--paper-2: #1d1a16;
-	--ink: #ede8dd;
-	--ink-2: #bdb6a8;
-	--ink-3: #8f887b;
-	--rule: rgb(237 232 221 / 0.15);
-	--accent: #e07a4f;
-	--label: #c9a66b;
+	--paper: #faf6e8; /* Warm Ivory */
+	--paper-2: #f1e8da; /* Linen Beige */
+	--surface-card: #fefcf7; /* Ivory White */
+	--surface-muted: #d8c9b8; /* Sand Taupe: image wells, never behind body text */
+	--ink: #0b0f14; /* Midnight Black */
+	--ink-2: #2b3138; /* Midnight Black, softened for long body copy (12:1 on Ivory) */
+	--ink-3: #5c6367; /* Stone Grey darkened from #A3A9AC (2.2:1) to pass AA on Ivory 5.7 and Linen 5.0 */
+	--label: var(--ink-3);
+	--accent: #0b5f56; /* Deep Teal Green */
+	--accent-hover: #0a3f3a; /* Deep Teal, gradient end */
+	--on-accent: #faf6e8; /* Warm Ivory text on Deep Teal (7:1) */
+	--secondary: #4b3621; /* Espresso Brown */
+	--sage: #6b7f6a; /* Sage Green */
+	--tag-bg: #e3eadc; /* Sage tint for tags and badges */
+	--rule: rgb(11 15 20 / 0.14); /* decorative hairlines */
+	--rule-strong: #7a7f82; /* Stone Grey darkened for 3:1 field borders (3.7 on Ivory, 3.3 on Linen) */
+	--positive: var(--sage); /* success marker (3.5:1 on Linen) */
+	--negative: #ef4444; /* error bars and borders (3.1:1 on Linen) */
+	--negative-text: #b42318; /* error text (6.1:1 on Ivory, 5.4 on Linen) */
 }
 
 :root {
@@ -75,11 +68,15 @@
 	--container-max: 1240px;
 	--container-pad: clamp(1.25rem, 4vw, 3rem);
 	--grid-gap: var(--space-5);
+	--header-h: 4.5rem; /* sticky site header height */
+	--crumbs-h: 4rem; /* breadcrumbs row on inner pages */
+	--above-fold: var(--header-h); /* what sits above the first section */
 
 	/* Paper grain: tiny inline SVG noise tile, ~3% opacity */
 	--grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
 	--radius: 2px;
 	--hairline: 1px solid var(--rule);
+	--btn-radius: 12px; /* every button: soft, rounded corners */
 
 	/* Motion */
 	--ease-out: cubic-bezier(0.22, 1, 0.36, 1);
@@ -103,11 +100,29 @@
 html {
 	-webkit-text-size-adjust: 100%;
 	text-size-adjust: 100%;
+	scroll-padding-top: var(--header-h);
+}
+
+/* Native smooth scrolling for anchor jumps. Lenis drives the scroll itself on
+   desktop, so CSS smoothing is switched off there to avoid the two fighting. */
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
+
+	html.lenis {
+		scroll-behavior: auto;
+	}
 }
 
 body {
 	min-height: 100vh;
 	min-height: 100dvh;
+}
+
+/* No scrolling under the preloader (see Preloader.astro) */
+html.is-preloading {
+	overflow: hidden;
 }
 
 img,
@@ -179,7 +194,7 @@ body {
 
 ::selection {
 	background: var(--accent);
-	color: var(--paper);
+	color: var(--on-accent);
 }
 
 :focus-visible {
@@ -192,18 +207,22 @@ p {
 	max-width: 65ch;
 }
 
+/* Text links: a quiet underline that thickens and takes the accent on hover. */
 a {
 	color: inherit;
 	text-decoration-line: underline;
+	text-decoration-color: var(--rule-strong);
 	text-decoration-thickness: 1px;
 	text-underline-offset: 0.22em;
 	transition:
 		color var(--dur-fast) var(--ease-out),
+		text-decoration-color var(--dur-fast) var(--ease-out),
 		text-decoration-thickness var(--dur-fast) var(--ease-out);
 }
 
 a:hover {
 	color: var(--accent);
+	text-decoration-color: currentColor;
 	text-decoration-thickness: 2px;
 }
 
@@ -326,12 +345,93 @@ h3,
 	padding-bottom: var(--section-pad);
 }
 
+/* Full-viewport sections: every main section is at least one screen tall and
+   grows with its content. svh keeps the height steady while mobile browser bars
+   show and hide. align-content centres the content without changing its flow.
+   .screen--first also subtracts the sticky header (and breadcrumbs) so the
+   opening screen fits exactly. */
+.screen,
+.page-section {
+	min-height: 100vh;
+	min-height: 100svh;
+	align-content: center;
+}
+
+.screen--first {
+	min-height: calc(100vh - var(--above-fold));
+	min-height: calc(100svh - var(--above-fold));
+}
+
+main:has(> .breadcrumbs-wrap) {
+	--above-fold: calc(var(--header-h) + var(--crumbs-h));
+}
+
 .page-section::before {
 	content: '';
 	position: absolute;
 	top: 0;
 	inset-inline: var(--container-pad);
 	border-top: var(--hairline);
+}
+
+/* Midnight Black band. The box-shadow + clip-path pair paints the colour edge to
+   edge while the content stays in the container (no horizontal scroll). Two soft
+   teal glows sit behind the content so the glass cards have something to frost.
+   Text tokens flip to light for the section's own content; children marked
+   [data-keep-tone] (the project cards) set their own palette. */
+.page-section--midnight {
+	background:
+		radial-gradient(40rem 28rem at 85% 30%, rgb(11 95 86 / 0.55), transparent 70%),
+		radial-gradient(34rem 26rem at 10% 75%, rgb(11 95 86 / 0.4), transparent 70%),
+		var(--ink);
+	box-shadow: 0 0 0 100vmax var(--ink);
+	clip-path: inset(0 -100vmax);
+	color: var(--on-accent);
+	--focus-ring: var(--on-accent);
+}
+
+.page-section--midnight::before {
+	display: none; /* the colour change marks the edge, no hairline needed */
+}
+
+.page-section--midnight > :not([data-keep-tone]) {
+	--ink: var(--on-accent);
+	--ink-2: #cfd3d5;
+	--ink-3: #a3a9ac;
+	--label: #a3a9ac; /* Stone Grey, 8:1 on Midnight Black */
+	--accent: #b5e4d8; /* light mint for accent words and links */
+	--accent-hover: var(--on-accent);
+	--rule: rgb(250 246 232 / 0.16);
+	color: var(--ink);
+}
+
+.page-section--midnight :focus-visible {
+	outline-color: var(--on-accent);
+}
+
+/* Cover stack: the next section slides up over the previous one.
+   Wrap both in .cover-stack[data-cover-stack]; mark the first [data-cover-under] and
+   the second .page-section--cover[data-cover-over]. The script in index.astro sets
+   --pin-top and adds .is-covering only when motion is allowed, so without JS or with
+   reduced motion the sections simply follow each other. The wrapper ends with the
+   covering section, which releases the pin so the page scrolls on normally. */
+.cover-stack.is-covering > [data-cover-under] {
+	position: sticky;
+	top: var(--pin-top, 0px);
+	z-index: 0;
+}
+
+.cover-stack > [data-cover-over] {
+	position: relative;
+	z-index: 1;
+}
+
+/* The covering section needs an opaque background, painted edge to edge the same way
+   as .page-section--midnight. */
+.page-section--cover {
+	background: var(--grain), var(--paper);
+	box-shadow: 0 0 0 100vmax var(--paper);
+	clip-path: inset(0 -100vmax);
 }
 
 /* Label + H2 row above a full-width block (lists that span all 12 columns). */

@@ -4,6 +4,9 @@ export const SITE = {
 	email: 'jibinjohnsoninfo@gmail.com',
 	location: 'Thiruvananthapuram, Kerala, India',
 	resume: '/resume/jibin-johnson-resume.pdf',
+	// WhatsApp number in international format, digits only (91 = India).
+	// The floating WhatsApp button stays hidden while this is empty.
+	whatsapp: '917736208172',
 	locale: 'en_IN',
 };
 

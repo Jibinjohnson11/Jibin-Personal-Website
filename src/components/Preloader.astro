@@ -1,0 +1,195 @@
+---
+/**
+ * First-visit preloader: a deep teal curtain with the name, a counter and a hairline
+ * progress bar, which lifts away once the page has loaded.
+ *
+ * Only shows while <html> has .is-preloading. The inline script in BaseLayout adds it
+ * on the first page of a session (never for reduced motion) and drops it after 4s as a
+ * safety net, so without JavaScript or on later pages this stays display: none.
+ * When it starts to lift it fires "preloader:done" so motion.ts can start the reveals.
+ */
+---
+
+<div class="preloader" aria-hidden="true" data-preloader>
+	<div class="preloader__inner">
+		<p class="preloader__label">Web developer · SEO · Thiruvananthapuram</p>
+		<p class="preloader__name">
+			<span class="preloader__word"><span>Jibin</span></span>
+			<span class="preloader__word"><em>Johnson</em></span>
+		</p>
+		<div class="preloader__foot">
+			<span class="preloader__status">Loading</span>
+			<span class="preloader__count" data-preloader-count>000</span>
+		</div>
+		<span class="preloader__bar"><span data-preloader-bar></span></span>
+	</div>
+</div>
+
+<script>
+	const root = document.documentElement;
+	const el = document.querySelector<HTMLElement>('[data-preloader]');
+
+	if (el && root.classList.contains('is-preloading')) {
+		const count = el.querySelector<HTMLElement>('[data-preloader-count]');
+		const bar = el.querySelector<HTMLElement>('[data-preloader-bar]');
+		const MIN = 1100; // long enough to read the name, short enough not to annoy
+		const MAX = 3200; // give up waiting on slow assets after this
+
+		let loaded = document.readyState === 'complete';
+		if (!loaded) window.addEventListener('load', () => (loaded = true), { once: true });
+
+		const start = performance.now();
+		let value = 0;
+
+		const finish = () => {
+			el.classList.add('is-leaving');
+			root.classList.remove('is-preloading');
+			document.dispatchEvent(new Event('preloader:done'));
+			el.addEventListener('transitionend', () => el.remove(), { once: true });
+			setTimeout(() => el.remove(), 1500);
+		};
+
+		// Ease towards 90 while the page loads, then run up to 100.
+		const tick = (now: number) => {
+			// The 4s fallback in BaseLayout already hid it (e.g. frames paused in a background tab)
+			if (!root.classList.contains('is-preloading')) return el.remove();
+
+			const t = now - start;
+			const done = (loaded && t >= MIN) || t >= MAX;
+			const target = done ? 100 : Math.min(90, (t / MIN) * 90);
+			value += (target - value) * 0.12;
+			if (done && value > 99.5) value = 100;
+
+			if (count) count.textContent = String(Math.round(value)).padStart(3, '0');
+			if (bar) bar.style.transform = `scaleX(${value / 100})`;
+
+			if (value === 100) setTimeout(finish, 200);
+			else requestAnimationFrame(tick);
+		};
+
+		requestAnimationFrame(tick);
+	}
+</script>
+
+<style>
+	.preloader {
+		position: fixed;
+		inset: 0;
+		z-index: 100;
+		display: none;
+		color: var(--paper);
+		background: var(--accent-hover) var(--grain);
+		clip-path: inset(0 0 0 0);
+		transition: clip-path 900ms var(--ease-out);
+	}
+
+	:global(.is-preloading) .preloader,
+	.preloader.is-leaving {
+		display: block;
+	}
+
+	/* Curtain lifts upwards */
+	.preloader.is-leaving {
+		clip-path: inset(0 0 100% 0);
+		pointer-events: none;
+	}
+
+	.preloader__inner {
+		display: grid;
+		grid-template-rows: auto 1fr auto;
+		height: 100%;
+		max-width: var(--container-max);
+		margin-inline: auto;
+		padding: var(--space-6) var(--container-pad) var(--space-7);
+		transition:
+			opacity 500ms var(--ease-out),
+			transform 900ms var(--ease-out);
+	}
+
+	.preloader.is-leaving .preloader__inner {
+		opacity: 0;
+		transform: translateY(-4rem);
+	}
+
+	.preloader__label,
+	.preloader__foot {
+		font-family: var(--font-mono);
+		font-size: var(--text-label);
+		letter-spacing: 0.06em;
+		text-transform: uppercase;
+		color: color-mix(in srgb, var(--paper) 70%, transparent);
+	}
+
+	.preloader__name {
+		align-self: center;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 0.25em;
+		font-family: var(--font-serif);
+		font-size: clamp(3.5rem, 13vw, 10rem);
+		line-height: 1;
+		letter-spacing: -0.01em;
+	}
+
+	.preloader__name em {
+		font-style: italic;
+		color: color-mix(in srgb, var(--paper) 75%, var(--accent));
+	}
+
+	/* Each word rises out of its own line */
+	.preloader__word {
+		display: inline-block;
+		overflow: hidden;
+		/* room for the J's descender inside the mask */
+		padding-bottom: 0.22em;
+		margin-bottom: -0.22em;
+	}
+
+	.preloader__word > * {
+		display: inline-block;
+		animation: preloader-rise 1s var(--ease-out) both;
+	}
+
+	.preloader__word + .preloader__word > * {
+		animation-delay: 120ms;
+	}
+
+	.preloader__foot {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		margin-bottom: var(--space-4);
+	}
+
+	.preloader__count {
+		font-size: clamp(1rem, 2.5vw, 1.5rem);
+		color: var(--paper);
+		font-variant-numeric: tabular-nums;
+	}
+
+	.preloader__bar {
+		display: block;
+		height: 1px;
+		background: color-mix(in srgb, var(--paper) 20%, transparent);
+	}
+
+	.preloader__bar > span {
+		display: block;
+		height: 100%;
+		background: var(--paper);
+		transform: scaleX(0);
+		transform-origin: left;
+	}
+
+	@keyframes preloader-rise {
+		from {
+			transform: translateY(105%);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.preloader {
+			display: none !important;
+		}
+	}
+</style>

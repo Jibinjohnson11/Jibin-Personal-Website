@@ -1,5 +1,5 @@
 /**
- * Open Graph images (1200×630) in the Editorial ink style, rendered at build time with
+ * Open Graph images (1200×630) in the brand palette, rendered at build time with
  * satori (layout → SVG) and sharp (SVG → PNG). Used by src/pages/og/[name].png.ts.
  */
 import { readFile } from 'node:fs/promises';
@@ -7,12 +7,12 @@ import { join } from 'node:path';
 import satori from 'satori';
 import sharp from 'sharp';
 
-const INK = '#1a1a1a';
-const INK_3 = '#69655c';
-const PAPER = '#f4f1ea';
-const ACCENT = '#a54c26';
-const LABEL = '#7a5f2f';
-const RULE = 'rgba(26, 26, 26, 0.15)';
+const INK = '#0b0f14';
+const INK_3 = '#5c6367';
+const PAPER = '#faf6e8';
+const ACCENT = '#0b5f56';
+const LABEL = '#5c6367';
+const RULE = 'rgba(11, 15, 20, 0.14)';
 
 export type OgContent = {
 	/** Main line, e.g. the page H1 without its accent words */

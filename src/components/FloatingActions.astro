@@ -1,0 +1,164 @@
+---
+/**
+ * Floating buttons, bottom right: back to top (appears after scrolling) and WhatsApp.
+ * The WhatsApp button only renders once SITE.whatsapp is set.
+ */
+import { SITE } from '../data/site';
+
+const waText = "Hi Jibin, I found your website and I'd like to talk about a project.";
+const waUrl = SITE.whatsapp ? `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(waText)}` : '';
+---
+
+<div class="fab">
+	<button type="button" class="fab__btn fab__top" data-to-top aria-label="Back to top" tabindex="-1">
+		<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+			<path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" />
+		</svg>
+	</button>
+
+	{
+		waUrl && (
+			<a class="fab__btn fab__wa" href={waUrl} target="_blank" rel="noopener" aria-label="Chat with me on WhatsApp (opens in a new tab)">
+				<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false">
+					<path
+						fill="currentColor"
+						d="M12.04 2a9.9 9.9 0 0 0-8.5 14.98L2 22l5.17-1.5A9.93 9.93 0 1 0 12.04 2Zm0 18.13a8.2 8.2 0 0 1-4.2-1.15l-.3-.18-3.07.89.9-2.99-.2-.31a8.2 8.2 0 1 1 6.87 3.74Zm4.5-6.14c-.25-.12-1.46-.72-1.69-.8-.23-.08-.39-.12-.55.12-.17.25-.64.8-.78.97-.14.16-.29.18-.53.06a6.7 6.7 0 0 1-3.34-2.92c-.25-.43.25-.4.72-1.34.08-.16.04-.3-.02-.43-.06-.12-.55-1.33-.76-1.82-.2-.48-.4-.41-.55-.42h-.47a.9.9 0 0 0-.65.3c-.22.25-.86.84-.86 2.04s.88 2.37 1 2.53c.13.17 1.73 2.64 4.2 3.7 1.55.67 2.16.73 2.94.61.47-.07 1.46-.6 1.66-1.18.21-.58.21-1.07.15-1.18-.06-.1-.22-.16-.47-.28Z"
+					/>
+				</svg>
+			</a>
+		)
+	}
+</div>
+
+<script>
+	const btn = document.querySelector<HTMLButtonElement>('[data-to-top]');
+
+	if (btn) {
+		const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+		const show = () => {
+			const visible = window.scrollY > window.innerHeight * 0.8;
+			btn.classList.toggle('is-visible', visible);
+			btn.tabIndex = visible ? 0 : -1;
+			btn.setAttribute('aria-hidden', String(!visible));
+		};
+		window.addEventListener('scroll', show, { passive: true });
+		show();
+
+		btn.addEventListener('click', () => {
+			const lenis = (window as Window & { siteLenis?: { scrollTo: (target: number) => void } }).siteLenis;
+			if (lenis && !reduceMotion.matches) lenis.scrollTo(0);
+			else window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+			// Move keyboard focus back to the top of the page too.
+			document.querySelector<HTMLElement>('.site-header .brand')?.focus({ preventScroll: true });
+		});
+	}
+</script>
+
+<style>
+	/* Stacked bottom right. Both buttons share one size (--fab-size), with a fixed gap,
+	   and sit clear of the iPhone home bar and notch (safe-area insets are added on top
+	   of the spacing, not instead of it). Smaller on phones so they cover less content. */
+	.fab {
+		--fab-size: 2.75rem;
+		--fab-edge: clamp(0.875rem, 4vw, 1.5rem);
+		position: fixed;
+		right: calc(var(--fab-edge) + env(safe-area-inset-right, 0px));
+		bottom: calc(var(--fab-edge) + env(safe-area-inset-bottom, 0px));
+		z-index: 40; /* under the header (50) and the mobile menu (55+) */
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.625rem;
+		pointer-events: none;
+	}
+
+	@media (min-width: 768px) {
+		.fab {
+			--fab-size: 3rem;
+			gap: 0.75rem;
+		}
+	}
+
+	:global(html.menu-open) .fab,
+	:global(html.is-preloading) .fab {
+		visibility: hidden;
+	}
+
+	.fab__btn {
+		display: grid;
+		place-items: center;
+		width: var(--fab-size);
+		height: var(--fab-size);
+		border-radius: 50%;
+		pointer-events: auto;
+		cursor: pointer;
+		transition:
+			transform var(--dur-fast) var(--ease-out),
+			box-shadow var(--dur-base) var(--ease-out),
+			opacity var(--dur-base) var(--ease-out),
+			visibility var(--dur-base);
+	}
+
+	.fab__btn:focus-visible {
+		outline: 2px solid #02a397;
+		outline-offset: 3px;
+	}
+
+	/* Back to top: black with a teal ring, matching the footer. */
+	.fab__top {
+		padding: 0;
+		border: 1px solid rgb(2 163 151 / 0.5);
+		background: #050505;
+		color: #02a397;
+		box-shadow: 0 6px 20px rgb(0 0 0 / 0.25);
+		opacity: 0;
+		visibility: hidden;
+		transform: translateY(0.5rem);
+	}
+
+	.fab__top.is-visible {
+		opacity: 1;
+		visibility: visible;
+		transform: none;
+	}
+
+	.fab__top svg {
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 1.8;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+	}
+
+	.fab__top:hover {
+		box-shadow:
+			0 6px 20px rgb(0 0 0 / 0.25),
+			0 0 18px rgb(2 163 151 / 0.45);
+		transform: translateY(-2px);
+	}
+
+	/* WhatsApp: dark WhatsApp green so the white icon keeps 4:1 contrast. */
+	.fab__wa svg {
+		width: 56%;
+		height: 56%;
+	}
+
+	.fab__wa {
+		background: #128c7e;
+		color: #fff;
+		box-shadow: 0 8px 24px rgb(18 140 126 / 0.35);
+	}
+
+	.fab__wa:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 10px 28px rgb(18 140 126 / 0.5);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.fab__btn,
+		.fab__btn:hover {
+			transition: none;
+			transform: none;
+		}
+	}
+</style>

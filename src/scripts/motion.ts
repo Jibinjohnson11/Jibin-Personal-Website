@@ -19,16 +19,21 @@ root.classList.add('motion-ready');
 if (!reduceMotion.matches && !touch.matches) {
 	import('lenis').then(({ default: Lenis }) => {
 		const lenis = new Lenis({ lerp: 0.1, autoRaf: true });
+		// Shared so other scripts (the back-to-top button) can scroll through Lenis.
+		(window as Window & { siteLenis?: typeof lenis }).siteLenis = lenis;
 
-		// Freeze the page while the mobile menu overlay is open (Header adds html.menu-open).
-		let menuOpen = false;
-		new MutationObserver(() => {
-			const open = root.classList.contains('menu-open');
-			if (open === menuOpen) return;
-			menuOpen = open;
-			if (open) lenis.stop();
+		// Freeze the page while the mobile menu overlay (html.menu-open) or the preloader
+		// (html.is-preloading) is showing.
+		const isLocked = () => root.classList.contains('menu-open') || root.classList.contains('is-preloading');
+		let locked = false;
+		const sync = () => {
+			if (isLocked() === locked) return;
+			locked = !locked;
+			if (locked) lenis.stop();
 			else lenis.start();
-		}).observe(root, { attributes: true, attributeFilter: ['class'] });
+		};
+		new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ['class'] });
+		sync();
 	});
 }
 
@@ -94,5 +99,8 @@ if (root.classList.contains('js-reveal')) {
 		{ rootMargin: '0px 0px -8% 0px' },
 	);
 
-	targets.forEach((el) => observer.observe(el));
+	// Hold the reveals until the preloader starts to lift, so they play where you can see them.
+	const observeAll = () => targets.forEach((el) => observer.observe(el));
+	if (root.classList.contains('is-preloading')) document.addEventListener('preloader:done', observeAll, { once: true });
+	else observeAll();
 }

@@ -15,6 +15,7 @@ const PAGES: Record<string, Omit<OgContent, 'isDefault'>> = {
 	'/services/web-development/': { headline: 'Website Development Services', accent: 'in Kerala' },
 	'/services/seo/': { headline: 'SEO Services', accent: 'in Kerala' },
 	'/services/python-django-development/': { headline: 'Python Django Developer', accent: 'in Kerala' },
+	'/services/website-redesign/': { headline: 'Website Redesign Services', accent: 'in Kerala' },
 };
 
 export type OgEntry = OgContent & {

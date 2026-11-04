@@ -9,7 +9,8 @@ type: Client work at Prception Medialab
 stack: [Keyword research, On-page SEO, Link building, Google Search Console, Google Analytics]
 summary: SEO for a healthcare brand, from keyword planning to client-approved content and link building.
 homeTags: [SEO, Keyword research, Link building]
-liveUrl: '[PLACEHOLDER]'
+liveUrl: https://serenederma.com/
+cover: ../../assets/images/work/seren-derma-hero.webp
 metaTitle: Seren Derma – Case Study | Jibin Johnson
 metaDescription: Healthcare SEO for Seren Derma, from keyword planning around treatments and locations to client-approved content, link building and reporting.
 ---

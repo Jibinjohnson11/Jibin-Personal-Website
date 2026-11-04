@@ -2,7 +2,7 @@
 /**
  * Writes dist/_headers with a Content-Security-Policy for Netlify after each build.
  *
- * Inline scripts (the theme/reveal script in BaseLayout) are allowed by their SHA-256
+ * Inline scripts (the reveal script in BaseLayout) are allowed by their SHA-256
  * hash, computed from the built HTML, so the policy stays correct when a script changes.
  * Google Analytics hosts are only allowed when PUBLIC_GA_ID is set.
  *
