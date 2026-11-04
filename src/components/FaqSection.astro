@@ -89,20 +89,11 @@ const { items } = Astro.props;
 		align-items: flex-start;
 	}
 
-	/* Small uppercase label led by a thin teal rule */
+	/* Small uppercase label */
 	.faq-section :global(.faq-label) {
 		display: inline-flex;
 		align-items: center;
-		gap: var(--space-3);
 		letter-spacing: 0.14em;
-	}
-
-	.faq-section :global(.faq-label)::before {
-		content: '';
-		flex: none;
-		width: 2rem;
-		height: 1px;
-		background: var(--accent);
 	}
 
 	.faq-section h2 {
