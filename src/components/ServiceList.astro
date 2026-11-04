@@ -1,7 +1,9 @@
 ---
 /**
  * Editorial numbered list of services: number, serif name, short description and a
- * keyword link to the service page. A row without a url is shown without a link.
+ * keyword link to the service page, laid out as four columns on desktop and stacked
+ * on phones. A row without a url is shown without a link. One row can be `featured`
+ * (light teal tint, teal rule on the left, teal title and link).
  */
 export interface ServiceItem {
 	name: string;
@@ -9,6 +11,8 @@ export interface ServiceItem {
 	url?: string;
 	/** Link text, usually the page's target keyword */
 	anchor?: string;
+	/** Quietly highlight this row */
+	featured?: boolean;
 }
 
 interface Props {
@@ -24,13 +28,14 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3';
 <ol class="service-list" role="list">
 	{
 		items.map((service, i) => (
-			<li class:list={['service-row', { 'has-link': service.url }]} data-reveal>
+			<li class:list={['service-row', { 'has-link': service.url, 'is-featured': service.featured }]} data-reveal>
 				<div class="service-row__inner">
-					<span class="service-row__num label">{String(i + 1).padStart(2, '0')}</span>
-					<div class="service-row__body">
-						<Heading class="service-row__name">{service.name}</Heading>
-						<p class="service-row__text">{service.text}</p>
-					</div>
+					<span class="service-row__num label">
+						{String(i + 1).padStart(2, '0')}
+						<span class="service-row__dash" aria-hidden="true" />
+					</span>
+					<Heading class="service-row__name">{service.name}</Heading>
+					<p class="service-row__text">{service.text}</p>
 					{service.url && (
 						<a class="service-row__link" href={service.url}>
 							{/* Last word and arrow share a no-wrap span so the arrow never ends up alone on a line. */}
@@ -50,51 +55,79 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3';
 </ol>
 
 <style>
+	.service-list {
+		--row-pad-x: var(--space-4);
+		--row-hover: 280ms;
+		--row-tint: color-mix(in srgb, var(--accent) 6%, var(--paper));
+		--row-tint-hover: color-mix(in srgb, var(--accent) 9%, var(--paper));
+		--row-hover-bg: color-mix(in srgb, var(--paper-2) 55%, var(--paper));
+	}
+
 	.service-row {
 		position: relative;
 		border-top: var(--hairline);
+		transition: background-color var(--row-hover) var(--ease-out);
 	}
 
 	.service-row:last-child {
 		border-bottom: var(--hairline);
 	}
 
+	/* Mobile: number and dash, then title, text and link stacked. */
 	.service-row__inner {
 		position: relative;
 		display: grid;
-		grid-template-columns: 2.5rem minmax(0, 1fr);
-		gap: var(--space-3) var(--space-4);
-		padding-block: var(--space-6);
-		transition: transform var(--dur-base) var(--ease-out);
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--space-3);
+		padding: var(--space-6) var(--row-pad-x);
 	}
 
 	.service-row__num {
-		padding-top: 0.6rem;
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-3);
+		color: var(--ink-3);
+	}
+
+	.service-row__dash {
+		display: inline-block;
+		width: 1.25rem;
+		height: 1px;
+		background: currentColor;
+		opacity: 0.6;
 	}
 
 	.service-row__name {
-		font-size: clamp(1.625rem, 3vw, 2.5rem);
+		font-size: clamp(1.75rem, 3vw, 2.5rem);
 		line-height: 1.1;
+		transition: color var(--row-hover) var(--ease-out);
 	}
 
 	.service-row__text {
-		margin-top: var(--space-3);
 		color: var(--ink-2);
+		font-size: var(--text-body);
+		line-height: 1.65;
 	}
 
 	.service-row__link {
-		grid-column: 2;
 		justify-self: start;
-		padding-block: var(--space-2);
+		display: inline-block;
+		min-height: 2.75rem;
+		padding-block: var(--space-3);
 		font-size: var(--text-small);
 		font-weight: 500;
+		line-height: 1.5;
+		color: var(--ink);
 		text-decoration: none;
+		transition: color var(--row-hover) var(--ease-out);
 	}
 
 	.service-row__anchor {
 		text-decoration: underline;
 		text-decoration-thickness: 1px;
-		text-underline-offset: 0.22em;
+		text-decoration-color: var(--rule-strong);
+		text-underline-offset: 0.25em;
+		transition: text-decoration-color var(--row-hover) var(--ease-out);
 	}
 
 	/* The whole row is clickable through the link. */
@@ -111,49 +144,134 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3';
 	.service-row__arrow {
 		display: inline-block;
 		margin-left: 0.4em;
-		transition: transform var(--dur-base) var(--ease-out);
+		transition: transform var(--row-hover) var(--ease-out);
 	}
 
-	.service-row.has-link:hover .service-row__inner {
-		transform: translateX(var(--space-2));
+	/* Featured row: light teal tint and a slim teal rule on the left. No card, no radius. */
+	.service-row.is-featured {
+		background-color: var(--row-tint);
+	}
+
+	.service-row.is-featured::before {
+		content: '';
+		position: absolute;
+		inset-block: -1px;
+		left: 0;
+		width: 2px;
+		background: var(--accent);
+	}
+
+	.service-row.is-featured .service-row__name,
+	.service-row.is-featured .service-row__link {
+		color: var(--accent);
+	}
+
+	.service-row.is-featured .service-row__anchor {
+		text-decoration-color: currentColor;
+	}
+
+	/* Hover and keyboard focus: tint the row, teal title and link, nudge the arrow. */
+	.service-row.has-link:hover,
+	.service-row.has-link:has(.service-row__link:focus-visible) {
+		background-color: var(--row-hover-bg);
+	}
+
+	.service-row.is-featured.has-link:hover,
+	.service-row.is-featured.has-link:has(.service-row__link:focus-visible) {
+		background-color: var(--row-tint-hover);
 	}
 
 	.service-row.has-link:hover .service-row__name,
-	.service-row.has-link:hover .service-row__link {
+	.service-row.has-link:hover .service-row__link,
+	.service-row__link:focus-visible {
 		color: var(--accent);
+	}
+
+	.service-row.has-link:hover .service-row__anchor,
+	.service-row__link:focus-visible .service-row__anchor {
+		text-decoration-color: currentColor;
 	}
 
 	.service-row.has-link:hover .service-row__arrow,
 	.service-row__link:focus-visible .service-row__arrow {
-		transform: translateX(6px);
+		transform: translateX(5px);
 	}
 
-	@media (min-width: 1024px) {
+	/* Tablet: number | title | text, link under the text. */
+	@media (min-width: 768px) {
+		.service-list {
+			--row-pad-x: var(--space-5);
+		}
+
 		.service-row__inner {
-			grid-template-columns: 4rem minmax(0, 1fr) minmax(0, 18rem);
-			align-items: center;
-			gap: var(--space-6);
-		}
-
-		.service-row__body {
-			display: grid;
-			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-			gap: var(--space-6);
+			grid-template-columns: 4.5rem minmax(0, 1fr) minmax(0, 1.2fr);
+			column-gap: var(--space-6);
+			row-gap: var(--space-2);
 			align-items: baseline;
-		}
-
-		.service-row__text {
-			margin-top: 0;
+			padding-block: var(--space-7);
 		}
 
 		.service-row__num {
-			padding-top: 0;
+			grid-row: 1 / span 2;
+		}
+
+		.service-row__name {
+			grid-column: 2;
+			grid-row: 1 / span 2;
+		}
+
+		.service-row__text {
+			grid-column: 3;
 		}
 
 		.service-row__link {
 			grid-column: 3;
+		}
+	}
+
+	/* Desktop: four columns in one line. */
+	@media (min-width: 1100px) {
+		.service-list {
+			--row-pad-x: var(--space-6);
+		}
+
+		.service-row__inner {
+			grid-template-columns: 4rem minmax(0, 1fr) minmax(0, 1.2fr) 17.5rem;
+			column-gap: clamp(var(--space-6), 2.6vw, var(--space-7));
+			align-items: center;
+			padding-block: var(--space-7);
+		}
+
+		.service-row__num,
+		.service-row__name,
+		.service-row__text,
+		.service-row__link {
+			grid-row: 1;
+		}
+
+		.service-row__num {
+			grid-column: 1;
+		}
+
+		.service-row__name {
+			grid-column: 2;
+		}
+
+		.service-row__text {
+			grid-column: 3;
+		}
+
+		.service-row__link {
+			grid-column: 4;
 			justify-self: end;
 			text-align: right;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.service-row.has-link:hover .service-row__arrow,
+		.service-row__link:focus-visible .service-row__arrow {
+			transform: none;
 		}
 	}
 </style>

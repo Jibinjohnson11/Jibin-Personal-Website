@@ -1,8 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import SectionLabel from '../../components/SectionLabel.astro';
 import ServiceList from '../../components/ServiceList.astro';
-import CtaLine from '../../components/CtaLine.astro';
 
 const services = [
 	{
@@ -22,6 +20,7 @@ const services = [
 		text: 'Technical fixes, on-page work, link building and local SEO for Kerala businesses, with a plain-English report every month.',
 		url: '/services/seo/',
 		anchor: 'SEO services in Kerala',
+		featured: true,
 	},
 	{
 		name: 'Python & Django Development',
@@ -37,34 +36,273 @@ const services = [
 	description="Website development, SEO and Python Django development for businesses in Kerala and beyond, from a web developer and SEO specialist in Trivandrum."
 	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Services', url: '/services/' }]}
 >
-	<section class="services-intro screen screen--first container" aria-labelledby="services-title">
-		<SectionLabel text="Services" />
-		<h1 id="services-title" class="services-intro__title" data-reveal="hero">Services</h1>
-		<p class="lead" data-reveal style="--reveal-delay: 250ms">
-			Four ways I can help: build your website, redesign the one you have, get it found on Google, or build the tool your team is missing.
-		</p>
-	</section>
+	<div class="services-page">
+		<!-- Faint decorative curves near the page edges. Hidden from assistive tech. -->
+		<svg class="services-deco services-deco--left" viewBox="0 0 220 900" fill="none" aria-hidden="true" focusable="false">
+			<path d="M-40 40 C 110 200, 120 420, 30 600 S -20 860, 70 940" />
+			<path d="M-60 120 C 70 260, 80 470, 0 640 S -40 860, 40 960" />
+		</svg>
+		<svg class="services-deco services-deco--right" viewBox="0 0 220 900" fill="none" aria-hidden="true" focusable="false">
+			<path d="M260 -20 C 110 140, 100 380, 190 560 S 240 800, 150 920" />
+			<path d="M280 60 C 150 200, 140 400, 220 580 S 260 820, 180 940" />
+		</svg>
 
-	<div class="services-list screen container">
-		<ServiceList items={services} headingLevel={2} />
-		<CtaLine text="Not sure which one you need?" accent="Ask me." label="Get in touch" />
+		<section class="services-hero container" aria-labelledby="services-title">
+			<div class="services-hero__grid">
+				<div class="services-hero__lead">
+					<p class="services-hero__eyebrow label" data-reveal="hero">
+						What I do <span class="services-hero__eyebrow-rule" aria-hidden="true"></span> 04 services
+					</p>
+					<h1 id="services-title" class="services-hero__title" data-reveal="hero" style="--reveal-delay: 80ms">Services</h1>
+					<svg class="services-hero__swash" viewBox="0 0 240 24" fill="none" aria-hidden="true" focusable="false">
+						<path d="M3 17 C 52 6, 128 3, 237 11" pathLength="1" />
+					</svg>
+				</div>
+				<div class="services-hero__aside">
+					<p class="services-hero__tagline" data-reveal="hero" style="--reveal-delay: 160ms">
+						Thoughtful <em>digital</em> solutions.
+					</p>
+					<p class="services-hero__text" data-reveal="hero" style="--reveal-delay: 240ms">
+						Four ways I can help: build your website, redesign the one you have, get it found on Google, or build the tool your team is missing.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<div class="services-body container">
+			<ServiceList items={services} headingLevel={2} />
+
+			<div class="services-cta" data-reveal>
+				<p class="services-cta__text">Not sure which one you need? <em>Ask me.</em></p>
+				<a class="services-cta__btn" href="/contact/">
+					Get in touch <span class="services-cta__arrow" aria-hidden="true">→</span>
+				</a>
+			</div>
+		</div>
 	</div>
 </BaseLayout>
 
 <style>
-	.services-intro {
+	/* isolation keeps the decorative curves behind the content but above the page background;
+	   overflow-x: clip stops them causing sideways scroll. */
+	.services-page {
+		position: relative;
+		isolation: isolate;
+		overflow-x: clip;
+	}
+
+	.services-deco {
+		display: none;
+		position: absolute;
+		z-index: -1;
+		width: clamp(100px, 9vw, 180px);
+		height: auto;
+		pointer-events: none;
+		stroke: var(--accent);
+		stroke-width: 1;
+		opacity: 0.14;
+		vector-effect: non-scaling-stroke;
+	}
+
+	.services-deco path {
+		vector-effect: non-scaling-stroke;
+	}
+
+	.services-deco--left {
+		top: 0;
+		left: 0;
+	}
+
+	.services-deco--right {
+		bottom: 0;
+		right: 0;
+	}
+
+	@media (min-width: 1024px) {
+		.services-deco {
+			display: block;
+		}
+	}
+
+	/* --- Hero -------------------------------------------------------------- */
+
+	.services-hero {
 		padding-block: var(--space-7) var(--space-8);
 	}
 
-	.services-intro__title {
-		margin-block: var(--space-5) var(--space-5);
+	.services-hero__grid {
+		display: grid;
+		gap: var(--space-6);
 	}
 
-	.services-intro .lead {
-		max-width: 38rem;
+	.services-hero__eyebrow {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		color: var(--ink-3);
 	}
 
-	.services-list {
+	.services-hero__eyebrow-rule {
+		display: inline-block;
+		width: 1.5rem;
+		height: 1px;
+		background: currentColor;
+	}
+
+	.services-hero__title {
+		margin-top: var(--space-5);
+		font-size: clamp(3.5rem, 10vw, 7.5rem);
+		line-height: 0.95;
+		letter-spacing: -0.025em;
+	}
+
+	.services-hero__swash {
+		width: clamp(9rem, 22vw, 16rem);
+		height: auto;
+		margin-top: var(--space-3);
+		stroke: var(--accent);
+		stroke-width: 2;
+		stroke-linecap: round;
+		overflow: visible;
+	}
+
+	.services-hero__swash path {
+		stroke-dasharray: 1;
+		stroke-dashoffset: 0;
+		animation: swash-draw 1100ms var(--ease-out) 350ms both;
+	}
+
+	@keyframes swash-draw {
+		from {
+			stroke-dashoffset: 1;
+		}
+	}
+
+	.services-hero__tagline {
+		max-width: 18ch;
+		font-family: var(--font-serif);
+		font-style: italic;
+		font-size: clamp(2rem, 3.6vw, 3.25rem);
+		line-height: 1.08;
+		letter-spacing: -0.01em;
+		color: var(--ink);
+	}
+
+	.services-hero__tagline em {
+		font-style: italic;
+		color: var(--accent);
+	}
+
+	.services-hero__text {
+		max-width: 34rem;
+		margin-top: var(--space-5);
+		font-size: var(--text-lead);
+		line-height: 1.55;
+		color: var(--ink-2);
+	}
+
+	/* Two columns from tablet up, split by a thin vertical rule. */
+	@media (min-width: 768px) {
+		.services-hero {
+			padding-block: var(--space-8) var(--space-9);
+		}
+
+		.services-hero__grid {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+			gap: 0;
+			align-items: end;
+		}
+
+		.services-hero__lead {
+			padding-right: clamp(var(--space-6), 5vw, var(--space-9));
+		}
+
+		.services-hero__aside {
+			align-self: stretch;
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-end;
+			padding-left: clamp(var(--space-6), 5vw, var(--space-9));
+			border-left: var(--hairline);
+		}
+	}
+
+	/* --- List and CTA ------------------------------------------------------ */
+
+	.services-body {
 		padding-bottom: var(--section-pad);
+	}
+
+	.services-cta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-5) var(--space-6);
+		margin-top: var(--space-8);
+	}
+
+	.services-cta__text {
+		font-family: var(--font-serif);
+		font-size: clamp(1.75rem, 3.2vw, 2.75rem);
+		line-height: 1.15;
+		color: var(--ink);
+	}
+
+	.services-cta__text em {
+		font-style: italic;
+		color: var(--accent);
+	}
+
+	.services-cta__btn {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		min-height: 3rem;
+		padding: var(--space-3) var(--space-6);
+		border: 1px solid var(--accent);
+		border-radius: 999px;
+		font-size: var(--text-small);
+		font-weight: 500;
+		line-height: 1;
+		color: var(--accent);
+		text-decoration: none;
+		transition:
+			background-color 280ms var(--ease-out),
+			color 280ms var(--ease-out),
+			border-color 280ms var(--ease-out);
+	}
+
+	.services-cta__btn:focus-visible {
+		border-radius: 999px;
+	}
+
+	.services-cta__arrow {
+		display: inline-block;
+		transition: transform 280ms var(--ease-out);
+	}
+
+	.services-cta__btn:hover,
+	.services-cta__btn:focus-visible {
+		background-color: color-mix(in srgb, var(--accent) 8%, var(--paper));
+		border-color: var(--accent-hover);
+		color: var(--accent-hover);
+		text-decoration: none;
+	}
+
+	.services-cta__btn:hover .services-cta__arrow,
+	.services-cta__btn:focus-visible .services-cta__arrow {
+		transform: translateX(4px);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.services-hero__swash path {
+			animation: none;
+		}
+
+		.services-cta__btn:hover .services-cta__arrow,
+		.services-cta__btn:focus-visible .services-cta__arrow {
+			transform: none;
+		}
 	}
 </style>
