@@ -111,11 +111,6 @@ body {
 	min-height: 100dvh;
 }
 
-/* No scrolling under the preloader (see Preloader.astro) */
-html.is-preloading {
-	overflow: hidden;
-}
-
 img,
 picture,
 video,
@@ -467,7 +462,7 @@ main:has(> .breadcrumbs-wrap) {
    set (see BaseLayout and src/scripts/motion.ts), so content shows without JS.
    Opacity and transform only, so nothing shifts layout. */
 
-.js-reveal [data-reveal]:not([data-reveal='lines']),
+.js-reveal [data-reveal]:not([data-reveal='lines'], [data-reveal='hero']),
 .js-reveal [data-reveal='lines'] .reveal-word {
 	opacity: 0;
 	transform: translateY(16px);
@@ -493,6 +488,21 @@ main:has(> .breadcrumbs-wrap) {
 	transform: none;
 }
 
+/* data-reveal="hero": above-the-fold content (page H1s, the home hero image).
+   CSS only, so it never waits for JavaScript, and it starts from a visible state, so the
+   browser counts it as painted on the first frame (good for Largest Contentful Paint).
+   Transform and opacity only. */
+[data-reveal='hero'] {
+	animation: hero-rise var(--dur-slow) var(--ease-out) var(--reveal-delay, 0ms) both;
+}
+
+@keyframes hero-rise {
+	from {
+		opacity: 0.35;
+		transform: translateY(14px);
+	}
+}
+
 /* --- Reduced motion ----------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -509,5 +519,9 @@ main:has(> .breadcrumbs-wrap) {
 		animation-iteration-count: 1 !important;
 		transition-duration: 0.01ms !important;
 		scroll-behavior: auto !important;
+	}
+
+	[data-reveal='hero'] {
+		animation: none;
 	}
 }

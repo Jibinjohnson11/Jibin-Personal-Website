@@ -11,8 +11,9 @@ summary: One place for SEO campaigns, team tasks, content approvals and reportin
 homeTags: [Python, Django, PostgreSQL]
 homeSummary: One place for SEO campaigns, approvals and reporting.
 cover: ../../assets/images/work/seo-management-dashboard.webp
+coverAlt: "Demo preview of the SEO dashboard filled with sample data: traffic and ranking cards, a performance chart, a task list and a keyword table"
 coverLabel: Demo preview
-metaTitle: SEO Management Dashboard – Case Study | Jibin Johnson
+metaTitle: SEO Management Dashboard Django Case Study | Jibin Johnson
 metaDescription: A Django and PostgreSQL app I'm building to bring SEO campaigns, team tasks, content approvals and reporting into one place.
 ---
 
@@ -35,3 +36,5 @@ Django gave me authentication, an admin panel and a solid ORM out of the box, so
 ## Status
 
 I'm still building this. I started with content approvals because that's where our team lost the most time, and I'm adding features as I use it on real campaigns.
+
+**Related service:** [Python Django Development in Kerala](/services/python-django-development/)

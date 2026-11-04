@@ -32,6 +32,8 @@ const projects = defineCollection({
 			liveUrl: z.string().optional(),
 			repoUrl: z.string().optional(),
 			cover: image().optional(),
+			/** What the cover actually shows, for its alt text. */
+			coverAlt: z.string().optional(),
 			/** Small label shown over the cover, e.g. "Demo preview" for sample data. */
 			coverLabel: z.string().optional(),
 			metaTitle: z.string().max(60),

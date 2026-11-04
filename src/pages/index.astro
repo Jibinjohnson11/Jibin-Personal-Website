@@ -226,6 +226,26 @@ const schema = [
 		inLanguage: 'en-IN',
 		publisher: { '@id': PERSON_ID },
 	},
+	// Locality only: there's no public street address, so none is given here.
+	{
+		'@context': 'https://schema.org',
+		'@type': 'ProfessionalService',
+		'@id': `${homeUrl}#service`,
+		name: SITE.name,
+		url: homeUrl,
+		email: SITE.email,
+		founder: { '@id': PERSON_ID },
+		areaServed: [
+			{ '@type': 'State', name: 'Kerala' },
+			{ '@type': 'Country', name: 'India' },
+		],
+		address: {
+			'@type': 'PostalAddress',
+			addressLocality: 'Thiruvananthapuram',
+			addressRegion: 'Kerala',
+			addressCountry: 'IN',
+		},
+	},
 	{
 		'@context': 'https://schema.org',
 		'@type': 'FAQPage',
@@ -245,7 +265,7 @@ const schema = [
 			<div class="grid hero__grid">
 				<div class="hero__text">
 					<SectionLabel text="Web developer · SEO · Thiruvananthapuram" />
-					<h1 id="hero-title" class="hero__title" data-reveal="lines">Web Developer and SEO Specialist <em>in Kerala</em></h1>
+					<h1 id="hero-title" class="hero__title" data-reveal="hero">Web Developer and SEO Specialist <em>in Kerala</em></h1>
 					<p class="lead hero__lead" data-reveal style="--reveal-delay: 350ms">
 						I'm Jibin Johnson. I build fast, responsive websites that are ready for search from day one, and I use Python, Django, and AI tools to automate the work behind them. I'm based in Thiruvananthapuram (Trivandrum) and work with businesses across Kerala and beyond.
 					</p>
@@ -254,12 +274,14 @@ const schema = [
 						<Button variant="link" href="/work/">See my work</Button>
 					</div>
 				</div>
-				<figure class="hero__media" data-reveal style="--reveal-delay: 450ms">
+				<!-- sizes follows the CSS below: phones min(68vw, 17.5rem); tablets ~5/12 cols × 88%;
+				     desktop capped by max-height 46rem at the image's 0.66 ratio (~485px). -->
+				<figure class="hero__media" data-reveal="hero" style="--reveal-delay: 450ms">
 					<Image
 						src={heroImage}
 						alt="Jibin Johnson in a cream linen shirt and olive chinos, leaning on a large glowing teal letter J"
-						widths={[360, 540, 720, 1018]}
-						sizes="(min-width: 960px) 30vw, (min-width: 768px) 45vw, 80vw"
+						widths={[320, 480, 640, 800, 1018]}
+						sizes="(min-width: 960px) 485px, (min-width: 768px) 37vw, min(68vw, 280px)"
 						quality={80}
 						loading="eager"
 						fetchpriority="high"
@@ -292,7 +314,7 @@ const schema = [
 			<div class="col-content stack about__content">
 				<h2 id="about-title" data-reveal="lines">Where web development <em>meets search</em></h2>
 				<p class="lead" data-reveal>
-					Most websites get built first and optimized later. I do both together. At Prception Medialab in Thiruvananthapuram, I build responsive websites and run SEO for clients in healthcare, education, and hospitality, and I lead the SEO and web team for Blackbox Learning, an AI training academy.
+					Most websites get built first and optimized later. I do both together. At Prception Medialab in Thiruvananthapuram, I build responsive websites and run SEO for clients in healthcare, education, and hospitality, and I lead the SEO and web team for BlackBox Learning, an AI training academy.
 				</p>
 				<p data-reveal>
 					Running SEO campaigns showed me how much time goes into manual coordination, so I started building software to handle it. That path led me to a PG in Artificial Intelligence and to full-stack work in Python and Django.

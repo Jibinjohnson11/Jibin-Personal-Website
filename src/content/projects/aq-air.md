@@ -12,7 +12,8 @@ homeTags: [HTML, CSS, JavaScript]
 liveUrl: https://jibinjohnson11.github.io/AQAir/
 repoUrl: https://github.com/Jibinjohnson11/AQAir
 cover: ../../assets/images/work/aq-air-hero.webp
-metaTitle: AQ Air – Case Study | Jibin Johnson
+coverAlt: "AQ Air landing page hero: a family in a sunlit living room beside the air monitor, with floating readings for air quality, CO₂, PM2.5, VOCs and temperature"
+metaTitle: AQ Air Landing Page Case Study | Jibin Johnson
 metaDescription: How I built a scroll-driven landing page for an AI air-quality monitor in vanilla JavaScript, with Lenis smooth scrolling and reveal animations.
 ---
 
@@ -34,3 +35,5 @@ The page is mostly one long, animated story. Plain JavaScript kept it light and 
 ## What I learned
 
 Animation is easy to overdo. The hardest part was deciding what to leave out, so every movement on the page helps explain the product instead of just decorating it. Mapping out the scroll story before writing any code saved me from rebuilding sections later.
+
+**Related service:** [Website Development Services in Kerala](/services/web-development/)

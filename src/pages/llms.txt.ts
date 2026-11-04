@@ -14,7 +14,7 @@ export const GET: APIRoute = async () => {
 
 > Web developer and SEO specialist in Thiruvananthapuram (Trivandrum), Kerala, India. I build fast, responsive websites with SEO set up from launch, run SEO campaigns, and build small-to-medium custom web apps with Python, Django and PostgreSQL.
 
-I'm a Web Developer & SEO Specialist at Prception Medialab, and I lead the SEO and web team for Blackbox Learning, an AI training academy. I have a PG in Artificial Intelligence from Edure. I work with clients across Kerala, the rest of India and abroad. Pricing is quote-based.
+I'm a Web Developer & SEO Specialist at Prception Medialab, and I lead the SEO and web team for BlackBox Learning, an AI training academy. I have a PG in Artificial Intelligence from Edure. I work with clients across Kerala, the rest of India and abroad. Pricing is quote-based.
 
 Email: ${SITE.email}
 

@@ -1,7 +1,7 @@
 ---
-title: Seren Derma
+title: Serene Derma
 subtitle: Healthcare SEO
-slug: seren-derma
+slug: serene-derma
 order: 2
 year: 2026
 role: SEO team lead
@@ -10,9 +10,10 @@ stack: [Keyword research, On-page SEO, Link building, Google Search Console, Goo
 summary: SEO for a healthcare brand, from keyword planning to client-approved content and link building.
 homeTags: [SEO, Keyword research, Link building]
 liveUrl: https://serenederma.com/
-cover: ../../assets/images/work/seren-derma-hero.webp
-metaTitle: Seren Derma – Case Study | Jibin Johnson
-metaDescription: Healthcare SEO for Seren Derma, from keyword planning around treatments and locations to client-approved content, link building and reporting.
+cover: ../../assets/images/work/serene-derma-hero.webp
+coverAlt: "Serene Derma homepage, with the clinic's logo, a headline about dermatologists in Trivandrum and Kollam, and a Book Appointment button"
+metaTitle: Serene Derma Healthcare SEO Case Study | Jibin Johnson
+metaDescription: Healthcare SEO for Serene Derma, from keyword planning around treatments and locations to client-approved content, link building and reporting.
 ---
 
 ## The goal
@@ -28,8 +29,10 @@ Help a healthcare brand show up for the treatments and locations its patients se
 
 ## Results
 
-Several target keywords reached top search positions. [PLACEHOLDER: add specific numbers or a Search Console screenshot once approved]
+Serene Derma now has a keyword plan built around its treatments and the locations it serves, so every new page has a clear search to target. Each piece of content went through client review before it was published, which kept the medical details accurate. Link building ran alongside the content, and the client got regular reports from Search Console and Analytics showing what had changed and what we'd work on next. [PLACEHOLDER: add specific numbers or a Search Console screenshot once approved]
 
 ## What made it work
 
 In healthcare, getting the facts right matters as much as ranking. Making client review a normal step in the process, not an afterthought, kept the content accurate without slowing the campaign down.
+
+**Related service:** [SEO Services in Kerala](/services/seo/)

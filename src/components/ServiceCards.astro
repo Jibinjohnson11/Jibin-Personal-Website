@@ -166,8 +166,7 @@ const { items } = Astro.props;
 					lastOffset = 0;
 				};
 			});
-			// Layout settles after the preloader lifts and the web fonts load: measure again then.
-			document.addEventListener('preloader:done', () => ScrollTrigger.refresh(), { once: true });
+			// Line breaks move when the web fonts swap in: measure again then.
 			document.fonts?.ready.then(() => ScrollTrigger.refresh());
 		});
 

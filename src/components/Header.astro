@@ -18,7 +18,7 @@ const trailingLinks = [
 
 <header class="site-header" data-header>
 	<Container class="site-header__inner">
-		<a href="/" class="brand" aria-label={SITE.name} aria-current={isCurrent('/') ? 'page' : undefined}><img class="brand__mark" src="/favicon-96.png" width="96" height="96" alt="" /><span aria-hidden="true">{SITE.name.slice(1)}</span></a>
+		<a href="/" class="brand" aria-current={isCurrent('/') ? 'page' : undefined}><img class="brand__mark" src="/favicon-96.png" width="96" height="96" alt="" /><span><span class="visually-hidden">{SITE.name[0]}</span>{SITE.name.slice(1)}</span></a>
 
 		<nav class="nav-desktop" aria-label="Main">
 			<ul class="nav-desktop__list" role="list">
@@ -81,7 +81,7 @@ const trailingLinks = [
 
 <div id="mobile-menu" class="mobile-menu" role="dialog" aria-modal="true" aria-label="Site menu" hidden data-menu data-lenis-prevent>
 	<Container class="mobile-menu__top">
-		<a href="/" class="brand" aria-label={SITE.name}><img class="brand__mark" src="/favicon-96.png" width="96" height="96" alt="" /><span aria-hidden="true">{SITE.name.slice(1)}</span></a>
+		<a href="/" class="brand"><img class="brand__mark" src="/favicon-96.png" width="96" height="96" alt="" /><span><span class="visually-hidden">{SITE.name[0]}</span>{SITE.name.slice(1)}</span></a>
 		<button type="button" class="menu-button menu-button--close" data-menu-close>Close</button>
 	</Container>
 

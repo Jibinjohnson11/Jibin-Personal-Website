@@ -12,6 +12,7 @@ export const SITE = {
 
 export const SERVICES = [
 	{ name: 'Web Development', url: '/services/web-development/' },
+	{ name: 'Website Redesign', url: '/services/website-redesign/' },
 	{ name: 'SEO', url: '/services/seo/' },
 	{ name: 'Python Django Development', url: '/services/python-django-development/' },
 ];

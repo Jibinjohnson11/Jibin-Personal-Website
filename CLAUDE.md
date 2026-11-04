@@ -3,7 +3,7 @@
 # Project: jibinjohnson.in — personal portfolio
 
 ## Owner
-Jibin Johnson — Web Developer & SEO Specialist at Prception Medialab, Thiruvananthapuram (Trivandrum), Kerala, India. Also leads the SEO & web team for Blackbox Learning (an AI training academy, client of Prception). PG in Artificial Intelligence (Edure, 2025), BCA (University of Madras, results awaited).
+Jibin Johnson — Web Developer & SEO Specialist at Prception Medialab, Thiruvananthapuram (Trivandrum), Kerala, India. Also leads the SEO & web team for BlackBox Learning (an AI training academy, client of Prception). PG in Artificial Intelligence (Edure, 2025), BCA (University of Madras, results awaited).
 Email: jibinjohnsoninfo@gmail.com · LinkedIn: linkedin.com/in/jibinjohnson · GitHub: github.com/Jibinjohnson11
 
 ## Goals

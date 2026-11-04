@@ -35,7 +35,7 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 		<!-- Scene 1: the title on its own -->
 		<div class="wi__intro">
 			<h2 id="wi-title" class="wi__title">
-				<span class="wi__title-line">Where I create</span>
+				<span class="wi__title-line">Where I create</span>{' '}
 				<em class="wi__title-line">impact.</em>
 			</h2>
 		</div>
@@ -79,7 +79,7 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 								)}
 
 								<h3 class="wi__name" aria-label={job.company}>
-									<span class="wi__name-main">{job.nameLines[0]}</span>
+									<span class="wi__name-main">{job.nameLines[0]}</span>{' '}
 									{job.nameLines.length > 1 && <em class="wi__name-sub">{job.nameLines.slice(1).join(' ')}</em>}
 								</h3>
 

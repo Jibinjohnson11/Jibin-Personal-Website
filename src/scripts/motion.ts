@@ -55,7 +55,8 @@ function assignLines(words: HTMLElement[]) {
 }
 
 if (root.classList.contains('js-reveal')) {
-	const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+	// data-reveal="hero" is CSS only (see global.css), so it isn't observed here.
+	const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]:not([data-reveal="hero"])'));
 	const pending = new Set(targets);
 	const splits: HTMLElement[][] = [];
 
@@ -100,11 +101,6 @@ if (root.classList.contains('js-reveal')) {
 		for (const el of [...pending]) if (el.getBoundingClientRect().top < bottom) reveal(el);
 	});
 
-	// Hold the reveals until the preloader starts to lift, so they play where you can see them.
-	const observeAll = () => {
-		targets.forEach((el) => observer.observe(el));
-		endObserver.observe(sentinel);
-	};
-	if (root.classList.contains('is-preloading')) document.addEventListener('preloader:done', observeAll, { once: true });
-	else observeAll();
+	targets.forEach((el) => observer.observe(el));
+	endObserver.observe(sentinel);
 }

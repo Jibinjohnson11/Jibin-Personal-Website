@@ -59,7 +59,7 @@ export const EXPERIENCE: Role[] = [
 			alt: 'The Prception logo symbol on a glowing teal glass disc, circled by a light ring and reflected on a dark glossy floor',
 		},
 		skills: ['Web Development', 'SEO', 'Analytics'],
-		cta: { href: '/work/seren-derma/', label: 'Seren Derma Case Study' },
+		cta: { href: '/work/serene-derma/', label: 'Serene Derma Case Study' },
 		link: { href: '/work/', label: 'View All Work' },
 	},
 	{
