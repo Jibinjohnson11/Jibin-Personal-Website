@@ -82,7 +82,11 @@ const pad = (n: number) => String(n).padStart(2, '0');
 <script>
 /* Stacked cards: depth for the cards behind, and the on/off switch for stacking.
    --depth on each card = how many cards are stacked on it, counted continuously
-   (0.5 = the next card is half way up). CSS turns it into scale and shade. */
+   (0.5 = the next card is half way up). CSS turns it into scale and shade.
+   The screen height is measured once per real resize (viewportHeight ignores the phone
+   toolbar), so stacking can't flip on and off, or the depth jump, mid-scroll. */
+import { viewportHeight, onLayoutResize } from '../scripts/viewport';
+
 const motionOk = window.matchMedia('(prefers-reduced-motion: no-preference)');
 
 document.querySelectorAll<HTMLElement>('[data-stack]').forEach((stack) => {
@@ -92,13 +96,15 @@ document.querySelectorAll<HTMLElement>('[data-stack]').forEach((stack) => {
 	let enabled = false;
 	let inView = false;
 	let frame = 0;
+	let screenH = window.innerHeight;
 
 	const measure = () => {
 		stack.classList.add('is-stacking');
+		screenH = viewportHeight();
 		stickTops = items.map((item) => parseFloat(getComputedStyle(item).top) || 0);
 		// A card taller than the space under its sticky top would have its lower part hidden
 		// behind the next card, so only stack when every card fits.
-		const fits = items.every((item, i) => stickTops[i] + item.offsetHeight <= window.innerHeight);
+		const fits = items.every((item, i) => stickTops[i] + item.offsetHeight <= screenH);
 		enabled = motionOk.matches && fits;
 		stack.classList.toggle('is-stacking', enabled);
 		if (!enabled) cards.forEach((card) => card.style.removeProperty('--depth'));
@@ -112,7 +118,7 @@ document.querySelectorAll<HTMLElement>('[data-stack]').forEach((stack) => {
 		const progress = tops.map((top, j) => {
 			if (j === 0) return 0;
 			// Card j starts covering card j-1 when it reaches that card's bottom edge.
-			const start = Math.min(window.innerHeight, stickTops[j - 1] + items[j - 1].offsetHeight);
+			const start = Math.min(screenH, stickTops[j - 1] + items[j - 1].offsetHeight);
 			const end = stickTops[j];
 			return Math.min(1, Math.max(0, (start - top) / (start - end)));
 		});
@@ -140,7 +146,7 @@ document.querySelectorAll<HTMLElement>('[data-stack]').forEach((stack) => {
 
 	new ResizeObserver(refresh).observe(stack);
 	window.addEventListener('scroll', schedule, { passive: true });
-	window.addEventListener('resize', refresh, { passive: true });
+	onLayoutResize(refresh);
 	motionOk.addEventListener('change', refresh);
 
 	// Tabbing to a card that's buried under others: scroll back to where it sits on its own.
@@ -219,6 +225,25 @@ document.querySelectorAll<HTMLElement>('[data-stack]').forEach((stack) => {
 	@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
 		.stack-card {
 			background: linear-gradient(150deg, var(--accent), var(--accent-hover));
+		}
+	}
+
+	/* Touch screens: no live blur. A 20px backdrop blur on cards that stick and scale every
+	   frame is re-rendered each frame and dropped frames on phones and tablets. The glass is
+	   82 to 90% opaque over Midnight Black, so the same teal mixed onto Midnight looks the
+	   same without the blur. The cards behind get their own layer for the depth scale, so
+	   the stacking is composited instead of repainted. Desktop keeps the frosted glass. */
+	@media (hover: none), (pointer: coarse) {
+		.stack-card {
+			-webkit-backdrop-filter: none;
+			backdrop-filter: none;
+			background:
+				linear-gradient(155deg, rgb(250 246 232 / 0.08), transparent 45%),
+				linear-gradient(150deg, color-mix(in srgb, rgb(11 95 86) 82%, #0b0f14), color-mix(in srgb, rgb(10 63 58) 90%, #0b0f14));
+		}
+
+		.is-stacking .stack-card {
+			will-change: scale;
 		}
 	}
 

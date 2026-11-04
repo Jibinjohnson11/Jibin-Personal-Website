@@ -437,7 +437,11 @@ const schema = [
 /* Why me covers Selected work. Selected work pins once its bottom edge reaches the
    bottom of the screen (after the project cards have finished stacking), and Why me
    scrolls up over it. Sticky needs a top offset, so this measures it:
-   screen height minus section height. CSS does the rest. */
+   screen height minus section height. CSS does the rest.
+   The screen height comes from viewportHeight(), which on phones ignores the toolbar
+   sliding in and out, so the pinned section never jumps mid-scroll. */
+import { viewportHeight, onLayoutResize } from '../scripts/viewport';
+
 const motionOk = window.matchMedia('(prefers-reduced-motion: no-preference)');
 
 document.querySelectorAll<HTMLElement>('[data-cover-stack]').forEach((stack) => {
@@ -448,11 +452,11 @@ document.querySelectorAll<HTMLElement>('[data-cover-stack]').forEach((stack) => 
 	const measure = () => {
 		const on = motionOk.matches;
 		stack.classList.toggle('is-covering', on);
-		if (on) under.style.setProperty('--pin-top', `${Math.min(0, window.innerHeight - under.offsetHeight)}px`);
+		if (on) under.style.setProperty('--pin-top', `${Math.min(0, viewportHeight() - under.offsetHeight)}px`);
 	};
 
 	new ResizeObserver(measure).observe(under);
-	window.addEventListener('resize', measure, { passive: true });
+	onLayoutResize(measure);
 	motionOk.addEventListener('change', measure);
 
 	// Tabbing back into Selected work while Why me covers it: scroll back until Why me

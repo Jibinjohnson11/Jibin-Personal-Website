@@ -106,9 +106,11 @@ html {
 /* No CSS scroll-behavior: smooth. Lenis (src/scripts/smooth-scroll.ts) is the only
    smoothing on desktop; phones, tablets and reduced motion keep plain native scrolling. */
 
+/* svh, not dvh: dvh changes on every frame of the mobile toolbar sliding in and out, which
+   relaid out the page mid-scroll. The body background fills the canvas either way. */
 body {
 	min-height: 100vh;
-	min-height: 100dvh;
+	min-height: 100svh;
 }
 
 img,

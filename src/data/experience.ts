@@ -1,7 +1,9 @@
 import type { ImageMetadata } from 'astro';
 import blackboxPanda from '../assets/brand/blackbox/blackbox-red-panda-walking.webp';
+import blackboxVisualMobile from '../assets/brand/blackbox/blackbox-visual-mobile.png';
 import prceptionLogo from '../assets/brand/prception/prception-logo.png';
 import prceptionVisual from '../assets/brand/prception/prception-visual.png';
+import prceptionVisualMobile from '../assets/brand/prception/prception-visual-mobile.png';
 
 /**
  * Current roles shown in the homepage "Where I work" showcase (src/components/WhereIWork.astro).
@@ -32,8 +34,9 @@ export interface Role {
 	preview?: { src: ImageMetadata; alt: string; caption: string };
 	/** Brand theme for the panel. Omit for the default teal/dark look */
 	theme?: 'blackbox' | 'prception';
-	/** Full-bleed background visual for themed panels, used instead of a screenshot */
-	mascot?: { src: ImageMetadata; alt: string };
+	/** Full-bleed background visual for themed panels, used instead of a screenshot.
+	 *  `mobile` is an optional portrait crop served at 768px and below. */
+	mascot?: { src: ImageMetadata; alt: string; mobile?: ImageMetadata };
 	/** Skill tags shown on the panel */
 	skills?: string[];
 	/** Main call to action. Links starting with http open in a new tab */
@@ -56,6 +59,7 @@ export const EXPERIENCE: Role[] = [
 		theme: 'prception',
 		mascot: {
 			src: prceptionVisual,
+			mobile: prceptionVisualMobile,
 			alt: 'The Prception logo symbol on a glowing teal glass disc, circled by a light ring and reflected on a dark glossy floor',
 		},
 		skills: ['Web Development', 'SEO', 'Analytics'],
@@ -77,6 +81,7 @@ export const EXPERIENCE: Role[] = [
 		theme: 'blackbox',
 		mascot: {
 			src: blackboxPanda,
+			mobile: blackboxVisualMobile,
 			alt: 'BlackBox Learning red panda mascot in an orange blazer and sunglasses, walking out of a glowing ring',
 		},
 		skills: ['Generative AI', 'Full Stack Development', 'Machine Learning', 'Digital Marketing'],

@@ -18,13 +18,24 @@
  * browser supports CSS scroll-driven animations. Data lives in src/data/experience.ts.
 
  */
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import Button from './Button.astro';
 import { EXPERIENCE } from '../data/experience';
 
 const total = EXPERIENCE.length;
 const pad = (n: number) => String(n).padStart(2, '0');
 const isExternal = (href: string) => /^https?:\/\//.test(href);
+
+// Portrait crops of the background visuals. On phones (768px and below) the crop sits inside
+// the copy, between the name and the role, so as one panel pushes the next the two images meet
+// side by side. Tablets and desktop keep the landscape background.
+// 1px transparent GIF: a <picture> source for the screens that hide that image, so it isn't fetched
+const BLANK_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+const mobileBgs = await Promise.all(
+	EXPERIENCE.map((job) =>
+		job.mascot?.mobile ? getImage({ src: job.mascot.mobile, widths: [480, 720, 941], format: 'webp' }) : null,
+	),
+);
 ---
 
 <section class="wi" aria-labelledby="wi-title" data-wi>
@@ -44,18 +55,26 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 		<ol class="wi__track" role="list">
 			{
 				EXPERIENCE.map((job, i) => (
-					<li class:list={['wi__panel', job.theme && `wi__panel--${job.theme}`]} data-wi-panel={i}>
+					<li
+						class:list={['wi__panel', job.theme && `wi__panel--${job.theme}`, mobileBgs[i] && 'wi__panel--portrait']}
+						style={mobileBgs[i] ? `--wi-portrait: url(${mobileBgs[i]!.src})` : undefined}
+						data-wi-panel={i}
+					>
 						{job.mascot && (
-							<div class="wi__bg">
-								<Image
-									class="wi__bg-img"
-									src={job.mascot.src}
-									alt={job.mascot.alt}
-									widths={[640, 960, 1280, 1600, 2048]}
-									sizes="100vw"
-									loading="lazy"
-									decoding="async"
-								/>
+							<div class:list={['wi__bg', mobileBgs[i] && 'wi__bg--has-portrait']}>
+								<picture>
+									{/* Phones show the portrait crop instead (.wi__disc): skip the download */}
+									{mobileBgs[i] && <source media="(max-width: 768px)" srcset={BLANK_PIXEL} />}
+									<Image
+										class="wi__bg-img"
+										src={job.mascot.src}
+										alt={job.mascot.alt}
+										widths={[640, 960, 1280, 1600, 2048]}
+										sizes="100vw"
+										loading="lazy"
+										decoding="async"
+									/>
+								</picture>
 								<div class="wi__bg-shade" aria-hidden="true" />
 							</div>
 						)}
@@ -82,6 +101,23 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 									<span class="wi__name-main">{job.nameLines[0]}</span>{' '}
 									{job.nameLines.length > 1 && <em class="wi__name-sub">{job.nameLines.slice(1).join(' ')}</em>}
 								</h3>
+
+								{mobileBgs[i] && job.mascot && (
+									<picture class="wi__disc">
+										{/* Wider screens get a 1px inline placeholder, so they never download the crop */}
+										<source media="(min-width: 769px)" srcset={BLANK_PIXEL} />
+										<img
+											src={mobileBgs[i]!.src}
+											srcset={mobileBgs[i]!.srcSet.attribute}
+											sizes="100vw"
+											width={job.mascot.mobile!.width}
+											height={job.mascot.mobile!.height}
+											alt={job.mascot.alt}
+											loading="lazy"
+											decoding="async"
+										/>
+									</picture>
+								)}
 
 								<div class="wi__role-row">
 									{!job.theme && (
@@ -818,7 +854,10 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 	   promotes transform only: will-change: opacity would cut its tags off from the image
 	   behind them, so their backdrop blur would vanish. Phones and touch tablets only:
 	   on a 1x desktop screen layered text antialiases a shade differently, and desktop
-	   already scrolled smoothly. */
+	   already scrolled smoothly.
+	   The skill tags also drop their backdrop blur here: the track slides every frame, so
+	   each tag's blur was re-rendered every frame. On these layouts the tags sit on the
+	   dark shade under the copy, where a 6px blur of a near-flat colour looks the same. */
 	@media (max-width: 899px), (pointer: coarse) {
 		/* Panel 1 dims and sinks as it's pushed off: composite that instead of repainting */
 		.wi--cinematic .wi__panel:first-child .wi__inner {
@@ -831,6 +870,11 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 
 		.wi--cinematic .wi__copy > .wi__skills {
 			will-change: transform;
+		}
+
+		.wi--cinematic .wi__skill {
+			-webkit-backdrop-filter: none;
+			backdrop-filter: none;
 		}
 	}
 
@@ -1124,13 +1168,16 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 	}
 
 	/* --- Stacked layout: copy fades and rises line by line, background drifts --- */
-	.wi__copy > :nth-child(1) { --n: 0; }
-	.wi__copy > :nth-child(2) { --n: 1; }
-	.wi__copy > :nth-child(3) { --n: 2; }
-	.wi__copy > :nth-child(4) { --n: 3; }
-	.wi__copy > :nth-child(5) { --n: 4; }
-	.wi__copy > :nth-child(6) { --n: 5; }
-	.wi__copy > :nth-child(7) { --n: 6; }
+	/* Stagger index. The phone-only visual (.wi__disc) is skipped, so desktop timing is
+	   the same with or without it; on phones it reveals with the name. */
+	.wi__copy > :nth-child(1 of :not(.wi__disc)) { --n: 0; }
+	.wi__copy > :nth-child(2 of :not(.wi__disc)) { --n: 1; }
+	.wi__copy > :nth-child(3 of :not(.wi__disc)) { --n: 2; }
+	.wi__copy > :nth-child(4 of :not(.wi__disc)) { --n: 3; }
+	.wi__copy > :nth-child(5 of :not(.wi__disc)) { --n: 4; }
+	.wi__copy > :nth-child(6 of :not(.wi__disc)) { --n: 5; }
+	.wi__copy > :nth-child(7 of :not(.wi__disc)) { --n: 6; }
+	.wi__copy > .wi__disc { --n: 2; }
 
 	@supports (animation-timeline: view()) {
 		@media (prefers-reduced-motion: no-preference) {
@@ -1581,5 +1628,250 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 		opacity: 1;
 		transform: none;
 		transition-delay: calc(var(--n, 0) * 45ms);
+	}
+
+	/* =========================================================================
+	   Phones (768px and below): panels with a portrait visual (.wi__panel--portrait,
+	   both companies) follow the portrait design. Meta and name at the top, the
+	   brand visual in the middle (it slides under the name and fades on every
+	   side), then role, text, tags and links. The landscape background is
+	   switched off and the portrait crop lives in the copy (.wi__disc), so it
+	   always lands in the gap whatever the text height. As the track slides,
+	   the incoming visual meets the outgoing one side by side and pushes it off.
+	   Colours come from each panel's theme (--accent, --wi-glow).
+	   Tablets and desktop are untouched.
+	   ========================================================================= */
+	.wi__disc {
+		display: none;
+	}
+
+
+	.wi__panel--prception {
+		--wi-glow: rgb(0 169 157 / 0.6);
+		--wi-disc-pos: 55% 31%; /* disc and its reflection centred */
+	}
+
+	.wi__panel--blackbox {
+		--wi-glow: rgb(255 101 0 / 0.6);
+		--wi-disc-pos: 51% 31%; /* panda, ring and reflection centred */
+	}
+
+	@media (max-width: 768px) {
+		.wi__panel--portrait .wi__bg--has-portrait,
+		.wi__panel--prception .wi__copy :global(.wi__brand) {
+			display: none; /* the portrait visual takes over; its disc carries the logo */
+		}
+
+		.wi__panel--portrait .wi__inner {
+			margin-top: 0;
+			padding-top: var(--space-7);
+		}
+
+		/* Text above the visual where they overlap */
+		.wi__panel--portrait .wi__copy > :not(.wi__disc) {
+			position: relative;
+			z-index: 1;
+		}
+
+		/* --- Meta: thin dividers, "Current" as a soft pill --- */
+		.wi__panel--portrait .wi__meta {
+			gap: var(--space-2) var(--space-3);
+			letter-spacing: 0.06em; /* keeps the three items on one line down to 320px */
+		}
+
+		.wi__panel--portrait .wi__meta > :not(:last-child)::after {
+			content: '';
+			display: inline-block;
+			width: 1px;
+			height: 1.1em;
+			margin-left: var(--space-3);
+			vertical-align: -0.2em;
+			background: rgb(244 241 234 / 0.22);
+		}
+
+		.wi__panel--portrait .wi__now {
+			padding: 0.25rem 0.6rem;
+			border-radius: 999px;
+			background: color-mix(in srgb, var(--accent) 16%, transparent);
+		}
+
+		/* --- Short accent line under the name --- */
+		.wi__panel--portrait .wi__name::after {
+			content: '';
+			display: block;
+			width: 4.5rem;
+			height: 2px;
+			margin-top: var(--space-4);
+			border-radius: 2px;
+			background: linear-gradient(90deg, var(--accent), transparent);
+			box-shadow: 0 0 12px var(--wi-glow);
+		}
+
+		/* --- The visual --- */
+		.wi__panel--portrait .wi__disc {
+			display: block;
+			position: relative;
+			height: clamp(14rem, 66vw, 24rem);
+			margin: calc(var(--space-8) * -1) calc(var(--container-pad) * -1) calc(var(--space-3) * -1);
+			pointer-events: none;
+			/* Fade on all four sides so the image edge never shows against the page */
+			-webkit-mask-image:
+				linear-gradient(180deg, transparent, #000 24%, #000 80%, transparent),
+				linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+			-webkit-mask-composite: source-in;
+			mask-image:
+				linear-gradient(180deg, transparent, #000 24%, #000 80%, transparent),
+				linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+			mask-composite: intersect;
+		}
+
+		.wi__disc img {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			object-position: var(--wi-disc-pos, 50% 30%);
+		}
+
+		/* --- Role: vertical accent bar on the left --- */
+		.wi__panel--portrait .wi__role-row {
+			position: relative;
+			margin-top: var(--space-4);
+			padding: 0 0 0 var(--space-4);
+			border-top: 0;
+		}
+
+		.wi__panel--portrait .wi__role-row::before {
+			content: '';
+			position: absolute;
+			top: 0.15rem;
+			bottom: 0.15rem;
+			left: 0;
+			width: 2px;
+			height: auto; /* Prception's base rule sets a 2px-tall line */
+			border-radius: 2px;
+			background: linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 35%, transparent));
+			box-shadow: 0 0 12px var(--wi-glow);
+		}
+
+		/* Prception's note is the place: a pin goes before it */
+		.wi__panel--prception .wi__note {
+			display: flex;
+			align-items: center;
+			gap: 0.4rem;
+		}
+
+		.wi__panel--prception .wi__note::before {
+			content: '';
+			flex: none;
+			width: 1em;
+			height: 1em;
+			background: currentColor;
+			-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z'/%3E%3Ccircle cx='12' cy='9.5' r='2.5'/%3E%3C/svg%3E") center / contain no-repeat;
+			mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21z'/%3E%3Ccircle cx='12' cy='9.5' r='2.5'/%3E%3C/svg%3E") center / contain no-repeat;
+		}
+
+		.wi__panel--prception .wi__skill {
+			border-color: rgb(0 169 157 / 0.7);
+		}
+
+		/* --- Cinematic: the copy fills the screen and the visual takes the spare height --- */
+		.wi.wi--cinematic .wi__panel--portrait {
+			flex-direction: column;
+			align-items: stretch;
+		}
+
+		.wi.wi--cinematic .wi__panel--portrait .wi__inner {
+			flex: 1 1 auto;
+			display: flex;
+			flex-direction: column;
+			padding-block: var(--space-4) var(--space-5);
+		}
+
+		.wi.wi--cinematic .wi__panel--portrait .wi__copy {
+			flex: 1 1 auto;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.wi.wi--cinematic .wi__panel--portrait .wi__disc {
+			flex: 1 1 auto;
+			height: auto;
+			min-height: clamp(11rem, 30svh, 20rem);
+		}
+
+		/* --- Atmosphere: the portrait image runs full screen behind everything, masked
+		   so only its top glow and the light streaks in the bottom corners show; the
+		   sharp visual stays in the gap (.wi__disc), so there's never a double image.
+		   Same file as the visual, only read on phones. --- */
+		.wi__panel--portrait::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			z-index: -1;
+			pointer-events: none;
+			background: var(--wi-portrait) 50% 100% / cover no-repeat;
+			-webkit-mask-image: linear-gradient(180deg, rgb(0 0 0 / 0.9), rgb(0 0 0 / 0.3) 12%, transparent 22%, transparent 84%, rgb(0 0 0 / 0.55) 100%);
+			mask-image: linear-gradient(180deg, rgb(0 0 0 / 0.9), rgb(0 0 0 / 0.3) 12%, transparent 22%, transparent 84%, rgb(0 0 0 / 0.55) 100%);
+		}
+
+		/* Keep the bottom link crisp where a light streak passes behind it */
+		.wi__panel--portrait .wi__actions :global(.wi__link) {
+			text-shadow: 0 0 10px var(--wi-shade, rgb(0 0 0 / 0.85)), 0 0 2px rgb(0 0 0 / 0.6);
+		}
+
+		/* Panel 1 sits over the intro title: its atmosphere fades in with the panel */
+		.wi.wi--cinematic .wi__panel--portrait:first-child::before {
+			opacity: var(--wi-in);
+			will-change: opacity;
+		}
+
+		/* BlackBox: a warm orange haze around the panda */
+		.wi .wi__panel--blackbox.wi__panel--portrait {
+			background:
+				radial-gradient(85% 30% at 50% 40%, rgb(255 101 0 / 0.16), transparent 72%),
+				var(--bb-brown);
+		}
+
+		/* Link on its own line under the CTA, clear of the floating buttons */
+		.wi__panel--portrait .wi__actions {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: var(--space-4);
+		}
+
+		/* --- The push: the incoming panel carries its visual the whole way in ---
+		   Its copy still waits for the panel to land, but the visual is on from the
+		   start, so the two images meet side by side and one shoves the other off.
+		   (Specificity beats the copy reveal rules for every mode.) */
+		.wi.wi--cinematic .wi__track .wi__panel.wi__panel--portrait:not(:first-child) .wi__copy > .wi__disc.wi__disc {
+			opacity: 1;
+			transform: none;
+			transition: none;
+		}
+
+		/* A light parallax inside each visual: the incoming image runs slightly ahead
+		   of its panel and settles, the outgoing one drags a touch behind. Transform
+		   only; on touch screens the offsets are whole pixels set by the script. */
+		.wi.wi--cinematic .wi__panel--portrait .wi__disc img {
+			will-change: transform;
+		}
+
+		.wi.wi--cinematic .wi__panel--portrait:first-child .wi__disc img {
+			transform: translate3d(calc(var(--wi-slide) * 3%), 0, 0);
+		}
+
+		.wi.wi--cinematic .wi__panel--portrait:not(:first-child) .wi__disc img {
+			transform: translate3d(calc((1 - var(--wi-slide)) * -5%), 0, 0);
+		}
+
+		.wi.wi--cinematic.wi--steady .wi__panel--portrait:first-child .wi__disc img {
+			transform: translate3d(var(--wi-bg1-x, 0px), 0, 0);
+		}
+
+		.wi.wi--cinematic.wi--steady .wi__panel--portrait:not(:first-child) .wi__disc img {
+			transform: translate3d(var(--wi-bg2-x, 0px), 0, 0);
+		}
 	}
 </style>

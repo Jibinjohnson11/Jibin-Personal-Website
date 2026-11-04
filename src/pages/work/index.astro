@@ -1,10 +1,25 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import CtaLine from '../../components/CtaLine.astro';
-import WorkList from '../../components/WorkList.astro';
+import Button from '../../components/Button.astro';
+import WorkShowcase from '../../components/WorkShowcase.astro';
+import { extraWork, type WorkCard } from '../../data/work-extra';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const cards: WorkCard[] = [
+	...projects.map(({ id, data }) => ({
+		title: data.title,
+		subtitle: data.subtitle,
+		summary: data.summary,
+		stack: data.stack,
+		href: `/work/${id}/`,
+		cover: data.cover,
+		coverAlt: data.coverAlt,
+		coverLabel: data.coverLabel,
+	})),
+	...extraWork,
+];
+const count = String(cards.length).padStart(2, '0');
 ---
 
 <BaseLayout
@@ -12,31 +27,139 @@ const projects = (await getCollection('projects')).sort((a, b) => a.data.order -
 	description="Website, SEO, and Django projects: AQ Air, healthcare and education SEO campaigns, and an SEO Management Dashboard."
 	breadcrumbs={[{ name: 'Home', url: '/' }, { name: 'Work', url: '/work/' }]}
 >
-	<section class="work-intro screen screen--first container" aria-labelledby="work-title">
-		<h1 id="work-title" data-reveal="hero">Work and <em>projects</em></h1>
-		<p class="lead" data-reveal style="--reveal-delay: 250ms">
-			Websites, SEO campaigns and full-stack builds. Each one started with a real problem.
+	<section class="work-intro container" aria-labelledby="work-title">
+		<p class="work-intro__eyebrow label">
+			<span>Selected work</span>
+			<span class="work-intro__dash" aria-hidden="true"></span>
+			<span>2026</span>
 		</p>
+		<div class="work-intro__row">
+			<h1 id="work-title" data-reveal="hero">Work and <em>projects</em></h1>
+			<p class="work-intro__count label">
+				<span class="work-intro__count-num">{count}</span> Projects
+			</p>
+			<p class="work-intro__lead">
+				A collection of real projects in web development, SEO and full-stack applications.
+			</p>
+		</div>
 	</section>
 
-	<div class="work-projects screen container">
-		<WorkList projects={projects} headingLevel={2} />
+	<div class="work-projects container">
+		<WorkShowcase cards={cards} />
 
-		<CtaLine />
+		<div class="work-cta">
+			<div class="work-cta__copy">
+				<span class="work-cta__line" aria-hidden="true"></span>
+				<p class="work-cta__text">Like what you see? <em>Let's build yours.</em></p>
+			</div>
+			<Button href="/contact/" class="work-cta__btn">
+				Start a project <span aria-hidden="true">→</span>
+			</Button>
+		</div>
 	</div>
 </BaseLayout>
 
 <style>
+	/* --- Intro --- */
 	.work-intro {
-		padding-block: var(--space-7) var(--space-8);
+		padding-block: var(--space-5) var(--space-7);
 	}
 
-	.work-intro .lead {
-		max-width: 38rem;
-		margin-top: var(--space-5);
+	.work-intro__eyebrow {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		margin-bottom: var(--space-4);
 	}
 
+	.work-intro__dash {
+		width: 1.75rem;
+		border-top: 1px solid currentColor;
+	}
+
+	.work-intro__row {
+		display: grid;
+		gap: var(--space-4);
+	}
+
+	.work-intro h1 {
+		font-size: clamp(2.75rem, 6vw, 5rem);
+		line-height: 1;
+	}
+
+	.work-intro__count {
+		color: var(--ink-2);
+	}
+
+	.work-intro__count-num {
+		color: var(--accent);
+	}
+
+	.work-intro__lead {
+		max-width: 26rem;
+		color: var(--ink-2);
+	}
+
+	@media (min-width: 1024px) {
+		.work-intro__row {
+			grid-template-columns: minmax(0, 1fr) auto minmax(0, 22rem);
+			align-items: end;
+			gap: var(--space-8);
+		}
+
+		.work-intro__count,
+		.work-intro__lead {
+			padding-bottom: 0.6rem;
+		}
+	}
+
+	/* --- Projects and closing call to action --- */
 	.work-projects {
 		padding-bottom: var(--section-pad);
+	}
+
+	.work-cta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-5) var(--space-6);
+		margin-top: var(--space-8);
+	}
+
+	.work-cta__copy {
+		display: flex;
+		align-items: center;
+		gap: var(--space-4);
+	}
+
+	.work-cta__line {
+		flex: none;
+		width: 2.5rem;
+		border-top: 1px solid var(--accent);
+	}
+
+	.work-cta__text {
+		font-family: var(--font-serif);
+		font-size: clamp(1.625rem, 3vw, 2.5rem);
+		line-height: 1.15;
+	}
+
+	.work-cta__text em {
+		color: var(--accent);
+	}
+
+	@media (max-width: 479px) {
+		.work-cta__copy {
+			align-items: flex-start;
+		}
+
+		.work-cta__line {
+			margin-top: 0.9rem;
+		}
+
+		.work-cta :global(.work-cta__btn) {
+			width: 100%;
+		}
 	}
 </style>
