@@ -204,19 +204,64 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 		// showing or hiding mid-scroll doesn't make the scene jump.
 		const runLength = () => section.offsetHeight - stage.offsetHeight;
 
+		// Set on the stage, where every consumer lives, not on the section: a change on
+		// the section repaints the section and the page layer under it on every frame.
+		const write = (name: string, value: string) => {
+			if (written.get(name) === value) return;
+			written.set(name, value);
+			stage.style.setProperty(name, value);
+		};
+
+		/* Steady mode (.wi--steady): touch screens and windows under 768px. On iOS the scroll
+		   position the page reads lags the compositor by a frame and then corrects itself, so
+		   anything moved by scroll progress shakes by a pixel or two. In this mode the title
+		   and the copy are never moved by scroll: each one plays a short timed CSS transition
+		   once, when progress crosses its threshold, and reverses when it crosses back. What
+		   still follows scroll (the track slide, the background drift) moves in whole pixels. */
+		const steadyQuery = window.matchMedia('(max-width: 767px), (hover: none), (pointer: coarse)');
+		const intro = section.querySelector<HTMLElement>('.wi__intro')!;
+		const TITLE_OUT = 0.1; // the title zooms away
+		const PANEL_ON = [0.28, 0.74]; // each panel's copy reveals
+		// Switch back only a little below the threshold, so a small correction in the scroll
+		// position can't flick a reveal on and off.
+		const SLACK = 0.02;
+		const STEADY_VARS = ['--wi-track-x', '--wi-bg1-x', '--wi-bg2-x'];
+		let steady = false;
+
+		const cross = (el: HTMLElement, name: string, p: number, at: number) => {
+			const on = el.classList.contains(name);
+			if (!on && p >= at) el.classList.add(name);
+			else if (on && p < at - SLACK) el.classList.remove(name);
+		};
+
 		const update = () => {
 			ticking = false;
 			const rect = section.getBoundingClientRect();
 			const run = rect.height - stage.offsetHeight;
 			const p = run > 0 ? clamp(-rect.top / run) : 0;
+			let slide = 0;
 			for (const [name, [a, b]] of phases) {
-				const value = ease(clamp((p - a) / (b - a))).toFixed(4);
-				if (written.get(name) === value) continue;
-				written.set(name, value);
-				// Set on the stage, where every consumer lives, not on the section: a change on
-				// the section repaints the section and the page layer under it on every frame.
-				stage.style.setProperty(name, value);
+				const t = ease(clamp((p - a) / (b - a)));
+				if (name === '--wi-slide') slide = t;
+				write(name, t.toFixed(4));
 			}
+			if (!steady) return;
+			// The track and both background images are one stage wide.
+			const w = stageW || stage.clientWidth;
+			write('--wi-track-x', `${-Math.round(slide * w)}px`);
+			write('--wi-bg1-x', `${Math.round(slide * w * 0.03)}px`);
+			write('--wi-bg2-x', `${-Math.round((1 - slide) * w * 0.05)}px`);
+			cross(intro, 'is-out', p, TITLE_OUT);
+			panels.forEach((panel, i) => cross(panel, 'is-active', p, PANEL_ON[i] ?? PANEL_ON[PANEL_ON.length - 1]));
+		};
+
+		const clearSteady = () => {
+			STEADY_VARS.forEach((name) => {
+				written.delete(name);
+				stage.style.removeProperty(name);
+			});
+			intro.classList.remove('is-out');
+			panels.forEach((panel) => panel.classList.remove('is-active'));
 		};
 
 		const onScroll = () => {
@@ -291,6 +336,9 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 		const apply = () => {
 			const on = query.matches;
 			section.classList.toggle('wi--cinematic', on);
+			steady = on && steadyQuery.matches;
+			section.classList.toggle('wi--steady', steady);
+			if (!steady) clearSteady();
 			if (on) {
 				io.observe(section);
 				preload.observe(section);
@@ -311,6 +359,7 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 		};
 
 		query.addEventListener('change', apply);
+		steadyQuery.addEventListener('change', apply);
 		apply();
 	}
 </script>
@@ -1426,4 +1475,59 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 		}
 	}
 
+	/* =========================================================================
+	   Steady mode: touch screens and windows under 768px (.wi--steady, set by the
+	   script). Text is never moved by scroll here, because the scroll position iOS
+	   hands the page lags and corrects itself every frame. The title and each
+	   panel's copy play a timed transition once their threshold is crossed
+	   (.is-out, .is-active), and the slide and image drift use whole pixels.
+	   ========================================================================= */
+	.wi.wi--cinematic.wi--steady .wi__title {
+		transform: none;
+		opacity: 1;
+		filter: none;
+		transition:
+			transform 500ms var(--ease-out),
+			opacity 400ms var(--ease-out);
+		will-change: transform, opacity;
+	}
+
+	.wi.wi--cinematic.wi--steady .wi__intro.is-out .wi__title {
+		transform: scale(1.5);
+		opacity: 0;
+	}
+
+	.wi.wi--cinematic.wi--steady .wi__track {
+		transform: translate3d(var(--wi-track-x, 0px), 0, 0);
+	}
+
+	.wi.wi--cinematic.wi--steady .wi__bg :global(.wi__bg-img) {
+		transform: translate3d(var(--wi-bg2-x, 0px), 0, 0);
+	}
+
+	.wi.wi--cinematic.wi--steady .wi__panel--prception .wi__bg :global(.wi__bg-img) {
+		transform: translate3d(var(--wi-bg1-x, 0px), 0, 0);
+	}
+
+	/* Panel 1 still dims as it's pushed off, but no longer shrinks (a scroll-driven scale
+	   can't land on whole pixels) */
+	.wi.wi--cinematic.wi--steady .wi__panel:first-child .wi__inner {
+		transform: none;
+	}
+
+	/* Copy: hidden until its panel is active, then each line rises once, in sequence.
+	   Hides straight away (no stagger) when scrolling back past the threshold. */
+	.wi.wi--cinematic.wi--steady .wi__track .wi__panel .wi__copy > * {
+		opacity: 0;
+		transform: translate3d(0, 1.25rem, 0);
+		transition:
+			opacity 400ms var(--ease-out),
+			transform 400ms var(--ease-out);
+	}
+
+	.wi.wi--cinematic.wi--steady .wi__track .wi__panel.is-active .wi__copy > * {
+		opacity: 1;
+		transform: none;
+		transition-delay: calc(var(--n, 0) * 45ms);
+	}
 </style>

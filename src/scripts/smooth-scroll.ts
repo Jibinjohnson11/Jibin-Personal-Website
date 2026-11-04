@@ -35,9 +35,9 @@ function create(): Lenis | null {
 		prevent: (node) => node.nodeName === 'TEXTAREA',
 	});
 
-	// Freeze the page while the menu overlay (html.menu-open) or the preloader
-	// (html.is-preloading) is showing. The menu itself scrolls via data-lenis-prevent.
-	const isLocked = () => root.classList.contains('menu-open') || root.classList.contains('is-preloading');
+	// Freeze the page while the menu overlay (html.menu-open) is showing.
+	// The menu itself scrolls via data-lenis-prevent.
+	const isLocked = () => root.classList.contains('menu-open');
 	let locked = false;
 	const sync = () => {
 		if (isLocked() === locked) return;
