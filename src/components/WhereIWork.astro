@@ -321,14 +321,23 @@ const mobileBgs = await Promise.all(
 		   from 100svh and again only when the width changes (rotation, split view) or, without
 		   a touch screen, on a real window resize. svh never follows the address bar anyway;
 		   the whole pixels also stop iOS rounding a fractional sticky offset differently from
-		   one frame to the next. Never written on scroll. */
+		   one frame to the next. Never written on scroll.
+		   100svh is read from a probe with its own inline style, never from the stage: Safari
+		   runs this script before the page's stylesheets have loaded, when the stage is still
+		   the unstyled stacked layout (about ten screens tall on a phone). */
 		const coarse = window.matchMedia('(hover: none), (pointer: coarse)');
 		let lockedW = 0;
+		const smallViewportHeight = () => {
+			const probe = document.createElement('div');
+			probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100vh;height:100svh;visibility:hidden;pointer-events:none';
+			document.body.append(probe);
+			const h = probe.getBoundingClientRect().height;
+			probe.remove();
+			return Math.round(h);
+		};
 		const lockHeight = () => {
 			lockedW = window.innerWidth;
-			section.style.removeProperty('--wi-section-h');
-			section.style.removeProperty('--wi-stage-h');
-			const h = Math.round(stage.getBoundingClientRect().height); // 100svh, unlocked
+			const h = smallViewportHeight();
 			section.style.setProperty('--wi-stage-h', `${h}px`);
 			section.style.setProperty('--wi-section-h', `${Math.round(h * 3.8)}px`);
 		};
