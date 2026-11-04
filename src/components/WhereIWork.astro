@@ -204,12 +204,25 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 		// showing or hiding mid-scroll doesn't make the scene jump.
 		const runLength = () => section.offsetHeight - stage.offsetHeight;
 
-		// Set on the stage, where every consumer lives, not on the section: a change on
-		// the section repaints the section and the page layer under it on every frame.
+		const intro = section.querySelector<HTMLElement>('.wi__intro')!;
+		const backdrop = section.querySelector<HTMLElement>('.wi__backdrop')!;
+		const track = section.querySelector<HTMLElement>('.wi__track')!;
+
+		// Desktop: set on the stage, where every consumer lives, not on the section: a change
+		// on the section repaints the section and the page layer under it on every frame.
+		// Steady mode: never on the stage. Any style write to the sticky stage makes iOS Safari
+		// work out its sticky offset again on the main thread, from a scroll position that lags
+		// the compositor, and the whole pinned stage bobs by a pixel. So each value goes straight
+		// to the children that read it (custom properties inherit down from there).
+		const STEADY_TARGETS: Record<string, HTMLElement[]> = {
+			'--wi-zoom': [intro],
+			'--wi-dark': [backdrop, intro, track], // backdrop fade, title colour, BlackBox edge shadow
+		};
+		const targets = (name: string) => (steady ? (STEADY_TARGETS[name] ?? [track]) : [stage]);
 		const write = (name: string, value: string) => {
 			if (written.get(name) === value) return;
 			written.set(name, value);
-			stage.style.setProperty(name, value);
+			for (const el of targets(name)) el.style.setProperty(name, value);
 		};
 
 		/* Steady mode (.wi--steady): touch screens and windows under 768px. On iOS the scroll
@@ -219,7 +232,6 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 		   once, when progress crosses its threshold, and reverses when it crosses back. What
 		   still follows scroll (the track slide, the background drift) moves in whole pixels. */
 		const steadyQuery = window.matchMedia('(max-width: 767px), (hover: none), (pointer: coarse)');
-		const intro = section.querySelector<HTMLElement>('.wi__intro')!;
 		const TITLE_OUT = 0.1; // the title zooms away
 		const PANEL_ON = [0.28, 0.74]; // each panel's copy reveals
 		// Switch back only a little below the threshold, so a small correction in the scroll
@@ -255,13 +267,38 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 			panels.forEach((panel, i) => cross(panel, 'is-active', p, PANEL_ON[i] ?? PANEL_ON[PANEL_ON.length - 1]));
 		};
 
+		// Every scroll value, from wherever it was written (the mode can switch on resize).
+		const clearVars = () => {
+			written.clear();
+			for (const el of [stage, intro, backdrop, track])
+				for (const name of [...Object.keys(PHASES), ...STEADY_VARS]) el.style.removeProperty(name);
+		};
+
 		const clearSteady = () => {
-			STEADY_VARS.forEach((name) => {
-				written.delete(name);
-				stage.style.removeProperty(name);
-			});
 			intro.classList.remove('is-out');
 			panels.forEach((panel) => panel.classList.remove('is-active'));
+			section.style.removeProperty('--wi-section-h');
+			section.style.removeProperty('--wi-stage-h');
+		};
+
+		/* Steady mode: the stage and section heights are fixed in whole pixels, measured once
+		   from 100svh and again only when the width changes (rotation, split view) or, without
+		   a touch screen, on a real window resize. svh never follows the address bar anyway;
+		   the whole pixels also stop iOS rounding a fractional sticky offset differently from
+		   one frame to the next. Never written on scroll. */
+		const coarse = window.matchMedia('(hover: none), (pointer: coarse)');
+		let lockedW = 0;
+		const lockHeight = () => {
+			lockedW = window.innerWidth;
+			section.style.removeProperty('--wi-section-h');
+			section.style.removeProperty('--wi-stage-h');
+			const h = Math.round(stage.getBoundingClientRect().height); // 100svh, unlocked
+			section.style.setProperty('--wi-stage-h', `${h}px`);
+			section.style.setProperty('--wi-section-h', `${Math.round(h * 3.8)}px`);
+		};
+		const onWindowResize = () => {
+			if (!steady || (window.innerWidth === lockedW && coarse.matches)) return;
+			lockHeight();
 		};
 
 		const onScroll = () => {
@@ -338,12 +375,15 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 			section.classList.toggle('wi--cinematic', on);
 			steady = on && steadyQuery.matches;
 			section.classList.toggle('wi--steady', steady);
+			clearVars();
 			if (!steady) clearSteady();
+			if (steady) lockHeight();
 			if (on) {
 				io.observe(section);
 				preload.observe(section);
 				stageObserver.observe(stage);
 				window.addEventListener('scroll', onScroll, { passive: true });
+				window.addEventListener('resize', onWindowResize);
 				section.addEventListener('focusin', onFocus);
 				refit();
 				document.fonts?.ready.then(refit);
@@ -351,9 +391,8 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 				io.disconnect();
 				stageObserver.disconnect();
 				window.removeEventListener('scroll', onScroll);
+				window.removeEventListener('resize', onWindowResize);
 				section.removeEventListener('focusin', onFocus);
-				written.clear();
-				Object.keys(PHASES).forEach((name) => stage.style.removeProperty(name));
 				panels.forEach((panel) => panel.querySelector<HTMLElement>('.wi__copy')?.style.removeProperty('--wi-fit'));
 			}
 		};
@@ -1482,6 +1521,19 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 	   panel's copy play a timed transition once their threshold is crossed
 	   (.is-out, .is-active), and the slide and image drift use whole pixels.
 	   ========================================================================= */
+	/* The pin: plain CSS sticky. Heights in whole pixels from the script (svh until then),
+	   and clip rather than hidden so the stage isn't a scroll container. Nothing writes
+	   to the stage or its ancestors while scrolling. */
+	.wi.wi--cinematic.wi--steady {
+		height: var(--wi-section-h, 380svh);
+	}
+
+	.wi.wi--cinematic.wi--steady .wi__stage {
+		height: var(--wi-stage-h, 100svh);
+		overflow: hidden;
+		overflow: clip;
+	}
+
 	.wi.wi--cinematic.wi--steady .wi__title {
 		transform: none;
 		opacity: 1;
