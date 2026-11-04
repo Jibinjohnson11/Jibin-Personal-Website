@@ -1,0 +1,346 @@
+---
+/**
+ * First-visit intro screen: the gold J monogram inside a thin gold ring with a turning
+ * teal arc, the name in champagne serif, and a quiet "Loading" line, on midnight navy.
+ *
+ * SEO and performance guardrails (why the old one was removed in ec619fe):
+ * - Shows only while <html> has .is-preloading. The inline script in BaseLayout adds it on the
+ *   first page of a session, never for reduced motion, and drops it after 4.5s whatever happens.
+ *   Without JavaScript, or on later pages, this stays display: none.
+ * - The page underneath renders normally the whole time. Nothing waits on this component,
+ *   it only pauses the CSS hero reveal so that plays once the screen lifts.
+ * - The monogram is loading="lazy", so pages where this stays hidden never download it.
+ *   When the preloader shows, it's in view on the first frame and loads straight away.
+ */
+import { Image } from 'astro:assets';
+import monogram from '../assets/brand/monogram-mark.png';
+---
+
+<div class="preloader" aria-hidden="true" data-preloader>
+	<div class="preloader__stage">
+		<div class="preloader__emblem">
+			<svg class="preloader__ring" viewBox="0 0 200 200" focusable="false">
+				<defs>
+					<linearGradient id="preloader-gold" x1="0" y1="0" x2="1" y2="1">
+						<stop offset="0" stop-color="#f6e7c1"></stop>
+						<stop offset="0.45" stop-color="#c9a45c"></stop>
+						<stop offset="1" stop-color="#8a6a32"></stop>
+					</linearGradient>
+					<linearGradient id="preloader-teal" x1="0" y1="0" x2="1" y2="0">
+						<stop offset="0" stop-color="#2ee6cf" stop-opacity="0"></stop>
+						<stop offset="1" stop-color="#5ff5e0"></stop>
+					</linearGradient>
+				</defs>
+				<circle class="preloader__track" cx="100" cy="100" r="96"></circle>
+				<g class="preloader__spin">
+					<circle class="preloader__arc" cx="100" cy="100" r="96" pathLength="100"></circle>
+				</g>
+			</svg>
+			<Image
+				class="preloader__logo"
+				src={monogram}
+				widths={[120, 180, 240, 360]}
+				sizes="(min-width: 768px) 150px, 112px"
+				alt=""
+				loading="lazy"
+				decoding="async"
+			/>
+		</div>
+
+		<p class="preloader__name">Jibin Johnson</p>
+
+		<p class="preloader__status">
+			<span class="preloader__line"></span>
+			<span class="preloader__label">Loading</span>
+			<span class="preloader__line"></span>
+		</p>
+	</div>
+</div>
+
+<script>
+	const root = document.documentElement;
+	const el = document.querySelector<HTMLElement>('[data-preloader]');
+
+	if (el && root.classList.contains('is-preloading')) {
+		const MIN = 2400; // long enough for the logo, name and loading line to settle
+		const MAX = 3600; // never hold a slow connection longer than this
+		const start = performance.now();
+
+		// "Ready" = what the first screen needs: web fonts and the priority hero image, if any.
+		const settle = (p: Promise<unknown> | undefined) => (p ?? Promise.resolve()).then(() => {}, () => {});
+		const hero = document.querySelector<HTMLImageElement>('img[fetchpriority="high"]');
+		const heroReady =
+			hero && !hero.complete
+				? new Promise<void>((resolve) => {
+						hero.addEventListener('load', () => resolve(), { once: true });
+						hero.addEventListener('error', () => resolve(), { once: true });
+					})
+				: Promise.resolve();
+
+		let done = false;
+		const remove = () => el.isConnected && el.remove();
+
+		const finish = () => {
+			if (done) return;
+			done = true;
+			el.classList.add('is-leaving');
+			root.classList.remove('is-preloading');
+			el.addEventListener('transitionend', (e) => e.target === el && e.propertyName === 'opacity' && remove());
+			setTimeout(remove, 1500);
+		};
+
+		const ready = Promise.all([settle(document.fonts?.ready), settle(heroReady)]);
+		const wait = (ms: number) => new Promise((r) => setTimeout(r, Math.max(0, ms - (performance.now() - start))));
+
+		Promise.race([ready.then(() => wait(MIN)), wait(MAX)]).then(finish);
+
+		// BaseLayout's 4.5s safety net may already have dropped the class (e.g. a background tab).
+		new MutationObserver(() => {
+			if (!root.classList.contains('is-preloading') && !done) {
+				done = true;
+				remove();
+			}
+		}).observe(root, { attributes: true, attributeFilter: ['class'] });
+	}
+</script>
+
+<style>
+	.preloader {
+		/* Local palette: this screen is dark on purpose, the site itself stays light */
+		--pl-bg: #020711;
+		--pl-gold: #d8b873;
+		--pl-champagne: #f3e4bf;
+		--pl-ivory: #fbf3de;
+		--pl-teal: #2ee6cf;
+		--pl-teal-deep: 15 140 128;
+		--pl-ring: clamp(184px, 46vmin, 300px);
+
+		position: fixed;
+		inset: 0;
+		z-index: 100;
+		display: none;
+		place-items: center;
+		padding: 1rem;
+		overflow: hidden;
+		color: var(--pl-champagne);
+		background:
+			/* soft vignette to the edges */
+			radial-gradient(ellipse at center, transparent 40%, rgb(0 0 0 / 0.7) 100%),
+			/* teal ambient glow behind the emblem */
+			radial-gradient(circle at 50% 42%, rgb(var(--pl-teal-deep) / 0.22) 0%, rgb(var(--pl-teal-deep) / 0.06) 32%, transparent 60%),
+			var(--pl-bg);
+		opacity: 1;
+		transition: opacity 800ms var(--ease-out) 100ms;
+	}
+
+	:global(html.is-preloading) .preloader,
+	.preloader.is-leaving {
+		display: grid;
+	}
+
+	.preloader.is-leaving {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.preloader__stage {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		transition:
+			transform 900ms var(--ease-out),
+			opacity 500ms var(--ease-out);
+	}
+
+	.preloader.is-leaving .preloader__stage {
+		opacity: 0;
+		transform: scale(1.04);
+	}
+
+	/* --- Emblem: ring + monogram ------------------------------------------ */
+
+	.preloader__emblem {
+		position: relative;
+		display: grid;
+		place-items: center;
+		width: var(--pl-ring);
+		aspect-ratio: 1;
+	}
+
+	/* Warm gold light behind the J, breathing slowly */
+	.preloader__emblem::before {
+		content: '';
+		position: absolute;
+		inset: 14%;
+		border-radius: 50%;
+		background: radial-gradient(circle, rgb(216 184 115 / 0.26) 0%, rgb(216 184 115 / 0.08) 45%, transparent 70%);
+		animation: pl-glow 3.2s ease-in-out infinite;
+	}
+
+	.preloader__ring {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		overflow: visible;
+		animation: pl-fade 900ms var(--ease-out) 150ms both;
+	}
+
+	.preloader__track,
+	.preloader__arc {
+		fill: none;
+		vector-effect: non-scaling-stroke;
+	}
+
+	.preloader__track {
+		stroke: url(#preloader-gold);
+		stroke-width: 1;
+		opacity: 0.55;
+	}
+
+	.preloader__spin {
+		transform-origin: 100px 100px;
+		animation: pl-spin 1.8s linear infinite;
+	}
+
+	.preloader__arc {
+		stroke: url(#preloader-teal);
+		stroke-width: 2.25;
+		stroke-linecap: round;
+		stroke-dasharray: 26 74;
+		filter: drop-shadow(0 0 4px rgb(46 230 207 / 0.85)) drop-shadow(0 0 12px rgb(46 230 207 / 0.45));
+		animation: pl-arc-pulse 2.4s ease-in-out infinite;
+	}
+
+	.preloader__logo {
+		position: relative;
+		width: auto;
+		height: 54%;
+		filter: drop-shadow(0 0 18px rgb(216 184 115 / 0.28)) drop-shadow(0 6px 14px rgb(0 0 0 / 0.5));
+		animation: pl-logo-in 1100ms var(--ease-out) both;
+	}
+
+	/* --- Name -------------------------------------------------------------- */
+
+	.preloader__name {
+		max-width: none;
+		margin-top: clamp(1.5rem, 4.5vmin, 2.5rem);
+		font-family: var(--font-serif);
+		font-size: clamp(2.25rem, 8vw, 4.25rem);
+		font-weight: 400;
+		line-height: 1.05;
+		letter-spacing: 0.01em;
+		white-space: nowrap;
+		/* Champagne with a lighter band across the middle, like light on brushed metal */
+		color: var(--pl-champagne);
+		background: linear-gradient(180deg, var(--pl-ivory) 0%, var(--pl-champagne) 38%, var(--pl-gold) 72%, #b8955a 100%);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+		text-shadow: 0 0 28px rgb(216 184 115 / 0.18);
+		animation: pl-rise 1000ms var(--ease-out) 550ms both;
+	}
+
+	/* --- Loading line ----------------------------------------------------- */
+
+	.preloader__status {
+		position: relative;
+		display: flex;
+		align-items: center;
+		gap: clamp(0.75rem, 2.5vw, 1.25rem);
+		max-width: none;
+		margin-top: clamp(1rem, 3vmin, 1.5rem);
+		padding-bottom: 0.75rem;
+		animation: pl-fade 900ms var(--ease-out) 900ms both;
+	}
+
+	/* Teal glow under the word */
+	.preloader__status::after {
+		content: '';
+		position: absolute;
+		left: 50%;
+		bottom: 0;
+		width: 4.5rem;
+		height: 1px;
+		translate: -50% 0;
+		background: linear-gradient(90deg, transparent, var(--pl-teal), transparent);
+		box-shadow: 0 0 10px 1px rgb(46 230 207 / 0.55);
+		animation: pl-glow 2.4s ease-in-out infinite;
+	}
+
+	.preloader__label {
+		font-family: var(--font-sans);
+		font-size: clamp(0.6875rem, 1.6vw, 0.8125rem);
+		font-weight: 500;
+		letter-spacing: 0.5em;
+		/* letter-spacing adds space after the last letter too; this keeps the word centred */
+		margin-right: -0.5em;
+		text-transform: uppercase;
+		color: var(--pl-champagne);
+		animation: pl-breathe 2s ease-in-out infinite;
+	}
+
+	.preloader__line {
+		width: clamp(2rem, 9vw, 4.5rem);
+		height: 1px;
+		background: linear-gradient(90deg, transparent, var(--pl-gold));
+	}
+
+	.preloader__line:last-child {
+		background: linear-gradient(270deg, transparent, var(--pl-gold));
+	}
+
+	/* --- Keyframes --------------------------------------------------------- */
+
+	@keyframes pl-logo-in {
+		from {
+			opacity: 0;
+			transform: scale(0.88);
+		}
+	}
+
+	@keyframes pl-rise {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+	}
+
+	@keyframes pl-fade {
+		from {
+			opacity: 0;
+		}
+	}
+
+	@keyframes pl-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	@keyframes pl-glow {
+		50% {
+			opacity: 0.55;
+		}
+	}
+
+	@keyframes pl-arc-pulse {
+		50% {
+			opacity: 0.7;
+		}
+	}
+
+	@keyframes pl-breathe {
+		50% {
+			opacity: 0.5;
+		}
+	}
+
+	/* BaseLayout never turns it on for reduced motion; this is a second guard. */
+	@media (prefers-reduced-motion: reduce) {
+		.preloader {
+			display: none !important;
+		}
+	}
+</style>

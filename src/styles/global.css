@@ -496,6 +496,17 @@ main:has(> .breadcrumbs-wrap) {
 	animation: hero-rise var(--dur-slow) var(--ease-out) var(--reveal-delay, 0ms) both;
 }
 
+/* Under the preloader the hero waits on its first (visible) frame, then plays as the
+   screen lifts. The content is still painted, so this doesn't delay LCP. */
+html.is-preloading [data-reveal='hero'] {
+	animation-play-state: paused;
+}
+
+/* No scrolling under the preloader (see Preloader.astro) */
+html.is-preloading {
+	overflow: hidden;
+}
+
 @keyframes hero-rise {
 	from {
 		opacity: 0.35;

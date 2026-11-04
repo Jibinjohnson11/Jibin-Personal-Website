@@ -8,6 +8,7 @@ import serifFont from '@fontsource/instrument-serif/files/instrument-serif-latin
 import sansFont from '@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2?url';
 import SEO from '../components/SEO.astro';
 import Header from '../components/Header.astro';
+import Preloader from '../components/Preloader.astro';
 import Footer from '../components/Footer.astro';
 import FloatingActions from '../components/FloatingActions.astro';
 import Container from '../components/Container.astro';
@@ -45,6 +46,17 @@ const og = await ogImageFor(path);
 				setTimeout(() => {
 					if (!root.classList.contains('motion-ready')) root.classList.remove('js-reveal');
 				}, 3000);
+
+				// Preloader (src/components/Preloader.astro): first page of a session only.
+				// Removed after 4.5s whatever happens, so it can never trap the page.
+				try {
+					if (sessionStorage.getItem('preloaded')) return;
+					sessionStorage.setItem('preloaded', '1');
+				} catch {
+					return;
+				}
+				root.classList.add('is-preloading');
+				setTimeout(() => root.classList.remove('is-preloading'), 4500);
 			})();
 		</script>
 		<!-- Without JavaScript: plain links instead of the JS-only menu and dropdown. -->
@@ -83,6 +95,7 @@ const og = await ogImageFor(path);
 		<meta name="generator" content={Astro.generator} />
 	</head>
 	<body>
+		<Preloader />
 		<Header />
 		<main id="main" tabindex="-1">
 			{

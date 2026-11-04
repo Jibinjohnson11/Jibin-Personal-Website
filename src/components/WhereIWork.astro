@@ -195,16 +195,27 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 
 		let ticking = false;
 		let visible = false;
+		const phases = Object.entries(PHASES);
+		// Last value written per property. Each write restyles the whole stage, so a value
+		// that hasn't changed since the previous frame is skipped.
+		const written = new Map<string, string>();
+
+		// Measured against the sticky stage, not innerHeight, so a mobile address bar
+		// showing or hiding mid-scroll doesn't make the scene jump.
+		const runLength = () => section.offsetHeight - stage.offsetHeight;
 
 		const update = () => {
 			ticking = false;
 			const rect = section.getBoundingClientRect();
-			// Measured against the sticky stage, not innerHeight, so a mobile address bar
-			// showing or hiding mid-scroll doesn't make the scene jump.
 			const run = rect.height - stage.offsetHeight;
 			const p = run > 0 ? clamp(-rect.top / run) : 0;
-			for (const [name, [a, b]] of Object.entries(PHASES)) {
-				section.style.setProperty(name, ease(clamp((p - a) / (b - a))).toFixed(4));
+			for (const [name, [a, b]] of phases) {
+				const value = ease(clamp((p - a) / (b - a))).toFixed(4);
+				if (written.get(name) === value) continue;
+				written.set(name, value);
+				// Set on the stage, where every consumer lives, not on the section: a change on
+				// the section repaints the section and the page layer under it on every frame.
+				stage.style.setProperty(name, value);
 			}
 		};
 
@@ -231,16 +242,24 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 			}
 		};
 
-		let resizing = false;
-		const onResize = () => {
-			if (resizing) return;
-			resizing = true;
-			requestAnimationFrame(() => {
-				resizing = false;
-				if (!query.matches) return;
-				fit();
-				update();
-			});
+		// Refit only when the stage itself changes size. The stage is 100svh tall, so the mobile
+		// address bar sliding in and out mid-scroll (which fires window resize events all the
+		// way through) never reaches this; a rotation or a real window resize does.
+		let stageW = 0;
+		let stageH = 0;
+		const onStageResize = () => {
+			const w = stage.clientWidth;
+			const h = stage.clientHeight;
+			if (!query.matches || (w === stageW && h === stageH)) return;
+			stageW = w;
+			stageH = h;
+			fit();
+			update();
+		};
+		const stageObserver = new ResizeObserver(onStageResize);
+		const refit = () => {
+			stageW = stageH = 0;
+			onStageResize();
 		};
 
 		// Only do work while the section is on screen.
@@ -252,28 +271,41 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 		const onFocus = (event: FocusEvent) => {
 			const panel = (event.target as HTMLElement).closest<HTMLElement>('[data-wi-panel]');
 			if (!panel) return;
-			const run = section.offsetHeight - window.innerHeight;
+			// Same run length as update(), so focus lands where the scene expects it on phones too.
 			const top = section.getBoundingClientRect().top + window.scrollY;
-			window.scrollTo({ top: top + run * (PANEL_AT[Number(panel.dataset.wiPanel)] ?? 0), behavior: 'instant' });
+			window.scrollTo({ top: top + runLength() * (PANEL_AT[Number(panel.dataset.wiPanel)] ?? 0), behavior: 'instant' });
 		};
+
+		// The second panel sits off screen to the right until the slide, so native lazy loading
+		// would only start fetching its full-bleed image mid-slide and pop it in. Fetch the
+		// section's images once it is about a screen away instead (still not on page load).
+		const preload = new IntersectionObserver(
+			([entry]) => {
+				if (!entry.isIntersecting) return;
+				section.querySelectorAll('img').forEach((img) => (img.loading = 'eager'));
+				preload.disconnect();
+			},
+			{ rootMargin: '100% 0px' },
+		);
 
 		const apply = () => {
 			const on = query.matches;
 			section.classList.toggle('wi--cinematic', on);
 			if (on) {
 				io.observe(section);
+				preload.observe(section);
+				stageObserver.observe(stage);
 				window.addEventListener('scroll', onScroll, { passive: true });
-				window.addEventListener('resize', onResize, { passive: true });
 				section.addEventListener('focusin', onFocus);
-				fit();
-				update();
-				document.fonts?.ready.then(onResize);
+				refit();
+				document.fonts?.ready.then(refit);
 			} else {
 				io.disconnect();
+				stageObserver.disconnect();
 				window.removeEventListener('scroll', onScroll);
-				window.removeEventListener('resize', onResize);
 				section.removeEventListener('focusin', onFocus);
-				Object.keys(PHASES).forEach((name) => section.style.removeProperty(name));
+				written.clear();
+				Object.keys(PHASES).forEach((name) => stage.style.removeProperty(name));
 				panels.forEach((panel) => panel.querySelector<HTMLElement>('.wi__copy')?.style.removeProperty('--wi-fit'));
 			}
 		};
@@ -578,6 +610,7 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 			radial-gradient(60% 35% at 50% 110%, rgb(0 169 157 / 0.16), transparent 70%),
 			#050708;
 		opacity: var(--wi-dark);
+		will-change: opacity; /* fade on the GPU instead of repainting the page layer each frame */
 	}
 
 	/* Scene 1 to 2: the title zooms toward the viewer and dissolves */
@@ -594,7 +627,7 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 		transform: scale(calc(1 + var(--wi-zoom) * 3));
 		opacity: calc(1 - var(--wi-zoom) * 1.2);
 		filter: blur(calc(var(--wi-zoom) * 8px));
-		will-change: transform, opacity;
+		will-change: transform, opacity, filter;
 	}
 
 	/* Title turns cream as the backdrop darkens behind it */
@@ -689,6 +722,28 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 		transform: scale(calc(1 - var(--wi-slide) * 0.06));
 		transform-origin: 100% 50%;
 		filter: brightness(calc(1 - var(--wi-slide) * 0.45));
+	}
+
+	/* Every line of copy moves and fades with scroll. Its own GPU layer means each frame is
+	   only recomposited: no repaint of the 200%-wide track, and no text snapping to whole
+	   pixels as it moves (that snapping is what read as shaking on phones). The skills row
+	   promotes transform only: will-change: opacity would cut its tags off from the image
+	   behind them, so their backdrop blur would vanish. Phones and touch tablets only:
+	   on a 1x desktop screen layered text antialiases a shade differently, and desktop
+	   already scrolled smoothly. */
+	@media (max-width: 899px), (pointer: coarse) {
+		/* Panel 1 dims and sinks as it's pushed off: composite that instead of repainting */
+		.wi--cinematic .wi__panel:first-child .wi__inner {
+			will-change: transform, filter;
+		}
+
+		.wi--cinematic .wi__copy > * {
+			will-change: transform, opacity;
+		}
+
+		.wi--cinematic .wi__copy > .wi__skills {
+			will-change: transform;
+		}
 	}
 
 	/* --- Panel 2: rides in with the track; its visual swings round and its name trails in --- */
@@ -1022,9 +1077,23 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 	.wi--cinematic .wi__panel--blackbox {
 		background: var(--bb-brown);
 		padding-top: 0; /* the image runs under the header too; the copy keeps its offset below */
-		/* Depth on the leading edge. Waiting just off screen, this shadow spilled onto the cream
-		   title scene, so it only shows once the stage has turned dark (identical from then on). */
-		box-shadow: -50px 0 90px -30px rgb(0 0 0 / calc(0.75 * var(--wi-dark)));
+		min-height: 0; /* exactly one stage tall: 100vh is taller than the 100svh stage on phones */
+	}
+
+	/* Depth on the leading edge. Waiting just off screen, this shadow spilled onto the cream
+	   title scene, so it only shows once the stage has turned dark (identical from then on).
+	   It lives on a pseudo-element whose opacity follows the dark phase: the same pixels as
+	   fading the shadow colour, but composited, where an animated box-shadow repainted the
+	   whole track on every frame. */
+	.wi--cinematic .wi__panel--blackbox::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: -2;
+		box-shadow: -50px 0 90px -30px rgb(0 0 0 / 0.75);
+		opacity: var(--wi-dark);
+		pointer-events: none;
+		will-change: opacity;
 	}
 
 	.wi--cinematic .wi__panel--blackbox .wi__inner {
@@ -1243,6 +1312,7 @@ const isExternal = (href: string) => /^https?:\/\//.test(href);
 	/* The visual fades in as the title clears, then drifts slightly as the panel is pushed off */
 	.wi--cinematic .wi__panel--prception .wi__bg {
 		opacity: var(--wi-in);
+		will-change: opacity;
 	}
 
 	.wi--cinematic .wi__panel--prception .wi__bg :global(.wi__bg-img) {
