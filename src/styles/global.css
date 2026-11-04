@@ -103,17 +103,8 @@ html {
 	scroll-padding-top: var(--header-h);
 }
 
-/* Native smooth scrolling for anchor jumps. Lenis drives the scroll itself on
-   desktop, so CSS smoothing is switched off there to avoid the two fighting. */
-@media (prefers-reduced-motion: no-preference) {
-	html {
-		scroll-behavior: smooth;
-	}
-
-	html.lenis {
-		scroll-behavior: auto;
-	}
-}
+/* No CSS scroll-behavior: smooth. Lenis (src/scripts/smooth-scroll.ts) is the only
+   smoothing on desktop; phones, tablets and reduced motion keep plain native scrolling. */
 
 body {
 	min-height: 100vh;

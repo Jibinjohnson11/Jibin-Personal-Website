@@ -5,37 +5,11 @@
  * script in BaseLayout adds (and removes again if this file never runs). Reduced-motion
  * users never get .js-reveal, so everything is visible and static for them.
  */
-import 'lenis/dist/lenis.css';
+import './smooth-scroll';
 
 const root = document.documentElement;
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-const touch = window.matchMedia('(hover: none), (pointer: coarse)');
 
 root.classList.add('motion-ready');
-
-/* --- Smooth scroll ------------------------------------------------------ */
-
-// Loaded on demand so the reveal code below isn't waiting on it.
-if (!reduceMotion.matches && !touch.matches) {
-	import('lenis').then(({ default: Lenis }) => {
-		const lenis = new Lenis({ lerp: 0.1, autoRaf: true });
-		// Shared so other scripts (the back-to-top button) can scroll through Lenis.
-		(window as Window & { siteLenis?: typeof lenis }).siteLenis = lenis;
-
-		// Freeze the page while the mobile menu overlay (html.menu-open) or the preloader
-		// (html.is-preloading) is showing.
-		const isLocked = () => root.classList.contains('menu-open') || root.classList.contains('is-preloading');
-		let locked = false;
-		const sync = () => {
-			if (isLocked() === locked) return;
-			locked = !locked;
-			if (locked) lenis.stop();
-			else lenis.start();
-		};
-		new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ['class'] });
-		sync();
-	});
-}
 
 /* --- Reveal on scroll --------------------------------------------------- */
 
@@ -67,40 +41,70 @@ function splitWords(el: HTMLElement): HTMLElement[] {
 
 /** Give each word a --line index based on which rendered line it sits on. */
 function assignLines(words: HTMLElement[]) {
+	// Read every position first, then write, so the browser lays out once per headline.
+	const tops = words.map((word) => word.getBoundingClientRect().top);
 	let line = -1;
 	let lineTop = -Infinity;
-	for (const word of words) {
-		const top = word.getBoundingClientRect().top;
-		if (top > lineTop + 2) {
+	words.forEach((word, i) => {
+		if (tops[i] > lineTop + 2) {
 			line += 1;
-			lineTop = top;
+			lineTop = tops[i];
 		}
 		word.style.setProperty('--line', String(line));
-	}
+	});
 }
 
 if (root.classList.contains('js-reveal')) {
-	const targets = document.querySelectorAll<HTMLElement>('[data-reveal]');
+	const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'));
+	const pending = new Set(targets);
+	const splits: HTMLElement[][] = [];
 
 	targets.forEach((el) => {
 		if (el.dataset.reveal !== 'lines') return;
-		assignLines(splitWords(el));
+		const words = splitWords(el);
+		splits.push(words);
+		assignLines(words);
 		el.classList.add('is-split');
 	});
+
+	// Line breaks move when the web fonts swap in, so re-count the lines for the stagger.
+	document.fonts?.ready.then(() => splits.forEach(assignLines));
+
+	const reveal = (el: Element) => {
+		el.classList.add('is-revealed');
+		observer.unobserve(el);
+		pending.delete(el as HTMLElement);
+		if (!pending.size) endObserver.disconnect();
+	};
 
 	const observer = new IntersectionObserver(
 		(entries) => {
 			for (const entry of entries) {
-				if (!entry.isIntersecting) continue;
-				entry.target.classList.add('is-revealed');
-				observer.unobserve(entry.target);
+				// In view, or already scrolled past (a reload or link landing mid-page).
+				const above = entry.rootBounds ? entry.boundingClientRect.bottom < entry.rootBounds.top : false;
+				if (entry.isIntersecting || above) reveal(entry.target);
 			}
 		},
 		{ rootMargin: '0px 0px -8% 0px' },
 	);
 
+	// The -8% margin above means something in the last sliver of the page could never cross
+	// the line. Once the end of the page is on screen, reveal whatever is still waiting there.
+	const sentinel = document.createElement('div');
+	sentinel.setAttribute('aria-hidden', 'true');
+	sentinel.style.cssText = 'height:1px;margin-top:-1px;pointer-events:none';
+	document.body.append(sentinel);
+	const endObserver = new IntersectionObserver(([entry]) => {
+		if (!entry.isIntersecting) return;
+		const bottom = window.innerHeight;
+		for (const el of [...pending]) if (el.getBoundingClientRect().top < bottom) reveal(el);
+	});
+
 	// Hold the reveals until the preloader starts to lift, so they play where you can see them.
-	const observeAll = () => targets.forEach((el) => observer.observe(el));
+	const observeAll = () => {
+		targets.forEach((el) => observer.observe(el));
+		endObserver.observe(sentinel);
+	};
 	if (root.classList.contains('is-preloading')) document.addEventListener('preloader:done', observeAll, { once: true });
 	else observeAll();
 }

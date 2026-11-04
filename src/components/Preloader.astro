@@ -1,12 +1,15 @@
 ---
 /**
- * First-visit preloader: a deep teal curtain with the name, a counter and a hairline
- * progress bar, which lifts away once the page has loaded.
+ * First-visit preloader: a quiet ivory screen with the name, a counter and a hairline
+ * emerald progress line, which fades into the page once the first screen is ready.
  *
  * Only shows while <html> has .is-preloading. The inline script in BaseLayout adds it
  * on the first page of a session (never for reduced motion) and drops it after 4s as a
  * safety net, so without JavaScript or on later pages this stays display: none.
- * When it starts to lift it fires "preloader:done" so motion.ts can start the reveals.
+ * When it starts to fade it fires "preloader:done" so motion.ts can start the reveals.
+ *
+ * "Ready" means what the first screen needs: the web fonts and the above-the-fold image
+ * marked fetchpriority="high". It doesn't wait for every lazy image on the page.
  */
 ---
 
@@ -18,7 +21,7 @@
 			<span class="preloader__word"><em>Johnson</em></span>
 		</p>
 		<div class="preloader__foot">
-			<span class="preloader__status">Loading</span>
+			<span class="preloader__status"><span class="preloader__dot"></span>Loading</span>
 			<span class="preloader__count" data-preloader-count>000</span>
 		</div>
 		<span class="preloader__bar"><span data-preloader-bar></span></span>
@@ -32,38 +35,57 @@
 	if (el && root.classList.contains('is-preloading')) {
 		const count = el.querySelector<HTMLElement>('[data-preloader-count]');
 		const bar = el.querySelector<HTMLElement>('[data-preloader-bar]');
-		const MIN = 1100; // long enough to read the name, short enough not to annoy
-		const MAX = 3200; // give up waiting on slow assets after this
+		const MIN = 900; // long enough for the name to settle, short enough not to annoy
+		const MAX = 2600; // never wait longer than this on a slow connection
 
-		let loaded = document.readyState === 'complete';
-		if (!loaded) window.addEventListener('load', () => (loaded = true), { once: true });
+		// Critical assets: web fonts, plus the priority hero image if the page has one.
+		const settle = (p: Promise<unknown>) => p.then(() => true, () => true);
+		const hero = document.querySelector<HTMLImageElement>('img[fetchpriority="high"]');
+		const heroReady = hero
+			? hero.complete
+				? Promise.resolve()
+				: new Promise<void>((resolve) => {
+						hero.addEventListener('load', () => resolve(), { once: true });
+						hero.addEventListener('error', () => resolve(), { once: true });
+					}).then(() => hero.decode?.())
+			: Promise.resolve();
+		let ready = false;
+		Promise.all([settle(document.fonts?.ready ?? Promise.resolve()), settle(heroReady)]).then(() => (ready = true));
 
 		const start = performance.now();
 		let value = 0;
+		let leaving = false;
+
+		const remove = () => {
+			if (el.isConnected) el.remove();
+		};
 
 		const finish = () => {
+			if (leaving) return;
+			leaving = true;
 			el.classList.add('is-leaving');
 			root.classList.remove('is-preloading');
 			document.dispatchEvent(new Event('preloader:done'));
-			el.addEventListener('transitionend', () => el.remove(), { once: true });
-			setTimeout(() => el.remove(), 1500);
+			// Only the overlay's own fade ends it; transitions on the content inside bubble up too.
+			el.addEventListener('transitionend', (event) => event.target === el && event.propertyName === 'opacity' && remove());
+			setTimeout(remove, 1400);
 		};
 
-		// Ease towards 90 while the page loads, then run up to 100.
+		// Ease towards 90 while the assets load, then run up to 100.
 		const tick = (now: number) => {
 			// The 4s fallback in BaseLayout already hid it (e.g. frames paused in a background tab)
-			if (!root.classList.contains('is-preloading')) return el.remove();
+			if (!root.classList.contains('is-preloading')) return remove();
 
 			const t = now - start;
-			const done = (loaded && t >= MIN) || t >= MAX;
+			const done = (ready && t >= MIN) || t >= MAX;
 			const target = done ? 100 : Math.min(90, (t / MIN) * 90);
-			value += (target - value) * 0.12;
+			value += (target - value) * (done ? 0.2 : 0.1);
 			if (done && value > 99.5) value = 100;
 
 			if (count) count.textContent = String(Math.round(value)).padStart(3, '0');
 			if (bar) bar.style.transform = `scaleX(${value / 100})`;
 
-			if (value === 100) setTimeout(finish, 200);
+			if (value === 100) setTimeout(finish, 120);
 			else requestAnimationFrame(tick);
 		};
 
@@ -77,10 +99,10 @@
 		inset: 0;
 		z-index: 100;
 		display: none;
-		color: var(--paper);
-		background: var(--accent-hover) var(--grain);
-		clip-path: inset(0 0 0 0);
-		transition: clip-path 900ms var(--ease-out);
+		color: var(--ink);
+		background: var(--grain), var(--paper);
+		opacity: 1;
+		transition: opacity 700ms var(--ease-out) 120ms;
 	}
 
 	:global(.is-preloading) .preloader,
@@ -88,9 +110,9 @@
 		display: block;
 	}
 
-	/* Curtain lifts upwards */
+	/* The page underneath is the same ivory, so a plain fade reads as one surface. */
 	.preloader.is-leaving {
-		clip-path: inset(0 0 100% 0);
+		opacity: 0;
 		pointer-events: none;
 	}
 
@@ -101,23 +123,29 @@
 		max-width: var(--container-max);
 		margin-inline: auto;
 		padding: var(--space-6) var(--container-pad) var(--space-7);
+		animation: preloader-in 600ms var(--ease-out) backwards; /* backwards: never fights the exit fade */
 		transition:
-			opacity 500ms var(--ease-out),
-			transform 900ms var(--ease-out);
+			opacity 450ms var(--ease-out),
+			transform 700ms var(--ease-out);
 	}
 
 	.preloader.is-leaving .preloader__inner {
 		opacity: 0;
-		transform: translateY(-4rem);
+		transform: translateY(-1.5rem);
 	}
 
 	.preloader__label,
 	.preloader__foot {
 		font-family: var(--font-mono);
 		font-size: var(--text-label);
+		line-height: 1.4;
 		letter-spacing: 0.06em;
 		text-transform: uppercase;
-		color: color-mix(in srgb, var(--paper) 70%, transparent);
+		color: var(--ink-3);
+	}
+
+	.preloader__label {
+		max-width: none;
 	}
 
 	.preloader__name {
@@ -125,23 +153,25 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0 0.25em;
+		max-width: none;
 		font-family: var(--font-serif);
-		font-size: clamp(3.5rem, 13vw, 10rem);
+		font-size: clamp(3.25rem, 12vw, 9rem);
 		line-height: 1;
-		letter-spacing: -0.01em;
+		letter-spacing: -0.02em;
+		color: var(--ink);
 	}
 
 	.preloader__name em {
 		font-style: italic;
-		color: color-mix(in srgb, var(--paper) 75%, var(--accent));
+		color: var(--accent);
 	}
 
 	/* Each word rises out of its own line */
 	.preloader__word {
 		display: inline-block;
 		overflow: hidden;
-		/* room for the J's descender inside the mask */
-		padding-bottom: 0.22em;
+		/* room for the J's descender and the italic overhang inside the mask */
+		padding: 0 0.08em 0.22em 0;
 		margin-bottom: -0.22em;
 	}
 
@@ -161,29 +191,56 @@
 		margin-bottom: var(--space-4);
 	}
 
+	.preloader__status {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6em;
+	}
+
+	/* A single emerald dot that breathes while loading */
+	.preloader__dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--accent);
+		animation: preloader-pulse 1.4s ease-in-out infinite;
+	}
+
 	.preloader__count {
 		font-size: clamp(1rem, 2.5vw, 1.5rem);
-		color: var(--paper);
+		color: var(--ink);
 		font-variant-numeric: tabular-nums;
 	}
 
 	.preloader__bar {
 		display: block;
 		height: 1px;
-		background: color-mix(in srgb, var(--paper) 20%, transparent);
+		background: var(--rule);
 	}
 
 	.preloader__bar > span {
 		display: block;
 		height: 100%;
-		background: var(--paper);
+		background: var(--accent);
 		transform: scaleX(0);
 		transform-origin: left;
+	}
+
+	@keyframes preloader-in {
+		from {
+			opacity: 0;
+		}
 	}
 
 	@keyframes preloader-rise {
 		from {
 			transform: translateY(105%);
+		}
+	}
+
+	@keyframes preloader-pulse {
+		50% {
+			opacity: 0.25;
 		}
 	}
 

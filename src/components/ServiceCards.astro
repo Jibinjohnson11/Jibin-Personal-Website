@@ -42,7 +42,7 @@ const { items } = Astro.props;
 <div class="service-carousel" data-carousel data-lenis-prevent-horizontal>
 	<ul class="service-track" role="list" data-carousel-track>
 		{
-			items.map((service, i) => (
+			items.map((service) => (
 				<li class:list={['service-card', { 'has-link': service.url }]} style={`--card-tint: ${service.tint}; --card-accent: ${service.accent}`}>
 					<div class="service-card__media">
 						<Image
@@ -51,7 +51,8 @@ const { items } = Astro.props;
 							widths={[560, 1120]}
 							sizes="(min-width: 1100px) 540px, (min-width: 640px) 70vw, 140vw"
 							quality={85}
-							loading={i < 4 ? 'eager' : 'lazy'}
+							loading="lazy"
+							decoding="async"
 							style={service.position ? `object-position: ${service.position}` : undefined}
 						/>
 					</div>
@@ -76,6 +77,8 @@ const { items } = Astro.props;
 </div>
 
 <script>
+	import { syncScrollTrigger } from '../scripts/smooth-scroll';
+
 	const SECONDS_PER_LOOP = 52; // one full pass through the original card set
 	const RESUME_AFTER = 1500; // ms of calm after manual scrolling before moving again
 
@@ -101,7 +104,11 @@ const { items } = Astro.props;
 		carousel.classList.add('is-auto');
 
 		// Width of one card set including its gaps, measured from the first original to the first clone.
-		const loopWidth = () => (track.children[originals.length] as HTMLElement).offsetLeft - (track.children[0] as HTMLElement).offsetLeft;
+		// Cached and re-measured only when the strip resizes, so the frame loop never forces layout.
+		const measureLoop = () => (track.children[originals.length] as HTMLElement).offsetLeft - (track.children[0] as HTMLElement).offsetLeft;
+		let cachedWidth = measureLoop();
+		const loopWidth = () => cachedWidth;
+		new ResizeObserver(() => (cachedWidth = measureLoop())).observe(track);
 
 		// Start with the first card lined up under the heading (its copy in the middle set),
 		// so the screen's left edge already shows the end of the previous set.
@@ -130,6 +137,9 @@ const { items } = Astro.props;
 
 		Promise.all([import('gsap'), import('gsap/ScrollTrigger')]).then(([{ gsap }, { ScrollTrigger }]) => {
 			gsap.registerPlugin(ScrollTrigger);
+			// Lenis and ScrollTrigger on one ticker, so the pin and the strip stay locked to the
+			// smoothed scroll position with no lag (see src/scripts/smooth-scroll.ts).
+			syncScrollTrigger(gsap, ScrollTrigger);
 			const mm = gsap.matchMedia();
 			// Desktop: the whole section fits one screen, so it pins at the top. Narrower windows:
 			// the section is taller than the screen, so only the strip pins, centred.
@@ -196,7 +206,19 @@ const { items } = Astro.props;
 				carousel.scrollLeft = pos;
 			}
 
-			requestAnimationFrame(tick);
+			// Off screen and at rest: stop the loop until the strip comes back into view.
+			if (!visible && speed <= 0.0005) {
+				frame = 0;
+				return;
+			}
+			frame = requestAnimationFrame(tick);
+		};
+
+		let frame = 0;
+		const start = () => {
+			if (frame) return;
+			last = performance.now();
+			frame = requestAnimationFrame(tick);
 		};
 
 		carousel.addEventListener('mouseenter', () => (hovering = true));
@@ -205,9 +227,12 @@ const { items } = Astro.props;
 		carousel.addEventListener('focusout', (event) => {
 			if (!carousel.contains(event.relatedTarget as Node | null)) focused = false;
 		});
-		new IntersectionObserver(([entry]) => (visible = entry.isIntersecting)).observe(carousel);
+		new IntersectionObserver(([entry]) => {
+			visible = entry.isIntersecting;
+			if (visible) start();
+		}).observe(carousel);
 
-		requestAnimationFrame(tick);
+		start();
 	});
 </script>
 

@@ -5,6 +5,7 @@ import '@fontsource-variable/instrument-sans/wght.css';
 import '@fontsource/jetbrains-mono/latin-400.css';
 import '../styles/global.css';
 import serifFont from '@fontsource/instrument-serif/files/instrument-serif-latin-400-normal.woff2?url';
+import sansFont from '@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2?url';
 import SEO from '../components/SEO.astro';
 import Header from '../components/Header.astro';
 import Preloader from '../components/Preloader.astro';
@@ -91,7 +92,9 @@ const og = await ogImageFor(path);
 		<link rel="icon" href="/favicon-96.png" type="image/png" sizes="96x96" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		<link rel="manifest" href="/site.webmanifest" />
+		<!-- Both text faces up front (Latin only), so headings and body don't swap fonts after first paint. -->
 		<link rel="preload" href={serifFont} as="font" type="font/woff2" crossorigin />
+		<link rel="preload" href={sansFont} as="font" type="font/woff2" crossorigin />
 		<meta name="generator" content={Astro.generator} />
 	</head>
 	<body>
